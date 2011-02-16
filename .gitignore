@@ -1,0 +1,6 @@
+.gradle/
+.idea/
+build/
+groovy-wslite.iml
+groovy-wslite.ipr
+groovy-wslite.iws

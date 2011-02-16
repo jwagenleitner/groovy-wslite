@@ -1,0 +1,14 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+
+version = '0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenRepo urls: "http://m2repo.spockframework.org/snapshots"
+}
+
+dependencies {
+    groovy 'org.codehaus.groovy:groovy-all:1.7.6'
+    testCompile "org.spockframework:spock-core:0.4-groovy-1.7"
+}
