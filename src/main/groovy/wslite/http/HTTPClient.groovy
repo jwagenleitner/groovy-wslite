@@ -35,10 +35,7 @@ class HTTPClient {
     private def executeMethod(String method, String url, Map headers) {
         HttpURLConnection conn = setupConnection(url, headers)
         conn.setRequestMethod(method)
-        String data
-        conn.getInputStream().withStream {
-            data = it.text
-        }
+        String data = conn.getInputStream().text
         def response = buildResponse(conn)
         response.data = data
         conn.disconnect()
@@ -51,13 +48,8 @@ class HTTPClient {
         conn.setRequestProperty('Content-Length', "${content.size()}")
         conn.setDoInput(true)
         conn.setDoOutput(true)
-        conn.getOutputStream().withStream {
-            it.write(content)
-        }
-        String data
-        conn.getInputStream().withStream {
-            data = it.text
-        }
+        conn.getOutputStream().bytes = content
+        String data = conn.getInputStream().text
         def response = buildResponse(conn)
         response.data = data
         conn.disconnect()
