@@ -16,9 +16,57 @@ package wslite.http
 
 class HTTPClient {
 
-    def setupConnection(String url, Map headers) {
-        def targetURL = new URL(url)
-        def conn = targetURL.openConnection()
+    def get(String url, Map headers=[:]) {
+        return executeMethod('GET', url, headers)
+    }
+
+    def delete(String url, Map headers=[:]) {
+        return executeMethod('DELETE', url, headers)
+    }
+
+    def post(String url, byte[] content, Map headers=[:]) {
+        return executeMethod('POST', url, content, headers)
+    }
+
+    def put(String url, byte[] content, Map headers=[:]) {
+        return executeMethod('PUT', url, content, headers)
+    }
+
+    private def executeMethod(String method, String url, Map headers) {
+        HttpURLConnection conn = setupConnection(url, headers)
+        conn.setRequestMethod(method)
+        String data
+        conn.getInputStream().withStream {
+            data = it.text
+        }
+        def response = buildResponse(conn)
+        response.data = data
+        conn.disconnect()
+        return response
+    }
+
+    private def executeMethod(String method, String url, byte[] content, Map headers) {
+        HttpURLConnection conn = setupConnection(url, headers)
+        conn.setRequestMethod(method)
+        conn.setRequestProperty('Content-Length', "${content.size()}")
+        conn.setDoInput(true)
+        conn.setDoOutput(true)
+        conn.getOutputStream().withStream {
+            it.write(content)
+        }
+        String data
+        conn.getInputStream().withStream {
+            data = it.text
+        }
+        def response = buildResponse(conn)
+        response.data = data
+        conn.disconnect()
+        return response
+    }
+
+    private HttpURLConnection setupConnection(String url, Map headers) {
+        URL targetURL = new URL(url)
+        HttpURLConnection conn = (HttpURLConnection)targetURL.openConnection()
         conn.setUseCaches(false)
         conn.setInstanceFollowRedirects(false)
         conn.setRequestProperty('Connection', 'Close')
@@ -26,22 +74,18 @@ class HTTPClient {
             conn.setRequestProperty(entry.key, entry.value)
         }
         return conn
-    }        
+    }
 
-    def post(String url, byte[] content, Map headers=[:]) {
-        def conn = setupConnection(url, headers)
-        conn.setRequestMethod('POST')
-        conn.setRequestProperty('Content-Length', "${content.size()}")
-        conn.setDoInput(true)
-        conn.setDoOutput(true)
-        def httpout = conn.getOutputStream()
-        httpout.write(content)
-        httpout.flush()
-        httpout.close()
-        def httpin = conn.getInputStream()
-        def result = httpin.text
-        conn.disconnect()
-        return result
+    private Map buildResponse(HttpURLConnection conn) {
+        def response = [:]
+        def headers = [:]
+        for (entry in conn.getHeaderFields()) {
+            headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
+        }
+        response.headers = headers
+        response.status = conn.getResponseCode()
+        response.statusMessage = conn.getResponseMessage()
+        return response
     }
 
 }

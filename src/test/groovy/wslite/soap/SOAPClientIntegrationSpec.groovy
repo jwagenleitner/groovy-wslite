@@ -18,22 +18,24 @@ import spock.lang.*
 
 class SOAPClientIntegrationSpec extends Specification {
 
-    def "Accessing a public SOAP webservice provided by .NET platform"() {
+    def "accessing a public SOAP service"() {
         given:
         def soapClient = new SOAPClient(serviceURL:'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
 
         when:
-        def response = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
+        def resp = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
             body {
                 GetMartinLutherKingDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
                     year(2011)
                 }
             }
         }
-        def soap = new XmlSlurper().parseText(response)
 
         then:
-        "2011-01-15T00:00:00" == soap.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+        "2011-01-15T00:00:00" == resp.Envelope.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+        200 == resp.status
+        "OK" == resp.statusMessage
+        "ASP.NET" == resp.headers['X-Powered-By']
 
     }
 

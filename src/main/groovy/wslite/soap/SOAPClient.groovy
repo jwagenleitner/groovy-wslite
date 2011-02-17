@@ -19,7 +19,7 @@ import wslite.http.HTTPClient
 class SOAPClient {
 
     String serviceURL
-    def httpClient = new HTTPClient()
+    def http = new HTTPClient()
 
     def send(Map headers=[:], Closure content) {
         SOAPMessageBuilder message = new SOAPMessageBuilder()
@@ -28,6 +28,8 @@ class SOAPClient {
         if (!headers.'Content-Type') {
             headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
         }
-        return httpClient.post(serviceURL, message.toString().bytes, headers)
+        def response = http.post(serviceURL, message.toString().bytes, headers)
+        response['Envelope'] = new XmlSlurper().parseText(response.data)
+        return response
     }
 }

@@ -16,9 +16,10 @@ package wslite.soap
 
 class SOAPMessageBuilder {
 
-    def xmlnsSoap = [(SOAPVersion.V1_1):'http://schemas.xmlsoap.org/soap/envelope/',
+    Map xmlnsSoap = [(SOAPVersion.V1_1):'http://schemas.xmlsoap.org/soap/envelope/',
                      (SOAPVersion.V1_2):'http://www.w3.org/2003/05/soap-envelope']
 
+    String soapNamespacePrefix = 'SOAP'
     SOAPVersion version = SOAPVersion.V1_1
     String encoding = 'UTF-8'
     Map namespaces = [:]
@@ -29,6 +30,10 @@ class SOAPMessageBuilder {
   
     void version(SOAPVersion version) {
         this.version = version
+    }
+
+    void soapNamespacePrefix(String prefix) {
+        this.soapNamespacePrefix = prefix
     }
     
     void encoding(String encoding) {
@@ -54,9 +59,9 @@ class SOAPMessageBuilder {
         def writer = new StringWriter()
         def soap = new groovy.xml.MarkupBuilder(writer)
         soap.mkp.xmlDeclaration(version:'1.0', encoding:encoding)
-        soap.'SOAP:Envelope'(['xmlns:SOAP':xmlnsSoap[version]] + namespaces) {
-            'SOAP:Header'(headerAttributes, header)
-            'SOAP:Body'(bodyAttributes, body)
+        soap."${soapNamespacePrefix}:Envelope"(["xmlns:${soapNamespacePrefix}":xmlnsSoap[version]] + namespaces) {
+            "${soapNamespacePrefix}:Header"(headerAttributes, header)
+            "${soapNamespacePrefix}:Body"(bodyAttributes, body)
         }
         writer.toString()
     }

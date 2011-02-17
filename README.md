@@ -1,12 +1,17 @@
 # groovy-wslite
 
+*Note*
+
+    This is a work in progress.
+
 Library for Groovy that aims to provide no-frills SOAP webservice client (and eventually REST)
 for interacting with SOAP and REST based webservices.
 
 ## Example
 
-    def serviceURL = 'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx'
-    def client = new SOAPClient(serviceURL)
+    import wslite.soap.*
+
+    def client = new SOAPClient(serviceURL:'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
     def resp = client.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
         body {
             GetMartinLutherKingDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
@@ -14,8 +19,10 @@ for interacting with SOAP and REST based webservices.
             }
         }
     }
-    def soap = new XmlSlurper().parseText(resp)
-    "2011-01-15T00:00:00" == soap.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+    "2011-01-15T00:00:00" == resp.Envelope.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+    200 == resp.status
+    "OK" == resp.statusMessage
+    "ASP.NET" == resp.headers['X-Powered-By']
 
 ## Dependencies
 
