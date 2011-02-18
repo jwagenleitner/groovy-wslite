@@ -41,7 +41,6 @@ class SOAPMessageBuilder {
     }
 
     void envelopeAttributes(Map attributes) {
-        if (!attributes) return
         this.envelopeAttributes = attributes
     }
 
