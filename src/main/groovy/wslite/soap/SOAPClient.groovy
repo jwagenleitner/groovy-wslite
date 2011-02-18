@@ -29,7 +29,7 @@ class SOAPClient {
             headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
         }
         def response = http.post(serviceURL, message.toString().bytes, headers)
-        response['Envelope'] = new XmlSlurper().parseText(response.data)
+        response['Envelope'] = new XmlSlurper().parse(new ByteArrayInputStream(response.data))
         return response
     }
 }

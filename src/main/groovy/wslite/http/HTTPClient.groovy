@@ -14,7 +14,13 @@
  */
 package wslite.http
 
+import javax.net.ssl.*;
+
 class HTTPClient {
+
+    def followRedirects = true
+    def useCaches = false
+    def trustAllSSLCerts = true
 
     def get(String url, Map headers=[:]) {
         return executeMethod('GET', url, headers)
@@ -35,7 +41,7 @@ class HTTPClient {
     private def executeMethod(String method, String url, Map headers) {
         HttpURLConnection conn = setupConnection(url, headers)
         conn.setRequestMethod(method)
-        String data = conn.getInputStream().text
+        def data = conn.getInputStream().bytes
         def response = buildResponse(conn)
         response.data = data
         conn.disconnect()
@@ -49,7 +55,7 @@ class HTTPClient {
         conn.setDoInput(true)
         conn.setDoOutput(true)
         conn.getOutputStream().bytes = content
-        String data = conn.getInputStream().text
+        def data = conn.getInputStream().bytes
         def response = buildResponse(conn)
         response.data = data
         conn.disconnect()
@@ -58,9 +64,12 @@ class HTTPClient {
 
     private HttpURLConnection setupConnection(String url, Map headers) {
         URL targetURL = new URL(url)
+        if (trustAllSSLCerts) {
+            setupSSLTrustManager()
+        }
         HttpURLConnection conn = (HttpURLConnection)targetURL.openConnection()
-        conn.setUseCaches(false)
-        conn.setInstanceFollowRedirects(false)
+        conn.setUseCaches(useCaches)
+        conn.setInstanceFollowRedirects(followRedirects)
         conn.setRequestProperty('Connection', 'Close')
         for (entry in headers) {
             conn.setRequestProperty(entry.key, entry.value)
@@ -78,6 +87,14 @@ class HTTPClient {
         response.status = conn.getResponseCode()
         response.statusMessage = conn.getResponseMessage()
         return response
+    }
+
+    private def setupSSLTrustManager() {
+        def trustingTrustManager = [getAcceptedIssuers:{}, checkClientTrusted:{arg0, arg1 -> }, checkServerTrusted:{arg0, arg1 -> }] as X509TrustManager
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, [trustingTrustManager] as TrustManager[], new java.security.SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+        HttpsURLConnection.setDefaultHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
     }
 
 }
