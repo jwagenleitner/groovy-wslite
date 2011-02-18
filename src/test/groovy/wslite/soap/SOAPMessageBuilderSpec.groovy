@@ -18,34 +18,68 @@ import spock.lang.*
 
 class SOAPMessageBuilderSpec extends Specification {
 
+    def buildMessage(message) {
+        def messageBuilder = new SOAPMessageBuilder()
+        message.delegate = messageBuilder
+        message.call()
+        return messageBuilder
+    }
+
+    def slurp(message) {
+        return new XmlSlurper().parseText(message)
+    }
+
     def "default SOAP version is 1.1"() {
-        given:"a closure with no version defined"
-        def message = {
+        when:"a message with no version is built"
+        def message = buildMessage {
             body {}
         }
 
-        when:"message is built"
-        def messageBuilder = new SOAPMessageBuilder()
-        message.delegate = messageBuilder
-        message.call()
-
         then:"version should default to 1.1"
-        assert SOAPVersion.V1_1 == messageBuilder.version
+        assert SOAPVersion.V1_1 == message.version
     }
 
     def "overriding SOAP version"() {
-        given:"a closure that sets the SOAP version to 1.2"
-        def message = {
+        when:"a message specifies v1.2 is built"
+        def message = buildMessage {
             version SOAPVersion.V1_2
         }
 
-        when:"message is built"
-        def messageBuilder = new SOAPMessageBuilder()
-        message.delegate = messageBuilder
-        message.call()
-
         then:"version should be set to 1.2"
-        assert SOAPVersion.V1_2 == messageBuilder.version
+        assert SOAPVersion.V1_2 == message.version
+    }
+
+    def "default SOAP namespace prefix"() {
+        when:"a message doesn't specify a SOAP namespace prefix"
+        def message = buildMessage {
+            body {}
+        }
+
+        then:"SOAP namespace prefix should default to SOAP"
+        assert message.toString().contains("<SOAP:Envelope")
+    }
+
+    def "overriding SOAP namespace prefix"() {
+        when:"a message specifies an alternative SOAP namespace prefix"
+        def message = buildMessage {
+            soapNamespacePrefix "FOOBAR"
+            body {}
+        }
+
+        then:
+        assert message.toString().contains("<FOOBAR:Envelope")
+    }
+
+    def "custom envelope attributes"() {
+        when:"custom envelope attributes are speicified"
+        def message = buildMessage {
+            envelopeAttributes foo:'bar'
+            body {}
+        }
+
+        then:
+        def env = slurp(message.toString())
+        assert env.@foo.text() == "bar"
     }
 
 }

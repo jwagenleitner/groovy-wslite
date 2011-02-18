@@ -22,12 +22,12 @@ class SOAPMessageBuilder {
     String soapNamespacePrefix = 'SOAP'
     SOAPVersion version = SOAPVersion.V1_1
     String encoding = 'UTF-8'
-    Map namespaces = [:]
+    Map envelopeAttributes = [:]
     Closure header = {}
     Map headerAttributes = [:]
     Closure body = {}
     Map bodyAttributes = [:]
-  
+
     void version(SOAPVersion version) {
         this.version = version
     }
@@ -35,31 +35,31 @@ class SOAPMessageBuilder {
     void soapNamespacePrefix(String prefix) {
         this.soapNamespacePrefix = prefix
     }
-    
+
     void encoding(String encoding) {
         this.encoding = encoding
     }
-    
-    void namespaces(Map additionalNamespaces) {
-        if (!additionalNamespaces) return
-        namespaces += additionalNamespaces
+
+    void envelopeAttributes(Map attributes) {
+        if (!attributes) return
+        this.envelopeAttributes = attributes
     }
-    
+
     void header(Map attributes=[:], Closure content) {
         this.header = content
         this.headerAttributes = attributes
     }
-    
+
     void body(Map attributes=[:], Closure content) {
         this.body = content
         this.bodyAttributes = attributes
     }
-    
+
     String toString() {
         def writer = new StringWriter()
         def soap = new groovy.xml.MarkupBuilder(writer)
         soap.mkp.xmlDeclaration(version:'1.0', encoding:encoding)
-        soap."${soapNamespacePrefix}:Envelope"(["xmlns:${soapNamespacePrefix}":xmlnsSoap[version]] + namespaces) {
+        soap."${soapNamespacePrefix}:Envelope"(["xmlns:${soapNamespacePrefix}":xmlnsSoap[version]] + envelopeAttributes) {
             "${soapNamespacePrefix}:Header"(headerAttributes, header)
             "${soapNamespacePrefix}:Body"(bodyAttributes, body)
         }
