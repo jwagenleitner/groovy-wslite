@@ -21,15 +21,32 @@ class SOAPClient {
     String serviceURL
     def http = new HTTPClient()
 
-    def send(Map headers=[:], Closure content) {
-        SOAPMessageBuilder message = new SOAPMessageBuilder()
-        content.delegate = message
-        content.call()
+    def send(headers=[:], builder=new SOAPMessageBuilder(), content) {
+        def message = buildSOAPMessage(content, builder)
         if (!headers.'Content-Type') {
             headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
         }
         def response = http.post(serviceURL, message.toString().bytes, headers)
-        response['Envelope'] = new XmlSlurper().parse(new ByteArrayInputStream(response.data))
+        response['Envelope'] = parseEnvelope(response.data)
+        if (!response.Envelope.Body.Fault.isEmpty()) {
+            def soapFault = buildSOAPFaultException(response.Envelope.Body.Fault)
+            soapFault.response = response
+            throw soapFault
+        }
         return response
+    }
+
+    private def buildSOAPMessage(content, builder) {
+        content.delegate = builder
+        content.call()
+        return builder
+    }
+
+    private def parseEnvelope(data) {
+        return new XmlSlurper().parse(new ByteArrayInputStream(data))
+    }
+
+    private def buildSOAPFaultException(fault) {
+        return new SOAPFaultException(fault.faultcode.text(), fault.faultstring.text(), fault.faultactor.text(), fault.detail.text())
     }
 }
