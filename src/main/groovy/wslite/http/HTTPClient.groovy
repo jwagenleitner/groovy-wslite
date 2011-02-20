@@ -64,16 +64,32 @@ class HTTPClient {
     private def executeMethod(String method, URL url, byte[] content, Map headers) {
         HttpURLConnection conn = setupConnection(url, headers)
         conn.setRequestMethod(method)
+        def response
+        try {
+            doOutput(conn, content)
+            def data = doInput(conn)
+            response = buildResponse(conn)
+            response.data = data
+        } catch(Exception ex) {
+            response = buildResponse(conn)
+            response.data = conn.getErrorStream().bytes
+            throw new HTTPClientException(response.status + " " + response.statusMessage, ex, response)
+        } finally {
+            conn.disconnect()
+        }
+        return response
+    }
+
+    private void doOutput(conn, content) {
         if (content) {
             conn.setDoOutput(true)
             conn.addRequestProperty("Content-Length", "${content.size()}")
             conn.getOutputStream().bytes = content
         }
-        def data = conn.getInputStream().bytes
-        def response = buildResponse(conn)
-        response.data = data
-        conn.disconnect()
-        return response
+    }
+
+    private def doInput(conn) {
+        return conn.getInputStream().bytes
     }
 
     private def setupConnection(URL url, Map headers) {
@@ -85,26 +101,45 @@ class HTTPClient {
         conn.setReadTimeout(readTimeout)
         conn.setUseCaches(useCaches)
         conn.setInstanceFollowRedirects(followRedirects)
+        setRequestHeaders(conn, headers)
+        setAuthorizationHeader(conn)
+        return conn
+    }
+
+    private void setRequestHeaders(conn, headers) {
         for (entry in headers) {
             conn.setRequestProperty(entry.key, entry.value)
         }
         for (entry in defaultHeaders) {
             conn.addRequestProperty(entry.key, entry.value)
         }
+    }
+
+    private def setAuthorizationHeader(conn) {
         auth.authorize(conn)
-        return conn
     }
 
     private def buildResponse(HttpURLConnection conn) {
         def response = [:]
+        response.status = conn.getResponseCode()
+        response.statusMessage = conn.getResponseMessage()
+        response.url = conn.getURL()
+        response.contentEncoding = conn.getContentEncoding()
+        response.contentLength = conn.getContentLength()
+        response.contentType = conn.getContentType()
+        response.date = new Date(conn.getDate())
+        response.expiration = new Date(conn.getExpiration())
+        response.lastModified = new Date(conn.getLastModified())
+        response.headers = headersToMap(conn)
+        return response
+    }
+
+    private def headersToMap(conn) {
         def headers = [:]
         for (entry in conn.getHeaderFields()) {
             headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
-        response.headers = headers
-        response.status = conn.getResponseCode()
-        response.statusMessage = conn.getResponseMessage()
-        return response
+        return headers
     }
 
     private def setupSSLTrustManager(conn) {
