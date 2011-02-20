@@ -18,66 +18,79 @@ import javax.net.ssl.*;
 
 class HTTPClient {
 
-    def followRedirects = true
+    int connectTimeout = 10000
+    int readTimeout = 30000
     def useCaches = false
+    def followRedirects = true
     def trustAllSSLCerts = true
+    def defaultHeaders = [Connection:"Close"]
 
     def get(String url, Map headers=[:]) {
-        return executeMethod('GET', url, headers)
+        return get(new URL(url), headers)
+    }
+
+    def get(URL url, Map headers=[:]) {
+        return executeMethod("GET", url, null, headers)
     }
 
     def delete(String url, Map headers=[:]) {
-        return executeMethod('DELETE', url, headers)
+        return delete(new URL(url), headers)
+    }
+
+    def delete(URL url, Map headers=[:]) {
+        return executeMethod("DELETE", url, null, headers)
     }
 
     def post(String url, byte[] content, Map headers=[:]) {
-        return executeMethod('POST', url, content, headers)
+        return post(new URL(url), content, headers)
+    }
+
+    def post(URL url, byte[] content, Map headers=[:]) {
+        return executeMethod("POST", url, content, headers)
     }
 
     def put(String url, byte[] content, Map headers=[:]) {
-        return executeMethod('PUT', url, content, headers)
+        return put(new URL(url), content, headers)
     }
 
-    private def executeMethod(String method, String url, Map headers) {
+    def put(URL url, byte[] content, Map headers=[:]) {
+        return executeMethod("PUT", url, content, headers)
+    }
+
+    private def executeMethod(String method, URL url, byte[] content, Map headers) {
         HttpURLConnection conn = setupConnection(url, headers)
         conn.setRequestMethod(method)
-        def data = conn.getInputStream().bytes
-        def response = buildResponse(conn)
-        response.data = data
-        conn.disconnect()
-        return response
-    }
-
-    private def executeMethod(String method, String url, byte[] content, Map headers) {
-        HttpURLConnection conn = setupConnection(url, headers)
-        conn.setRequestMethod(method)
-        conn.setRequestProperty('Content-Length', "${content.size()}")
-        conn.setDoInput(true)
-        conn.setDoOutput(true)
-        conn.getOutputStream().bytes = content
-        def data = conn.getInputStream().bytes
-        def response = buildResponse(conn)
-        response.data = data
-        conn.disconnect()
-        return response
-    }
-
-    private HttpURLConnection setupConnection(String url, Map headers) {
-        URL targetURL = new URL(url)
-        if (trustAllSSLCerts) {
-            setupSSLTrustManager()
+        if (content) {
+            conn.setDoOutput(true)
+            conn.addRequestProperty("Content-Length", "${content.size()}")
+            conn.getOutputStream().bytes = content
         }
-        HttpURLConnection conn = (HttpURLConnection)targetURL.openConnection()
+        def data = conn.getInputStream().bytes
+        def response = buildResponse(conn)
+        response.data = data
+        conn.disconnect()
+        return response
+    }
+
+    private def setupConnection(URL url, Map headers) {
+        def conn = url.openConnection()
+        if (url.getProtocol() == "https") {
+            setupSSLTrustManager(conn)
+        }
+        conn.setConnectTimeout(connectTimeout)
+        conn.setReadTimeout(readTimeout)
         conn.setUseCaches(useCaches)
         conn.setInstanceFollowRedirects(followRedirects)
-        conn.setRequestProperty('Connection', 'Close')
         for (entry in headers) {
             conn.setRequestProperty(entry.key, entry.value)
+        }
+        for (entry in defaultHeaders) {
+            conn.addRequestProperty(entry.key, entry.value)
         }
         return conn
     }
 
-    private Map buildResponse(HttpURLConnection conn) {
+    private def buildResponse(HttpURLConnection conn) {
         def response = [:]
         def headers = [:]
         for (entry in conn.getHeaderFields()) {
@@ -89,12 +102,13 @@ class HTTPClient {
         return response
     }
 
-    private def setupSSLTrustManager() {
+    private def setupSSLTrustManager(conn) {
+        if (!trustAllSSLCerts) return
         def trustingTrustManager = [getAcceptedIssuers:{}, checkClientTrusted:{arg0, arg1 -> }, checkServerTrusted:{arg0, arg1 -> }] as X509TrustManager
         SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, [trustingTrustManager] as TrustManager[], new java.security.SecureRandom())
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-        HttpsURLConnection.setDefaultHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
+        sc.init(null, [trustingTrustManager] as TrustManager[], null)
+        conn.setSSLSocketFactory(sc.getSocketFactory())
+        conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
     }
 
 }
