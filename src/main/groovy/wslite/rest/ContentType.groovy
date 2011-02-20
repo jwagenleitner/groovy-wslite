@@ -15,9 +15,10 @@
 package wslite.rest
 
 class ContentType {
-	static String JSON = "application/json,text/json"
-	static String XML = "application/xml,text/xml"
+    static String JSON = "application/json,text/json"
+    static String XML = "application/xml,text/xml"
     static String HTML = "text/html"
     static String TEXT = "text/plain"
     static String URLENC = "application/x-www-form-urlencoded"
 }
+
