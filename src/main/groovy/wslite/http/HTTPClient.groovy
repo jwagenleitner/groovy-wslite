@@ -20,9 +20,11 @@ class HTTPClient {
 
     int connectTimeout = 10000
     int readTimeout = 30000
-    def useCaches = false
-    def followRedirects = true
-    def trustAllSSLCerts = true
+
+    boolean useCaches = false
+    boolean followRedirects = true
+    boolean trustAllSSLCerts = true
+
     def defaultHeaders = [Connection:"Close"]
 
     def get(String url, Map headers=[:]) {
