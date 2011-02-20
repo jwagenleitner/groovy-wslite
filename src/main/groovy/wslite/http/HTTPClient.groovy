@@ -27,7 +27,12 @@ class HTTPClient {
 
     def defaultHeaders = [Connection:"Close"]
 
+    HTTPConnectionFactory httpConnectionFactory
     HTTPAuthorization auth = new HTTPAuthorization()
+
+    HTTPClient(HTTPConnectionFactory httpConnectionFactory=new HTTPConnectionFactory()) {
+         this.httpConnectionFactory = httpConnectionFactory
+    }
 
     def get(String url, Map headers=[:]) {
         return get(new URL(url), headers)
@@ -93,7 +98,7 @@ class HTTPClient {
     }
 
     private def setupConnection(URL url, Map headers) {
-        def conn = url.openConnection()
+        def conn = httpConnectionFactory.getConnection(url)
         if (url.getProtocol() == "https") {
             setupSSLTrustManager(conn)
         }
