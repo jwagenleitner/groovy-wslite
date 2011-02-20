@@ -27,6 +27,8 @@ class HTTPClient {
 
     def defaultHeaders = [Connection:"Close"]
 
+    HTTPAuthorization auth = new HTTPAuthorization()
+
     def get(String url, Map headers=[:]) {
         return get(new URL(url), headers)
     }
@@ -89,6 +91,7 @@ class HTTPClient {
         for (entry in defaultHeaders) {
             conn.addRequestProperty(entry.key, entry.value)
         }
+        auth.authorize(conn)
         return conn
     }
 
