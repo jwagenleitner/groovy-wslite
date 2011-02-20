@@ -26,7 +26,7 @@ class SOAPClient {
         if (!headers.'Content-Type') {
             headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
         }
-        def response = http.post(serviceURL, message.toString().bytes, headers)
+        def response = http.executeMethod("POST", new URL(serviceURL), message.toString().bytes, headers)
         response['Envelope'] = parseEnvelope(response.data)
         if (!response.Envelope.Body.Fault.isEmpty()) {
             def soapFault = buildSOAPFaultException(response.Envelope.Body.Fault)

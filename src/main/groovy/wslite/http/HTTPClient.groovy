@@ -34,39 +34,7 @@ class HTTPClient {
          this.httpConnectionFactory = httpConnectionFactory
     }
 
-    def get(String url, Map headers=[:]) {
-        return get(new URL(url), headers)
-    }
-
-    def get(URL url, Map headers=[:]) {
-        return executeMethod("GET", url, null, headers)
-    }
-
-    def delete(String url, Map headers=[:]) {
-        return delete(new URL(url), headers)
-    }
-
-    def delete(URL url, Map headers=[:]) {
-        return executeMethod("DELETE", url, null, headers)
-    }
-
-    def post(String url, byte[] content, Map headers=[:]) {
-        return post(new URL(url), content, headers)
-    }
-
-    def post(URL url, byte[] content, Map headers=[:]) {
-        return executeMethod("POST", url, content, headers)
-    }
-
-    def put(String url, byte[] content, Map headers=[:]) {
-        return put(new URL(url), content, headers)
-    }
-
-    def put(URL url, byte[] content, Map headers=[:]) {
-        return executeMethod("PUT", url, content, headers)
-    }
-
-    private def executeMethod(String method, URL url, byte[] content, Map headers) {
+    def executeMethod(String method, URL url, byte[] content, Map headers) {
         HttpURLConnection conn = setupConnection(url, headers)
         conn.setRequestMethod(method)
         def response
