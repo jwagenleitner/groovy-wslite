@@ -19,14 +19,18 @@ import wslite.http.HTTPClient
 class SOAPClient {
 
     String serviceURL
-    def http = new HTTPClient()
+    HTTPClient httpClient
+
+    SOAPClient(HTTPClient httpClient=new HTTPClient()) {
+        this.httpClient = httpClient
+    }
 
     def send(headers=[:], builder=new SOAPMessageBuilder(), content) {
         def message = buildSOAPMessage(content, builder)
         if (!headers.'Content-Type') {
             headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
         }
-        def response = http.executeMethod("POST", new URL(serviceURL), message.toString().bytes, headers)
+        def response = httpClient.executeMethod("POST", new URL(serviceURL), message.toString().bytes, headers)
         response['Envelope'] = parseEnvelope(response.data)
         if (!response.Envelope.Body.Fault.isEmpty()) {
             def soapFault = buildSOAPFaultException(response.Envelope.Body.Fault)
