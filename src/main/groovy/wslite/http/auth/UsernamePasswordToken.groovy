@@ -12,18 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wslite.http
+package wslite.http.auth
 
-class HTTPAuthorization {
-
-    String authorization
-
-    void basic(String username, String password) {
-        this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
-    }
-
-    void authorize(URLConnection conn) {
-        if (!authorization) return
-        conn.addRequestProperty("Authorization", authorization)
-    }
+class UsernamePasswordToken {
+    String username
+    String password
 }

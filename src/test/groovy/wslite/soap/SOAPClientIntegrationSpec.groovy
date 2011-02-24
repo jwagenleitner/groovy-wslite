@@ -33,7 +33,7 @@ class SOAPClientIntegrationSpec extends Specification {
 
         then:
         "2011-01-15T00:00:00" == resp.Envelope.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
-        200 == resp.status
+        200 == resp.statusCode
         "OK" == resp.statusMessage
         "ASP.NET" == resp.headers['X-Powered-By']
 

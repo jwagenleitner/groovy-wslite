@@ -14,12 +14,13 @@
  */
 package wslite.http
 
-import javax.net.ssl.*;
+import javax.net.ssl.*
+import wslite.http.auth.*;
 
 class HTTPClient {
 
-    int connectTimeout = 10000
-    int readTimeout = 30000
+    int connectTimeout = 0
+    int readTimeout = 0
 
     boolean useCaches = false
     boolean followRedirects = true
@@ -28,29 +29,81 @@ class HTTPClient {
     def defaultHeaders = [Connection:"Close"]
 
     HTTPConnectionFactory httpConnectionFactory
-    HTTPAuthorization auth = new HTTPAuthorization()
+    HTTPAuthorization authorization
 
     HTTPClient(HTTPConnectionFactory httpConnectionFactory=new HTTPConnectionFactory()) {
          this.httpConnectionFactory = httpConnectionFactory
     }
 
-    def executeMethod(String method, URL url, byte[] content, Map headers) {
-        HttpURLConnection conn = setupConnection(url, headers)
-        conn.setRequestMethod(method)
-        def response
+    HTTPResponse execute(HTTPRequest request) {
+        HttpURLConnection conn = setupConnection(request)
+        HTTPResponse response
         try {
-            doOutput(conn, content)
-            def data = doInput(conn)
-            response = buildResponse(conn)
-            response.data = data
+            doOutput(conn, request.data)
+            byte[] data = doInput(conn)
+            response = buildResponse(conn, data)
         } catch(Exception ex) {
-            response = buildResponse(conn)
-            response.data = conn.getErrorStream().bytes
-            throw new HTTPClientException(response.status + " " + response.statusMessage, ex, response)
+            response = buildResponse(conn, conn.getErrorStream().bytes)
+            throw new HTTPClientException(response.statusCode + " " + response.statusMessage, ex, response)
         } finally {
             conn.disconnect()
         }
         return response
+    }
+
+    private def setupConnection(HTTPRequest request) {
+        def conn = httpConnectionFactory.getConnection(request.url)
+        if (isSecureConnection(conn) && shouldTrustAllSSLCerts(request)) {
+            setupSSLTrustManager(conn)
+        }
+        conn.setRequestMethod(request.method.toString())
+        conn.setConnectTimeout(request.isConnectTimeoutSet ? request.connectTimeout : connectTimeout)
+        conn.setReadTimeout(request.isReadTimeoutSet ? request.readTimeout : readTimeout)
+        conn.setUseCaches(request.isUseCachesSet ? request.useCaches : useCaches)
+        conn.setInstanceFollowRedirects(request.isFollowRedirectsSet ? request.followRedirects : followRedirects)
+        setRequestHeaders(conn, request)
+        setAuthorizationHeader(conn)
+        return conn
+    }
+
+    private boolean isSecureConnection(conn) {
+        return (conn.getURL().getProtocol().toLowerCase() == "https") ? true : false
+    }
+
+    private boolean shouldTrustAllSSLCerts(request) {
+        if (request.isTrustAllSSLCertsSet) {
+            if (request.trustAllSSLCerts) {
+                return true
+            }
+        } else {
+            if (trustAllSSLCerts) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private void setupSSLTrustManager(conn) {
+        if (!trustAllSSLCerts) return
+        def trustingTrustManager = [getAcceptedIssuers:{}, checkClientTrusted:{arg0, arg1 -> }, checkServerTrusted:{arg0, arg1 -> }] as X509TrustManager
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, [trustingTrustManager] as TrustManager[], null)
+        conn.setSSLSocketFactory(sc.getSocketFactory())
+        conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
+    }
+
+    private void setRequestHeaders(conn, request) {
+        for (entry in request.headers) {
+            conn.setRequestProperty(entry.key, entry.value)
+        }
+        for (entry in defaultHeaders) {
+            conn.addRequestProperty(entry.key, entry.value)
+        }
+    }
+
+    private void setAuthorizationHeader(conn) {
+        if (!authorization) return
+        authorization.authorize(conn)
     }
 
     private void doOutput(conn, content) {
@@ -61,40 +114,14 @@ class HTTPClient {
         }
     }
 
-    private def doInput(conn) {
+    private byte[] doInput(conn) {
         return conn.getInputStream().bytes
     }
 
-    private def setupConnection(URL url, Map headers) {
-        def conn = httpConnectionFactory.getConnection(url)
-        if (url.getProtocol() == "https") {
-            setupSSLTrustManager(conn)
-        }
-        conn.setConnectTimeout(connectTimeout)
-        conn.setReadTimeout(readTimeout)
-        conn.setUseCaches(useCaches)
-        conn.setInstanceFollowRedirects(followRedirects)
-        setRequestHeaders(conn, headers)
-        setAuthorizationHeader(conn)
-        return conn
-    }
-
-    private void setRequestHeaders(conn, headers) {
-        for (entry in headers) {
-            conn.setRequestProperty(entry.key, entry.value)
-        }
-        for (entry in defaultHeaders) {
-            conn.addRequestProperty(entry.key, entry.value)
-        }
-    }
-
-    private def setAuthorizationHeader(conn) {
-        auth.authorize(conn)
-    }
-
-    private def buildResponse(HttpURLConnection conn) {
-        def response = [:]
-        response.status = conn.getResponseCode()
+    private HTTPResponse buildResponse(HttpURLConnection conn, byte[] data) {
+        def response = new HTTPResponse()
+        response.data = data
+        response.statusCode = conn.getResponseCode()
         response.statusMessage = conn.getResponseMessage()
         response.url = conn.getURL()
         response.contentEncoding = conn.getContentEncoding()
@@ -113,15 +140,6 @@ class HTTPClient {
             headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
         return headers
-    }
-
-    private def setupSSLTrustManager(conn) {
-        if (!trustAllSSLCerts) return
-        def trustingTrustManager = [getAcceptedIssuers:{}, checkClientTrusted:{arg0, arg1 -> }, checkServerTrusted:{arg0, arg1 -> }] as X509TrustManager
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, [trustingTrustManager] as TrustManager[], null)
-        conn.setSSLSocketFactory(sc.getSocketFactory())
-        conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
     }
 
 }

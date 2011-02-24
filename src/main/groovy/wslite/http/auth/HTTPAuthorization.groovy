@@ -12,15 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wslite.http
+package wslite.http.auth
 
-class HTTPClientException extends Exception {
+class HTTPAuthorization {
 
-    HTTPResponse response
+    String authorization
 
-    HTTPClientException(String message, Throwable cause, HTTPResponse response) {
-        super(message, cause)
-        this.response = response
+    void basic(UsernamePasswordToken token) {
+        basic(token.username, token.password)
     }
 
+    void basic(String username, String password) {
+        this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
+    }
+
+    void authorize(URLConnection conn) {
+        if (!authorization) return
+        conn.addRequestProperty("Authorization", authorization)
+    }
 }

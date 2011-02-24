@@ -14,13 +14,18 @@
  */
 package wslite.http
 
-class HTTPClientException extends Exception {
+class HTTPResponse {
+    int statusCode
+    String statusMessage
+    URL url
+    String contentEncoding
+    int contentLength
+    String contentType
+    Date date
+    Date expiration
+    Date lastModified
 
-    HTTPResponse response
+    def headers
 
-    HTTPClientException(String message, Throwable cause, HTTPResponse response) {
-        super(message, cause)
-        this.response = response
-    }
-
+    byte[] data
 }

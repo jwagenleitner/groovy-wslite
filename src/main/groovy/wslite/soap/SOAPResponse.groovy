@@ -12,15 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wslite.http
+package wslite.soap
 
-class HTTPClientException extends Exception {
+import wslite.http.HTTPResponse
 
-    HTTPResponse response
-
-    HTTPClientException(String message, Throwable cause, HTTPResponse response) {
-        super(message, cause)
-        this.response = response
-    }
-
+class SOAPResponse {
+    @Delegate HTTPResponse httpResponse
+    def Envelope
 }

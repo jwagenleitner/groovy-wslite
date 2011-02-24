@@ -14,13 +14,20 @@
  */
 package wslite.http
 
-class HTTPClientException extends Exception {
+enum HTTPMethod {
+    GET("GET"),
+    POST("POST"),
+    PUT("PUT"),
+    DELETE("DELETE")
 
-    HTTPResponse response
+    String method
 
-    HTTPClientException(String message, Throwable cause, HTTPResponse response) {
-        super(message, cause)
-        this.response = response
+    HTTPMethod(String method) {
+        this.method = method
     }
 
+    @Override
+    String toString() {
+        return method
+    }
 }

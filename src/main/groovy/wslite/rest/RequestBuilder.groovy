@@ -14,11 +14,15 @@
  */
 package wslite.rest
 
+import wslite.http.*
+
 class RequestBuilder {
 
+    HTTPMethod method
     String url
     String path
     Map params
+    byte[] data
 
     def getURL() {
         def targetURL = new StringBuilder(url)
@@ -39,6 +43,14 @@ class RequestBuilder {
 
     def toQueryString(params) {
         params?.collect { k, v -> "${URLEncoder.encode(k.toString())}=${URLEncoder.encode(v.toString())}" }.join('&')
+    }
+
+    HTTPRequest build() {
+        HTTPRequest request = new HTTPRequest()
+        request.url = this.getURL()
+        request.method = this.method
+        request.headers = this.getHeaders()
+        return request
     }
 
 }

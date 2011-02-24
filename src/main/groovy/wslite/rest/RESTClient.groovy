@@ -19,22 +19,22 @@ import wslite.http.*
 class RESTClient {
 
     String url
-    HTTPClient http
+    HTTPClient httpClient
 
     String defaultCharset = "UTF-8"
     def charContentTypes = [ContentType.HTML, ContentType.JSON, ContentType.TEXT, ContentType.XML]
 
     RESTClient(String url, HTTPClient client=new HTTPClient()) {
         this.url = url
-        this.http = client
+        this.httpClient = client
     }
 
     def get(Map params=[:], String path, String mimeType=ContentType.JSON) {
-        return executeMethod("GET", path, params, mimeType, null)
+        return executeMethod(HTTPMethod.GET, path, params, mimeType, null)
     }
 
     def delete(Map params=[:], String path) {
-        return executeMethod("DELETE", path, params, null, null)
+        return executeMethod(HTTPMethod.DELETE, path, params, null, null)
     }
 
     def post(Map params=[:], String path, String mimeType=ContentType.JSON, String content) {
@@ -42,7 +42,7 @@ class RESTClient {
     }
 
     def post(Map params=[:], String path, String mimeType=ContentType.JSON, byte[] content) {
-        return executeMethod("POST", path, params, mimeType, content)
+        return executeMethod(HTTPMethod.POST, path, params, mimeType, content)
     }
 
     def put(Map params=[:], String path, String mimeType=ContentType.JSON, String content) {
@@ -50,18 +50,18 @@ class RESTClient {
     }
 
     def put(Map params=[:], String path, String mimeType=ContentType.JSON, byte[] content) {
-        return executeMethod("PUT", path, params, mimeType, content)
+        return executeMethod(HTTPMethod.PUT, path, params, mimeType, content)
     }
 
-    def executeMethod(String method, String path, Map params, String mimeType, byte[] content) {
-        RequestBuilder builder = new RequestBuilder(url:url, path:path, params:params)
+    def executeMethod(HTTPMethod method, String path, Map params, String mimeType, byte[] content) {
+        RequestBuilder builder = new RequestBuilder(method:method, url:url, path:path, params:params, data:content)
         def headers = builder.getHeaders()
-        if (method in ["PUT", "POST"]) {
+        if (method in [HTTPMethod.POST, HTTPMethod.PUT]) {
             headers["Content-Type"] = mimeType
         } else {
             headers["Accept"] = mimeType
         }
-        def response = http.executeMethod(method, builder.getURL(), content, headers)
+        def response = httpClient.execute(builder.build())
         parseResponseData(response)
         return response
     }

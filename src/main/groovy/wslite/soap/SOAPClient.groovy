@@ -14,7 +14,7 @@
  */
 package wslite.soap
 
-import wslite.http.HTTPClient
+import wslite.http.*
 
 class SOAPClient {
 
@@ -25,25 +25,40 @@ class SOAPClient {
         this.httpClient = httpClient
     }
 
-    def send(headers=[:], builder=new SOAPMessageBuilder(), content) {
-        def message = buildSOAPMessage(content, builder)
-        if (!headers.'Content-Type') {
-            headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
-        }
-        def response = httpClient.executeMethod("POST", new URL(serviceURL), message.toString().bytes, headers)
-        response['Envelope'] = parseEnvelope(response.data)
-        if (!response.Envelope.Body.Fault.isEmpty()) {
-            def soapFault = buildSOAPFaultException(response.Envelope.Body.Fault)
-            soapFault.response = response
+    def send(requestParams=[:], content) {
+        def message = buildSOAPMessage(content)
+        def httpRequest = buildHTTPRequest(requestParams, message)
+        def response = httpClient.execute(httpRequest)
+        def soapResponse = new SOAPResponse(httpResponse:response)
+        soapResponse['Envelope'] = parseEnvelope(response.data)
+        if (!soapResponse.Envelope.Body.Fault.isEmpty()) {
+            def soapFault = buildSOAPFaultException(soapResponse.Envelope.Body.Fault)
+            soapFault.response = soapResponse
             throw soapFault
         }
-        return response
+        return soapResponse
     }
 
-    private def buildSOAPMessage(content, builder) {
+    private def buildSOAPMessage(content) {
+        def builder = new SOAPMessageBuilder()
         content.delegate = builder
         content.call()
         return builder
+    }
+
+    private def buildHTTPRequest(requestParams, message) {
+        def soapAction = requestParams.remove("SOAPAction")
+        def httpRequest = new HTTPRequest(requestParams)
+        httpRequest.url = new URL(serviceURL)
+        httpRequest.method = HTTPMethod.POST
+        httpRequest.data = message.toString().bytes
+        if (!httpRequest.headers.'Content-Type') {
+            httpRequest.headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
+        }
+        if (!httpRequest.headers.SOAPAction && soapAction && message.version == SOAPVersion.V1_1) {
+            httpRequest.headers.SOAPAction = soapAction
+        }
+        return httpRequest
     }
 
     private def parseEnvelope(data) {
