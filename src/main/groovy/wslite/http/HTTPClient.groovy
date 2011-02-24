@@ -43,7 +43,7 @@ class HTTPClient {
             byte[] data = doInput(conn)
             response = buildResponse(conn, data)
         } catch(Exception ex) {
-            response = buildResponse(conn, conn.getErrorStream().bytes)
+            response = buildResponse(conn, conn.getErrorStream()?.bytes)
             throw new HTTPClientException(response.statusCode + " " + response.statusMessage, ex, response)
         } finally {
             conn.disconnect()

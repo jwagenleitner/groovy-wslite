@@ -14,7 +14,16 @@
  */
 package wslite.http.auth
 
-class UsernamePasswordToken {
+class HTTPBasicAuthorization implements HTTPAuthorization {
+
     String username
     String password
+
+    void authorize(URLConnection conn) {
+        conn.addRequestProperty("Authorization", getAuthorization())
+    }
+
+    private String getAuthorization() {
+        return "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
+    }
 }

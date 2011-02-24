@@ -14,20 +14,8 @@
  */
 package wslite.http.auth
 
-class HTTPAuthorization {
+interface HTTPAuthorization {
 
-    String authorization
+    void authorize(URLConnection conn)
 
-    void basic(UsernamePasswordToken token) {
-        basic(token.username, token.password)
-    }
-
-    void basic(String username, String password) {
-        this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
-    }
-
-    void authorize(URLConnection conn) {
-        if (!authorization) return
-        conn.addRequestProperty("Authorization", authorization)
-    }
 }
