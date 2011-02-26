@@ -18,7 +18,7 @@ import spock.lang.*
 
 class SOAPClientIntegrationSpec extends Specification {
 
-    def "accessing a public SOAP service"() {
+    def "accessing a public SOAP 1.1 service"() {
         given:
         def soapClient = new SOAPClient(serviceURL:'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
 
@@ -37,6 +37,24 @@ class SOAPClientIntegrationSpec extends Specification {
         "OK" == resp.statusMessage
         "ASP.NET" == resp.headers['X-Powered-By']
 
+    }
+
+    def "accessing a public SOAP 1.2 service"() {
+        given:
+        def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")
+
+        when:
+        def response = soapClient.send {
+            version SOAPVersion.V1_2
+            body {
+                GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+                    ZipCode("93657")
+                }
+            }
+        }
+
+        then:
+        "SANGER" == response.Envelope.Body.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
     }
 
 }
