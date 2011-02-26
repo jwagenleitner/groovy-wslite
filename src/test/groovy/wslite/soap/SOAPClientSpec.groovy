@@ -15,12 +15,19 @@
 package wslite.soap
 
 import spock.lang.*
+import org.spockframework.runtime.*
 import wslite.http.*
 
 class SOAPClientSpec extends Specification {
 
     def soapClient = new SOAPClient(serviceURL: "http://test.com")
     def testSoapMessage = { body { test(true) } }
+    def simpleSoapResponse = """<?xml version='1.0' encoding='UTF-8'?>
+                                <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+                                  <SOAP:Body>
+                                    <GetFoo/>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""".trim()
 
     def "parse valid SOAP response message"() {
         given: "a SOAP 1.1 response that is valid"
@@ -150,6 +157,89 @@ class SOAPClientSpec extends Specification {
         def sfe = thrown(SOAPFaultException)
         "742" == sfe.faultcode
         "742" == sfe.response.Envelope.Body.Fault.faultcode.text()
+    }
+
+    def "should add SOAPAction to request headers"() {
+        setup:
+        def httpc = [execute:{req -> return new HTTPResponse(headers:req.headers, data:simpleSoapResponse.bytes)}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a message is sent that includes a SOAPAction"
+        def response = soapClient.send(SOAPAction:"http://foo/bar", testSoapMessage)
+
+        then:
+        "http://foo/bar" == response.headers.SOAPAction
+    }
+
+    def "send should pass arguments in the http request"() {
+        setup:
+        def httpc = [
+            execute: {req ->
+                        assert 15000 == req.readTimeout
+                        assert 30000 == req.connectTimeout
+                        assert false == req.followRedirects
+                        [data:simpleSoapResponse.bytes]
+        }] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "send args contain http request params"
+        def response = soapClient.send(readTimeout:15000, connectTimeout:30000, followRedirects:false, testSoapMessage)
+
+        then: notThrown(ConditionNotSatisfiedError)
+    }
+
+    def "content-type for http request should default based on SOAP 1.1 message version"() {
+        setup: "an http client expecting a SOAP 1.1 content-type for the request"
+        def httpc = [
+            execute: {req ->
+                        assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        [data:simpleSoapResponse.bytes]
+        }] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a v1.1 message is sent"
+        def response = soapClient.send {
+            version SOAPVersion.V1_1
+            body { test() }
+        }
+
+        then: notThrown(ConditionNotSatisfiedError)
+    }
+
+    def "content-type for http request should default based on SOAP 1.2 message version"() {
+        setup: "an http client expecting a SOAP 1.2 content-type for the request"
+        def httpc = [
+            execute: {req ->
+                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        [data:simpleSoapResponse.bytes]
+        }] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a v1.2 message is sent"
+        def response = soapClient.send {
+            version SOAPVersion.V1_2
+            body { test() }
+        }
+
+        then: notThrown(ConditionNotSatisfiedError)
+    }
+
+    def "content-type specified in header for http request should override setting based on message version"() {
+        setup: "an http client expecting a custom content-type for the request"
+        def httpc = [
+            execute: {req ->
+                        assert "vendor/soap" == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        [data:simpleSoapResponse.bytes]
+        }] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a message is sent that includes a custom content-type header"
+        def response = soapClient.send(headers:["content-type":"vendor/soap"]) {
+            version SOAPVersion.V1_2
+            body { test() }
+        }
+
+        then: notThrown(ConditionNotSatisfiedError)
     }
 
 }

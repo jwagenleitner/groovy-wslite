@@ -18,6 +18,9 @@ import wslite.http.*
 
 class SOAPClient {
 
+    static final String SOAP_V11_CONTENT_TYPE = "text/xml; charset=UTF-8"
+    static final String SOAP_V12_CONTENT_TYPE = "application/soap+xml; charset=UTF-8"
+
     String serviceURL
     HTTPClient httpClient
 
@@ -30,7 +33,7 @@ class SOAPClient {
         def httpRequest = buildHTTPRequest(requestParams, message)
         def response = httpClient.execute(httpRequest)
         def soapResponse = new SOAPResponse(httpResponse:response)
-        soapResponse['Envelope'] = parseEnvelope(response.data)
+        soapResponse["Envelope"] = parseEnvelope(response.data)
         if (!soapResponse.Envelope.Body.Fault.isEmpty()) {
             def soapFault = buildSOAPFaultException(soapResponse.Envelope.Body.Fault)
             soapFault.response = soapResponse
@@ -53,10 +56,10 @@ class SOAPClient {
         httpRequest.url = new URL(serviceURL)
         httpRequest.method = HTTPMethod.POST
         httpRequest.data = message.toString().bytes
-        if (!httpRequest.headers.'Content-Type') {
-            httpRequest.headers.'Content-Type' = (message.version == SOAPVersion.V1_1) ? 'text/xml; charset=UTF-8' : 'application/soap+xml; charset=UTF-8'
+        if (!httpRequest.headers?.find { it.key.toLowerCase() == "content-type" } ) {
+            httpRequest.headers["Content-Type"] = (message.version == SOAPVersion.V1_1) ? SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
         }
-        if (!httpRequest.headers.SOAPAction && soapAction && message.version == SOAPVersion.V1_1) {
+        if (!httpRequest.headers?.find { it.key.toLowerCase() == "soapaction" } && soapAction && message.version == SOAPVersion.V1_1) {
             httpRequest.headers.SOAPAction = soapAction
         }
         return httpRequest
@@ -67,9 +70,9 @@ class SOAPClient {
         try {
             envelopeNode = new XmlSlurper().parse(new ByteArrayInputStream(data))
         } catch (org.xml.sax.SAXParseException sax) {
-            throw new SOAPMessageParseException(sax)
+            throw new SOAPMessageParseException("Unable to parse XML response", sax)
         } catch (Exception ex) {
-            throw new SOAPMessageParseException("Invalid argument", ex)
+            throw new SOAPMessageParseException("Invalid Argument", ex)
         }
         if (envelopeNode.name() != "Envelope") {
             throw new SOAPMessageParseException("Root element is " + envelopeNode.name() + ", expected 'Envelope'")
