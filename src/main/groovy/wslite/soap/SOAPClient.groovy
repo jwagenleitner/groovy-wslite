@@ -41,6 +41,7 @@ class SOAPClient {
 
     private def buildSOAPMessage(content) {
         def builder = new SOAPMessageBuilder()
+        content.resolveStrategy = Closure.DELEGATE_FIRST
         content.delegate = builder
         content.call()
         return builder
@@ -62,7 +63,21 @@ class SOAPClient {
     }
 
     private def parseEnvelope(data) {
-        return new XmlSlurper().parse(new ByteArrayInputStream(data))
+        def envelopeNode
+        try {
+            envelopeNode = new XmlSlurper().parse(new ByteArrayInputStream(data))
+        } catch (org.xml.sax.SAXParseException sax) {
+            throw new SOAPMessageParseException(sax)
+        } catch (Exception ex) {
+            throw new SOAPMessageParseException("Invalid argument", ex)
+        }
+        if (envelopeNode.name() != "Envelope") {
+            throw new SOAPMessageParseException("Root element is " + envelopeNode.name() + ", expected 'Envelope'")
+        }
+        if (!envelopeNode.childNodes().find {it.name() == "Body"}) {
+            throw new SOAPMessageParseException("Body element is missing")
+        }
+        return envelopeNode
     }
 
     private def buildSOAPFaultException(fault) {
