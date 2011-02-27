@@ -33,6 +33,10 @@ class SOAPClient {
         return send(requestParams, message.version, message.toString())
     }
 
+    SOAPResponse send(Map requestParams=[:], String content) {
+        return send(requestParams, SOAPVersion.V1_1, content)
+    }
+
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
         def httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
         def response = httpClient.execute(httpRequest)
