@@ -242,4 +242,46 @@ class SOAPClientSpec extends Specification {
         then: notThrown(ConditionNotSatisfiedError)
     }
 
+    def "can send raw soap message"() {
+        given: "a soap client configured to echo the soap request to soap response"
+        def httpc = [execute:{req -> [data:req.data]}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a raw text string is sent"
+        def response = soapClient.send(SOAPVersion.V1_1,
+                                """<?xml version='1.0' encoding='UTF-8'?>
+                                <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+                                  <SOAP:Body>
+                                    <GetFoo>bar</GetFoo>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""".trim())
+
+        then:
+        "bar" == response.Envelope.Body.GetFoo.text()
+    }
+
+    def "can send raw soap message with http params"() {
+        given: "a soap client configured to echo the soap request to soap response and verify http params"
+        def httpc = [execute:{req ->
+                        assert 7000 == req.connectTimeout
+                        assert 9000 == req.readTimeout
+                    [data:req.data]}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a raw text string is sent"
+        def response = soapClient.send(SOAPVersion.V1_1,
+                                connectTimeout:7000,
+                                readTimeout:9000,
+                                """<?xml version='1.0' encoding='UTF-8'?>
+                                <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+                                  <SOAP:Body>
+                                    <GetFoo>bar</GetFoo>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""".trim())
+
+        then:
+        notThrown(ConditionNotSatisfiedError)
+        "bar" == response.Envelope.Body.GetFoo.text()
+    }
+
 }

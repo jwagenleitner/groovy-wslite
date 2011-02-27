@@ -28,9 +28,13 @@ class SOAPClient {
         this.httpClient = httpClient
     }
 
-    def send(requestParams=[:], content) {
+    SOAPResponse send(Map requestParams=[:], Closure content) {
         def message = buildSOAPMessage(content)
-        def httpRequest = buildHTTPRequest(requestParams, message)
+        return send(requestParams, message.version, message.toString())
+    }
+
+    SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
+        def httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
         def response = httpClient.execute(httpRequest)
         def soapResponse = new SOAPResponse(httpResponse:response)
         soapResponse["Envelope"] = parseEnvelope(response.data)
@@ -50,16 +54,16 @@ class SOAPClient {
         return builder
     }
 
-    private def buildHTTPRequest(requestParams, message) {
+    private def buildHTTPRequest(requestParams, soapVersion, message) {
         def soapAction = requestParams.remove("SOAPAction")
         def httpRequest = new HTTPRequest(requestParams)
         httpRequest.url = new URL(serviceURL)
         httpRequest.method = HTTPMethod.POST
-        httpRequest.data = message.toString().bytes
+        httpRequest.data = message.bytes
         if (!httpRequest.headers?.find { it.key.toLowerCase() == "content-type" } ) {
-            httpRequest.headers["Content-Type"] = (message.version == SOAPVersion.V1_1) ? SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
+            httpRequest.headers["Content-Type"] = (soapVersion == SOAPVersion.V1_1) ? SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
         }
-        if (!httpRequest.headers?.find { it.key.toLowerCase() == "soapaction" } && soapAction && message.version == SOAPVersion.V1_1) {
+        if (!httpRequest.headers?.find { it.key.toLowerCase() == "soapaction" } && soapAction && soapVersion == SOAPVersion.V1_1) {
             httpRequest.headers.SOAPAction = soapAction
         }
         return httpRequest
