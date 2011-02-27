@@ -14,8 +14,24 @@
  */
 package wslite.http.auth
 
-interface HTTPAuthorization {
+import spock.lang.*
 
-    void authorize(conn)
+class HTTPBasicAuthorizationSpec extends Specification {
+
+    def "sets authorization header"() {
+        given:
+        def conn = new Expando()
+        conn.addRequestProperty = {k, v ->
+            assert "Authorization" == k
+            assert "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" == v
+        }
+        def auth = new HTTPBasicAuthorization(username:"Aladdin", password:"open sesame")
+
+        when:
+        auth.authorize(conn)
+
+        then:
+        notThrown(Exception)
+    }
 
 }

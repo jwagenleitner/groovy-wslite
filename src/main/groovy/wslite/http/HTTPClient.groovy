@@ -36,7 +36,7 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
-        HttpURLConnection conn = setupConnection(request)
+        def conn = setupConnection(request)
         HTTPResponse response
         try {
             doOutput(conn, request.data)
@@ -118,7 +118,7 @@ class HTTPClient {
         return conn.getInputStream().bytes
     }
 
-    private HTTPResponse buildResponse(HttpURLConnection conn, byte[] data) {
+    private HTTPResponse buildResponse(conn, data) {
         def response = new HTTPResponse()
         response.data = data
         response.statusCode = conn.getResponseCode()

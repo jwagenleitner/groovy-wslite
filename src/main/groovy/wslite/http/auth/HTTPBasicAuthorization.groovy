@@ -19,7 +19,7 @@ class HTTPBasicAuthorization implements HTTPAuthorization {
     String username
     String password
 
-    void authorize(URLConnection conn) {
+    void authorize(conn) {
         conn.addRequestProperty("Authorization", getAuthorization())
     }
 
