@@ -15,17 +15,19 @@
 package wslite.http
 
 class HTTPResponse {
+    URL url
     int statusCode
     String statusMessage
-    URL url
+    HTTPHeaderMap headers
+    String contentType
     String contentEncoding
     int contentLength
-    String contentType
     Date date
     Date expiration
     Date lastModified
-
-    def headers
-
     byte[] data
+
+    Map getHeaders() {
+        return Collections.unmodifiableMap(headers)
+    }
 }

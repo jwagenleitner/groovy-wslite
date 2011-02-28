@@ -200,7 +200,7 @@ class SOAPClientSpec extends Specification {
         setup: "an http client expecting a SOAP 1.1 content-type for the request"
         def httpc = [
             execute: {req ->
-                        assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers."content-type"
                         [data:simpleSoap11Response.bytes]
         }] as HTTPClient
         soapClient.httpClient = httpc
@@ -218,7 +218,7 @@ class SOAPClientSpec extends Specification {
         setup: "an http client expecting a SOAP 1.2 content-type for the request"
         def httpc = [
             execute: {req ->
-                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
                         [data:simpleSoap12Response.bytes]
         }] as HTTPClient
         soapClient.httpClient = httpc
@@ -236,7 +236,7 @@ class SOAPClientSpec extends Specification {
         setup: "an http client expecting a custom content-type for the request"
         def httpc = [
             execute: {req ->
-                        assert "vendor/soap" == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        assert "vendor/soap" == req.headers."content-type"
                         [data:simpleSoap12Response.bytes]
         }] as HTTPClient
         soapClient.httpClient = httpc
@@ -253,7 +253,7 @@ class SOAPClientSpec extends Specification {
     def "send raw string with soap message"() {
         given: "a soap client configured to echo the soap request to soap response and verifies default soap version 1.1"
         def httpc = [execute:{req ->
-                                assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                                assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers."content-type"
                                 [data:req.data]}] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -273,7 +273,7 @@ class SOAPClientSpec extends Specification {
     def "send raw string with soap message and override the soap version used"() {
         given: "a soap client configured to echo the soap request to soap response"
         def httpc = [execute:{req ->
-                                assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                                assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
                                 [data:req.data]}] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -315,7 +315,7 @@ class SOAPClientSpec extends Specification {
     def "can send raw soap message with http params and overriding soap version"() {
         given: "a soap client configured to echo the soap request to soap response and verify http params"
         def httpc = [execute:{req ->
-                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers.find { it.key.toLowerCase() == "content-type" }?.value
+                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
                         assert 7000 == req.connectTimeout
                         assert 9000 == req.readTimeout
                     [data:req.data]}] as HTTPClient

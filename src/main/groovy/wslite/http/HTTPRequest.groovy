@@ -25,7 +25,7 @@ class HTTPRequest {
     boolean followRedirects = true
     boolean trustAllSSLCerts = true
 
-    def headers = [:]
+    HTTPHeaderMap headers = [:] as HTTPHeaderMap
 
     byte[] data = null
 
@@ -44,6 +44,11 @@ class HTTPRequest {
     void setUseCaches(boolean useCaches) {
         this.useCaches = useCaches
         this.isUseCachesSet = true
+    }
+
+    void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects
+        this.isFollowRedirectsSet = true
     }
 
     void setTrustAllSSLCerts(boolean trustAllSSLCerts) {

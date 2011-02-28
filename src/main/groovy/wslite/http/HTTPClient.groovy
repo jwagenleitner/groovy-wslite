@@ -135,7 +135,7 @@ class HTTPClient {
     }
 
     private def headersToMap(conn) {
-        def headers = [:]
+        def headers = new HTTPHeaderMap()
         for (entry in conn.getHeaderFields()) {
             headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }

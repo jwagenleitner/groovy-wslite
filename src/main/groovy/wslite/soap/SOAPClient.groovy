@@ -64,10 +64,10 @@ class SOAPClient {
         httpRequest.url = new URL(serviceURL)
         httpRequest.method = HTTPMethod.POST
         httpRequest.data = message.bytes
-        if (!httpRequest.headers?.find { it.key.toLowerCase() == "content-type" } ) {
+        if (!httpRequest.headers."Content-Type") {
             httpRequest.headers["Content-Type"] = (soapVersion == SOAPVersion.V1_1) ? SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
         }
-        if (!httpRequest.headers?.find { it.key.toLowerCase() == "soapaction" } && soapAction && soapVersion == SOAPVersion.V1_1) {
+        if (!httpRequest.headers."SOAPAction" && soapAction && soapVersion == SOAPVersion.V1_1) {
             httpRequest.headers.SOAPAction = soapAction
         }
         return httpRequest
