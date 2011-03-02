@@ -39,6 +39,7 @@ class SOAPClientIntegrationSpec extends Specification {
 
     }
 
+    @Ignore
     def "accessing a public SOAP 1.2 service"() {
         given:
         def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")

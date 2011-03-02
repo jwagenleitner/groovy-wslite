@@ -40,8 +40,7 @@ class SOAPClient {
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
         def httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
         def response = httpClient.execute(httpRequest)
-        def soapResponse = new SOAPResponse(httpResponse:response)
-        soapResponse["Envelope"] = parseEnvelope(response.data)
+        def soapResponse = new SOAPResponse(httpResponse:response, Envelope:parseEnvelope(response.data))
         if (!soapResponse.Envelope.Body.Fault.isEmpty()) {
             def soapFault = buildSOAPFaultException(soapResponse.Envelope.Body.Fault)
             soapFault.response = soapResponse
@@ -92,6 +91,9 @@ class SOAPClient {
     }
 
     private def buildSOAPFaultException(fault) {
-        return new SOAPFaultException(fault.faultcode.text(), fault.faultstring.text(), fault.faultactor.text(), fault.detail.text())
+        return new SOAPFaultException(  fault.faultcode.text(),
+                                        fault.faultstring.text(),
+                                        fault.faultactor.text(),
+                                        fault.detail.text() )
     }
 }
