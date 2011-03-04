@@ -11,18 +11,20 @@ for interacting with SOAP and REST based webservices.
 
     import wslite.soap.*
 
-    def client = new SOAPClient(serviceURL:'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
-    def resp = client.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
+    def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")
+    def response = soapClient.send(connectTimeout:5000, readTimeout:10000) {
+        version SOAPVersion.V1_2
         body {
-            GetMartinLutherKingDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
-                year(2011)
+            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+                ZipCode("93657")
             }
         }
     }
-    "2011-01-15T00:00:00" == resp.Envelope.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
-    200 == resp.status
-    "OK" == resp.statusMessage
-    "ASP.NET" == resp.headers['X-Powered-By']
+
+    assert "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
+    assert 200 == resp.http.statusCode
+    assert "OK" == resp.http.statusMessage
+    assert "ASP.NET" == resp.http.headers["X-Powered-By"]
 
 ## Dependencies
 
