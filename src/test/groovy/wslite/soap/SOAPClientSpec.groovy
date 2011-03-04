@@ -176,7 +176,7 @@ class SOAPClientSpec extends Specification {
         def response = soapClient.send(SOAPAction:"http://foo/bar", testSoapMessage)
 
         then:
-        "http://foo/bar" == response.headers.SOAPAction
+        "http://foo/bar" == response.http.headers.SOAPAction
     }
 
     def "send should pass arguments in the http request"() {

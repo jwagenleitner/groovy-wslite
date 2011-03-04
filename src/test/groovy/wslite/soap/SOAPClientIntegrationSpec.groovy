@@ -32,14 +32,13 @@ class SOAPClientIntegrationSpec extends Specification {
         }
 
         then:
-        "2011-01-15T00:00:00" == resp.Envelope.Body.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
-        200 == resp.statusCode
-        "OK" == resp.statusMessage
-        "ASP.NET" == resp.headers['X-Powered-By']
+        "2011-01-15T00:00:00" == resp.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+        200 == resp.http.statusCode
+        "OK" == resp.http.statusMessage
+        "ASP.NET" == resp.http.headers['X-Powered-By']
 
     }
 
-    @Ignore
     def "accessing a public SOAP 1.2 service"() {
         given:
         def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")
@@ -55,7 +54,7 @@ class SOAPClientIntegrationSpec extends Specification {
         }
 
         then:
-        "SANGER" == response.Envelope.Body.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
+        "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
     }
 
 }

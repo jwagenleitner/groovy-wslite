@@ -17,6 +17,26 @@ package wslite.soap
 import wslite.http.HTTPResponse
 
 class SOAPResponse {
-    @Delegate HTTPResponse httpResponse
+    HTTPResponse http
     def Envelope
+
+    def getBody() {
+        return Envelope.Body
+    }
+
+    def getHeader() {
+        return Envelope.Header
+    }
+
+    def getFault() {
+        getBody().Fault
+    }
+
+    boolean hasFault() {
+        return !getBody().Fault.isEmpty()
+    }
+
+    def propertyMissing(String name) {
+        return getBody()."${name}"
+    }
 }
