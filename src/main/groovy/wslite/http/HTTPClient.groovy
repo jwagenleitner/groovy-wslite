@@ -31,7 +31,11 @@ class HTTPClient {
     HTTPConnectionFactory httpConnectionFactory
     HTTPAuthorization authorization
 
-    HTTPClient(HTTPConnectionFactory httpConnectionFactory=new HTTPConnectionFactory()) {
+    HTTPClient() {
+        this.httpConnectionFactory = new HTTPConnectionFactory()
+    }
+
+    HTTPClient(HTTPConnectionFactory httpConnectionFactory) {
          this.httpConnectionFactory = httpConnectionFactory
     }
 
