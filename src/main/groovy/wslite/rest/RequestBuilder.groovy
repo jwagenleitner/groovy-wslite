@@ -20,37 +20,77 @@ class RequestBuilder {
 
     HTTPMethod method
     String url
-    String path
     Map params
     byte[] data
 
-    def getURL() {
+    HTTPRequest build() {
+        if (!url || !method) {
+            throw new IllegalStateException("URL and Method are required")
+        }
+        HTTPRequest request = new HTTPRequest(params?.connectionParams ?: [:])
+        request.url = this.getURL()
+        request.method = this.method
+        request.headers = this.getHeaders()
+        request.data = this.data
+        return request
+    }
+
+    void setParams(params) {
+        this.params = new HashMap(params)
+    }
+
+    private URL getURL() {
         def targetURL = new StringBuilder(url)
-        targetURL.toString().endsWith("/") ?: targetURL.append('/')
+        def path = params?.path
         if (path && path != "/") {
+            targetURL.toString().endsWith("/") ?: targetURL.append('/')
             path.startsWith("/") ? targetURL.append(path[1..-1]) : targetURL.append(path)
         }
-        if (params?.params) {
+        if (params?.query) {
             targetURL.toString().indexOf("?") > 0 ? targetURL.append("&") : targetURL.append("?")
-            targetURL.append(toQueryString(params.params))
+            targetURL.append(toQueryString(params.query))
         }
         return new URL(targetURL.toString())
     }
 
-    def getHeaders() {
-        return params?.headers
-    }
-
-    def toQueryString(params) {
+    private String toQueryString(params) {
         params?.collect { k, v -> "${URLEncoder.encode(k.toString())}=${URLEncoder.encode(v.toString())}" }.join('&')
     }
 
-    HTTPRequest build() {
-        HTTPRequest request = new HTTPRequest()
-        request.url = this.getURL()
-        request.method = this.method
-        request.headers = this.getHeaders()
-        return request
+    private HTTPHeaderMap getHeaders() {
+        HTTPHeaderMap headers = new HTTPHeaderMap(params?.headers ?: [:])
+        if (!headers.containsKey("Accept")) {
+            headers.Accept = getAcceptHeader()
+        }
+        if (!headers.containsKey("Content-Type")) {
+            headers."Content-Type" = getContentType()
+        }
+        return headers
+    }
+
+    private String getAcceptHeader() {
+        def acceptParam = params?.accept
+        if (!acceptParam) {
+            return ContentType.ANY.getAcceptHeader()
+        }
+        if (acceptParam instanceof ContentType) {
+            return acceptParam.getAcceptHeader()
+        }
+        if (acceptParam instanceof String) {
+            return acceptParam
+        }
+        if (acceptParam instanceof GString) {
+            return acceptParam.toString()
+        }
+        throw new IllegalArgumentException("accept parameter must be an instace of ContentType or String")
+    }
+
+    private String getContentType() {
+        def contentType = params?.contentType
+        if (!contentType) {
+            return ContentType.TEXT.toString()
+        }
+        return contentType.toString()
     }
 
 }

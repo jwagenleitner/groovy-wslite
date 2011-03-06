@@ -14,11 +14,31 @@
  */
 package wslite.rest
 
-class ContentType {
-    static String JSON = "application/json,text/json"
-    static String XML = "application/xml,text/xml"
-    static String HTML = "text/html"
-    static String TEXT = "text/plain"
-    static String URLENC = "application/x-www-form-urlencoded"
-}
+enum ContentType {
+    JSON(["application/json","application/javascript","text/javascript"]),
+    XML(["application/xml","text/xml","application/xhtml+xml","application/atom+xml"]),
+    HTML(["text/html"]),
+    URLENC(["application/x-www-form-urlencoded"]),
+    BINARY(["application/octet-stream"]),
+    TEXT(["text/plain"]),
+    ANY(["*/*"])
 
+    private final List contentTypes
+
+    List getContentTypeList() {
+        return contentTypes
+    }
+
+    @Override
+    String toString() {
+        return contentTypes.first()
+    }
+
+    String getAcceptHeader() {
+        return contentTypes.join(", ")
+    }
+
+    private ContentType(contentTypes) {
+        this.contentTypes = contentTypes;
+    }
+}

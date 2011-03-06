@@ -15,83 +15,106 @@
 package wslite.rest
 
 import wslite.http.*
+import wslite.http.auth.*
 
 class RESTClient {
 
     String url
     HTTPClient httpClient
+    HTTPAuthorization authorization
 
-    String defaultCharset = "UTF-8"
-    def charContentTypes = [ContentType.HTML, ContentType.JSON, ContentType.TEXT, ContentType.XML]
+    def responseHandlers = [XmlResponse.class, TextResponse.class]
+
+    RESTClient(HTTPClient client=new HTTPClient()) {
+        this.httpClient = client
+    }
 
     RESTClient(String url, HTTPClient client=new HTTPClient()) {
         this.url = url
         this.httpClient = client
     }
 
-    def get(Map params=[:], String path, String mimeType=ContentType.JSON) {
-        return executeMethod(HTTPMethod.GET, path, params, mimeType, null)
+    void setAuthorization(HTTPAuthorization authorization) {
+        this.httpClient.authorization = authorization
     }
 
-    def delete(Map params=[:], String path) {
-        return executeMethod(HTTPMethod.DELETE, path, params, null, null)
+    HTTPAuthorization getAuthorization() {
+        return this.authorization
     }
 
-    def post(Map params=[:], String path, String mimeType=ContentType.JSON, String content) {
-        return post(params, path, mimeType, content?.bytes)
+    void addResponseHandler(Class clazz) {
+        responseHandlers.remove(clazz)
+        responseHandlers = [clazz] + responseHandlers
     }
 
-    def post(Map params=[:], String path, String mimeType=ContentType.JSON, byte[] content) {
-        return executeMethod(HTTPMethod.POST, path, params, mimeType, content)
+    def get(Map params=[:]) {
+        return executeMethod(HTTPMethod.GET, params)
     }
 
-    def put(Map params=[:], String path, String mimeType=ContentType.JSON, String content) {
-        return put(params, path, mimeType, content?.bytes)
+    def delete(Map params=[:]) {
+        return executeMethod(HTTPMethod.DELETE, params)
     }
 
-    def put(Map params=[:], String path, String mimeType=ContentType.JSON, byte[] content) {
-        return executeMethod(HTTPMethod.PUT, path, params, mimeType, content)
+    def post(Map params=[:]) {
+        // handle urlencoding a map ex. params.body
+        throw new UnsupportedOperationException("URLEncoded body POST not support yet.")
     }
 
-    def executeMethod(HTTPMethod method, String path, Map params, String mimeType, byte[] content) {
-        RequestBuilder builder = new RequestBuilder(method:method, url:url, path:path, params:params, data:content)
-        def headers = builder.getHeaders()
-        if (method in [HTTPMethod.POST, HTTPMethod.PUT]) {
-            headers["Content-Type"] = mimeType
-        } else {
-            headers["Accept"] = mimeType
-        }
+    def post(Map params=[:], Closure content) {
+        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
+        return post(params, xml.toString())
+    }
+
+    def post(Map params=[:], String content) {
+        return post(params, content.bytes)
+    }
+
+    def post(Map params=[:], byte[] content) {
+        return executeMethod(HTTPMethod.POST, params, content)
+    }
+
+    def put(Map params=[:]) {
+        // handle urlencoding a map ex. params.body
+        throw new UnsupportedOperationException("URLEncoded body PUT not support yet.")
+    }
+
+    def put(Map params=[:], Closure content) {
+        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
+        return put(params, xml.toString())
+    }
+
+    def put(Map params=[:], String content) {
+        return put(params, content.bytes)
+    }
+
+    def put(Map params=[:], byte[] content) {
+        return executeMethod(HTTPMethod.PUT, params, content)
+    }
+
+    def executeMethod(HTTPMethod method, Map params) {
+        executeMethod(method, params, null)
+    }
+
+    def executeMethod(HTTPMethod method, Map params, byte[] content) {
+        RequestBuilder builder = new RequestBuilder(method:method, url:url, params:params, data:content)
         def response = httpClient.execute(builder.build())
-        parseResponseData(response)
-        return response
+        return buildResponse(response)
     }
 
-    def parseResponseData(response) {
-        def contentType = parseContentType(response.contentType)
-        if (isTextContentType(contentType)) {
-            def charset = parseCharset(response.contentType) ?: defaultCharset
-            response.data = new String(response.data, charset.toUpperCase())
+    private def buildResponse(HTTPResponse response) {
+        def handler = getResponseHandler(response.contentType)
+        if (!handler) {
+            return response
         }
+        return handler.newInstance(response)
     }
 
-    boolean isTextContentType(String contentType) {
-        for (entry in charContentTypes) {
-            if (entry.contains(contentType)) {
-                return true
-            }
+    private Class getResponseHandler(String contentType) {
+        for (handler in responseHandlers) {
+             if (handler.handles(contentType)) {
+                 return handler
+             }
         }
-        return false
-    }
-
-    String parseContentType(String contentType) {
-        int semicolon = contentType.indexOf(";")
-        return (semicolon < 0) ? contentType : contentType.substring(0, semicolon)
-    }
-
-    String parseCharset(String contentType) {
-        String marker = "charset="
-        int start = contentType.indexOf(marker)
-        return (start < 0) ? null : contentType.substring(start + marker.size())
     }
 
 }
