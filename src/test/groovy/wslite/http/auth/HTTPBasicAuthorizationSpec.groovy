@@ -19,19 +19,28 @@ import spock.lang.*
 class HTTPBasicAuthorizationSpec extends Specification {
 
     def "sets authorization header"() {
-        given:
-        def conn = new Expando()
-        conn.addRequestProperty = {k, v ->
-            assert "Authorization" == k
-            assert "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" == v
-        }
-        def auth = new HTTPBasicAuthorization(username:"Aladdin", password:"open sesame")
+        setup:
+        def conn = new MockConnection()
 
-        when:
+        expect:
+        def auth = new HTTPBasicAuthorization(username, password)
         auth.authorize(conn)
+        conn.value == encodedAuthorization
+        conn.name == "Authorization"
 
-        then:
-        notThrown(Exception)
+        where:
+        username        | password              | encodedAuthorization
+        "Aladdin"       | "open sesame"         | "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+        "homers"        | "mr.simpson"          | "Basic aG9tZXJzOm1yLnNpbXBzb24="
     }
 
+}
+
+class MockConnection {
+    String name
+    String value
+    void addRequestProperty(String name, String value) {
+        this.name = name
+        this.value = value
+    }
 }

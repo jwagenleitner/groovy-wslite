@@ -19,11 +19,43 @@ class HTTPBasicAuthorization implements HTTPAuthorization {
     String username
     String password
 
+    private String authorization
+
+    HTTPBasicAuthorization() {
+
+    }
+
+    HTTPBasicAuthorization(String username, String password) {
+        this.username = username
+        this.password = password
+    }
+
+    void setUsername(String username) {
+        this.username = username
+        this.authorization = null
+    }
+
+    void setPassword(String password) {
+        this.password = password
+        this.authorization = null
+    }
+
+    String getUsername() {
+        return this.username
+    }
+
+    String getPassword() {
+        return this.password
+    }
+
     void authorize(conn) {
         conn.addRequestProperty("Authorization", getAuthorization())
     }
 
     private String getAuthorization() {
-        return "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
+        if (!this.authorization) {
+            this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
+        }
+        return this.authorization
     }
 }
