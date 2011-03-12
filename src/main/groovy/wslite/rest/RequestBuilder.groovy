@@ -62,7 +62,7 @@ class RequestBuilder {
         if (!headers.containsKey("Accept")) {
             headers.Accept = getAcceptHeader()
         }
-        if (!headers.containsKey("Content-Type")) {
+        if (data && !headers.containsKey("Content-Type")) {
             headers."Content-Type" = getContentType()
         }
         return headers
