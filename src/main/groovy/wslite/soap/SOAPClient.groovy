@@ -15,6 +15,7 @@
 package wslite.soap
 
 import wslite.http.*
+import wslite.http.auth.*
 
 class SOAPClient {
 
@@ -23,9 +24,22 @@ class SOAPClient {
 
     String serviceURL
     HTTPClient httpClient
+    HTTPAuthorization authorization
 
-    SOAPClient(HTTPClient httpClient=new HTTPClient()) {
+    SOAPClient() {
+        this.httpClient = new HTTPClient()
+    }
+
+    SOAPClient(HTTPClient httpClient) {
         this.httpClient = httpClient
+    }
+
+    void setAuthorization(HTTPAuthorization authorization) {
+        this.httpClient.authorization = authorization
+    }
+
+    HTTPAuthorization getAuthorization() {
+        return this.authorization
     }
 
     SOAPResponse send(Map requestParams=[:], Closure content) {
@@ -40,7 +54,8 @@ class SOAPClient {
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
         def httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
         def response = httpClient.execute(httpRequest)
-        def soapResponse = new SOAPResponse(http:response, Envelope:parseEnvelope(response.data))
+        String soapMessage = new String(response.data ?: "".bytes, response.charset ?: HTTP.DEFAULT_CHARSET)
+        def soapResponse = new SOAPResponse(http:response, Envelope:parseEnvelope(soapMessage), text:soapMessage)
         if (soapResponse.hasFault()) {
             def soapFault = buildSOAPFaultException(soapResponse.fault)
             soapFault.response = soapResponse
@@ -72,10 +87,10 @@ class SOAPClient {
         return httpRequest
     }
 
-    private def parseEnvelope(data) {
+    private def parseEnvelope(soapMessageText) {
         def envelopeNode
         try {
-            envelopeNode = new XmlSlurper().parse(new ByteArrayInputStream(data))
+            envelopeNode = new XmlSlurper().parseText(soapMessageText)
         } catch (org.xml.sax.SAXParseException sax) {
             throw new SOAPMessageParseException("Unable to parse XML response", sax)
         } catch (Exception ex) {

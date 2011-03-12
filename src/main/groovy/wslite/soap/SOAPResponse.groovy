@@ -15,10 +15,12 @@
 package wslite.soap
 
 import wslite.http.HTTPResponse
+import groovy.util.slurpersupport.GPathResult
 
 class SOAPResponse {
     HTTPResponse http
-    def Envelope
+    GPathResult Envelope
+    String text
 
     def getBody() {
         return Envelope.Body
