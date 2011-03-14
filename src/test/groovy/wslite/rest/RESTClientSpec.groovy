@@ -44,15 +44,6 @@ class RESTClientSpec extends Specification {
         "http://test.org" == response.url.toString()
     }
 
-    def "defaults accept content type if none specified"() {
-        when:
-        def response = client.get()
-
-        then:
-        //Accept: application/xml;q=0.9,*/*;q=0.8
-        ContentType.ANY.toString() == client.httpClient.request.headers.Accept
-    }
-
     def "xml response parsing"() {
         expect:
         client.httpClient.response.contentType = contentType

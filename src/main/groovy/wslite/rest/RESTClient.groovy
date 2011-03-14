@@ -96,7 +96,7 @@ class RESTClient {
     }
 
     def executeMethod(HTTPMethod method, Map params, byte[] content) {
-        RequestBuilder builder = new RequestBuilder(method:method, url:url, params:params, data:content)
+        RequestBuilder builder = new RequestBuilder(method, url, params, content)
         def response = httpClient.execute(builder.build())
         return buildResponse(response)
     }

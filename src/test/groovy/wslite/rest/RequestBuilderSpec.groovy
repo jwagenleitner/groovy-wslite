@@ -19,38 +19,28 @@ import wslite.http.*
 
 class RequestBuilderSpec extends Specification {
 
-    def builder = new RequestBuilder()
-
-    def "minimal builder"() {
+    def "requires a method"() {
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org"
-        builder.build()
-
-        then: notThrown(Exception)
-    }
-
-    def "requires a url"() {
-        when:
-        builder.method = HTTPMethod.GET
+        def builder = new RequestBuilder(null, "http://ws.org", null, null)
         builder.build()
 
         then: thrown(IllegalStateException)
     }
 
-    def "requires a method"() {
+    def "requires a url"() {
         when:
-        builder.url = "http://ws.org"
+        def builder = new RequestBuilder(HTTPMethod.GET, null, null, null)
         builder.build()
 
         then: thrown(IllegalStateException)
     }
 
     def "adding path to url"() {
+        given:
+        def params = [path: "/users/123"]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org/services"
-        builder.params = [path: "/users/123"]
+        def builder = new RequestBuilder(HTTPMethod.GET, "http://ws.org/services", params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -58,10 +48,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "path with slash and url with trailing slash"() {
+        given:
+        def url =  "http://ws.org/services/"
+        def params = [path: "/users/123"]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org/services/"
-        builder.params = [path: "/users/123"]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -69,10 +61,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "path with no beginning slash and url with no trailing slash"() {
+        given:
+        def url =  "http://ws.org/services"
+        def params = [path: "users/123"]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org/services"
-        builder.params = [path: "users/123"]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -80,10 +74,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "map to querystring"() {
+        given:
+        def url =  "http://ws.org/services"
+        def params = [path: "/users", query:[deptid:"6900", managerid:"123"]]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org/services"
-        builder.params = [path: "/users", query:[deptid:"6900", managerid:"123"]]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -91,10 +87,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "map to querystring with encoded strings"() {
+        given:
+        def url =  "http://ws.org/services"
+        def params = [path: "/users", query:["hire_date":"06/19/2009", homepage:"http://geocities.com/users/jansmith"]]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org/services"
-        builder.params = [path: "/users", query:["hire_date":"06/19/2009", homepage:"http://geocities.com/users/jansmith"]]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -102,10 +100,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "headers added to request"() {
+        given:
+        def url =  "http://ws.org/services"
+        def params = [headers:["Accept":"text/plain", "X-Foo": "123"]]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org"
-        builder.params = [headers:["Accept":"text/plain", "X-Foo": "123"]]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -114,10 +114,12 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "sets http connection parameters"() {
+        given:
+        def url =  "http://ws.org/services"
+        def params = [connectionParams:[readTimeout:9876, trustAllSSLCerts:false]]
+
         when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org"
-        builder.params = [connectionParams:[readTimeout:9876, trustAllSSLCerts:false]]
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         HTTPRequest request = builder.build()
 
         then:
@@ -126,24 +128,23 @@ class RequestBuilderSpec extends Specification {
     }
 
     def "original params not modified"() {
-        when:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org"
+        given:
+        def url =  "http://ws.org/services"
         def params = [path: "/users/123", connectionParams:[readTimeout:9876, trustAllSSLCerts:false]]
-        builder.params = params
+
+        when:
+        def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
         params.remove("path")
         HTTPRequest request = builder.build()
 
         then:
         null == params.path
-        "http://ws.org/users/123" == request.url.toString()
+        "http://ws.org/services/users/123" == request.url.toString()
     }
 
     def "accept parameter can be set using enum or string"() {
         expect:
-        builder.method = HTTPMethod.GET
-        builder.url = "http://ws.org"
-        builder.params = [accept:accept]
+        def builder = new RequestBuilder(HTTPMethod.GET, "http://ws.org/services", [accept:accept], null)
         builder.build()
         builder.headers.Accept == contentType
 
