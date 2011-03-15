@@ -107,6 +107,84 @@ class RESTClientSpec extends Specification {
         MockXmlResponse == client.responseHandlers.first()
     }
 
+    def "no accept header if no accept param specified"() {
+        when:
+        def response = client.get()
+
+        then:
+        null == client.httpClient.request.headers.Accept
+    }
+
+    def "default accept header"() {
+        when:
+        client.setDefaultAcceptHeader("text/xml")
+        def response = client.get()
+
+        then:
+        "text/xml" == client.httpClient.request.headers.Accept
+    }
+
+    def "accept params overrides default accept header"() {
+        when:
+        client.setDefaultAcceptHeader("text/xml")
+        def response = client.get(accept: "application/json")
+
+        then:
+        "application/json" == client.httpClient.request.headers.Accept
+    }
+
+    def "accept header params overrides default accept header"() {
+        when:
+        client.setDefaultAcceptHeader("text/xml")
+        def response = client.get(accept: "application/json", headers:[Accept: "text/csv"])
+
+        then:
+        "text/csv" == client.httpClient.request.headers.Accept
+    }
+
+    def "content type ignored if no data"() {
+        when:
+        def response = client.get(contentType: "application/json")
+
+        then:
+        null == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "content type header sets header even if no data"() {
+        when:
+        def response = client.get(headers:["Content-Type": "application/json"])
+
+        then:
+        "application/json" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "default content type"() {
+        when:
+        client.setDefaultContentTypeHeader("application/xml")
+        def response = client.post("foo".bytes)
+
+        then:
+        "application/xml" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "content type param overrides default content type"() {
+        when:
+        client.setDefaultContentTypeHeader("application/xml")
+        def response = client.post(contentType: "text/plain", "foo".bytes)
+
+        then:
+        "text/plain" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "content type header overrides param and default content type"() {
+        when:
+        client.setDefaultContentTypeHeader("application/xml")
+        def response = client.post(contentType: "text/plain", headers:["Content-Type":"text/csv"], "foo".bytes)
+
+        then:
+        "text/csv" == client.httpClient.request.headers."Content-Type"
+    }
+
     def setup() {
         def httpClient = new MockHTTPClient()
         httpClient.response = getMockResponse()

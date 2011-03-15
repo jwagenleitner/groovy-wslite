@@ -116,7 +116,7 @@ class RequestBuilderSpec extends Specification {
     def "sets http connection parameters"() {
         given:
         def url =  "http://ws.org/services"
-        def params = [connectionParams:[readTimeout:9876, trustAllSSLCerts:false]]
+        def params = [path: "/foo", readTimeout:9876, trustAllSSLCerts:false]
 
         when:
         def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)
@@ -130,7 +130,7 @@ class RequestBuilderSpec extends Specification {
     def "original params not modified"() {
         given:
         def url =  "http://ws.org/services"
-        def params = [path: "/users/123", connectionParams:[readTimeout:9876, trustAllSSLCerts:false]]
+        def params = [path: "/users/123", readTimeout:9876, trustAllSSLCerts:false]
 
         when:
         def builder = new RequestBuilder(HTTPMethod.GET, url, params, null)

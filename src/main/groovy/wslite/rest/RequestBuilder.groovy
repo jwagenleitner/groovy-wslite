@@ -29,7 +29,7 @@ class RequestBuilder {
     private def contentType
     private def charset
     private def headers
-    private def connectionParams
+    private def targetURL
 
     RequestBuilder(HTTPMethod method, String url, Map params, byte[] data) {
         this.method = method
@@ -37,38 +37,39 @@ class RequestBuilder {
         this.params = new LinkedHashMap(params ?: [:])
         this.data = data
 
-        this.path = params?.remove("path")
-        this.query = params?.remove("query")
-        this.accept = params?.remove("accept")
-        this.contentType = params?.remove("contentType")
-        this.charset = params?.remove("charset")
-        this.headers = new HTTPHeaderMap(params?.remove("headers") ?: [:])
-        this.connectionParams = params?.remove("connectionParams")
+        this.path = this.params?.remove("path")
+        this.query = this.params?.remove("query")
+        this.accept = this.params?.remove("accept")
+        this.contentType = this.params?.remove("contentType")
+        this.charset = this.params?.remove("charset")
+        this.headers = new HTTPHeaderMap(this.params?.remove("headers") ?: [:])
     }
 
     HTTPRequest build() {
         if (!method || !url) {
             throw new IllegalStateException("URL and Method are required")
         }
-        HTTPRequest request = new HTTPRequest(connectionParams ?: [:])
+        HTTPRequest request = new HTTPRequest(params ?: [:])
+        buildURL()
+        buildHeaders()
         request.method = this.method
-        request.url = this.buildURL()
-        request.headers = this.buildHeaders()
+        request.url = this.targetURL
+        request.headers = this.headers
         request.data = this.data
         return request
     }
 
-    private URL buildURL() {
-        def targetURL = new StringBuilder(url)
+    private void buildURL() {
+        def target = new StringBuilder(url)
         if (path && path != "/") {
-            targetURL.toString().endsWith("/") ?: targetURL.append('/')
-            path.startsWith("/") ? targetURL.append(path[1..-1]) : targetURL.append(path)
+            target.toString().endsWith("/") ?: target.append('/')
+            path.startsWith("/") ? target.append(path[1..-1]) : target.append(path)
         }
         if (query) {
-            targetURL.toString().indexOf("?") > 0 ? targetURL.append("&") : targetURL.append("?")
-            targetURL.append(toQueryString(query))
+            target.toString().indexOf("?") > 0 ? target.append("&") : target.append("?")
+            target.append(toQueryString(query))
         }
-        return new URL(targetURL.toString())
+        targetURL = new URL(target.toString())
     }
 
     private String toQueryString(params) {
@@ -77,25 +78,22 @@ class RequestBuilder {
         }.join('&')
     }
 
-    private HTTPHeaderMap buildHeaders() {
-        if (!headers.containsKey("Accept")) {
-            headers.Accept = getAcceptHeader()
-        }
-        if (data && !headers.containsKey("Content-Type")) {
-            headers."Content-Type" = getContentType()
-        }
-        return headers
+    private void buildHeaders() {
+        buildAcceptHeader()
+        buildContentType()
     }
 
-    private String getAcceptHeader() {
-        if (accept instanceof ContentType) {
-            return accept.getAcceptHeader()
+    private void buildAcceptHeader() {
+        if (!accept || headers.containsKey("Accept")) {
+            return
         }
-        return accept.toString()
+        headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
     }
 
-    private String getContentType() {
-        return contentType.toString()
+    private void buildContentType() {
+        if (data && contentType && !headers.containsKey("Content-Type")) {
+            headers."Content-Type" = contentType.toString()
+        }
     }
 
 }

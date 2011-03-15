@@ -25,6 +25,9 @@ class RESTClient {
 
     def responseHandlers = [XmlResponse.class, TextResponse.class]
 
+    def defaultAcceptHeader
+    def defaultContentTypeHeader
+
     RESTClient(HTTPClient client=new HTTPClient()) {
         this.httpClient = client
     }
@@ -56,16 +59,18 @@ class RESTClient {
     }
 
     def post(Map params=[:]) {
-        // handle urlencoding a map ex. params.body
+        // TODO: handle urlencoding a map ex. params.body
         throw new UnsupportedOperationException("URLEncoded body POST not support yet.")
     }
 
     def post(Map params=[:], Closure content) {
+        // TODO: automatic content type assignment
         def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
         return post(params, xml.toString())
     }
 
     def post(Map params=[:], String content) {
+        // TODO: charset handling
         return post(params, content.bytes)
     }
 
@@ -74,16 +79,18 @@ class RESTClient {
     }
 
     def put(Map params=[:]) {
-        // handle urlencoding a map ex. params.body
+        // TODO: handle urlencoding a map ex. params.body
         throw new UnsupportedOperationException("URLEncoded body PUT not support yet.")
     }
 
     def put(Map params=[:], Closure content) {
+        // TODO: automatic content type assignment
         def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
         return put(params, xml.toString())
     }
 
     def put(Map params=[:], String content) {
+        // TODO: charset handling
         return put(params, content.bytes)
     }
 
@@ -97,8 +104,20 @@ class RESTClient {
 
     def executeMethod(HTTPMethod method, Map params, byte[] content) {
         RequestBuilder builder = new RequestBuilder(method, url, params, content)
-        def response = httpClient.execute(builder.build())
+        HTTPRequest request = builder.build()
+        assignDefaultsToRequest(request)
+        def response = httpClient.execute(request)
         return buildResponse(response)
+    }
+
+    private void assignDefaultsToRequest(request) {
+        if (!request.headers.Accept && defaultAcceptHeader) {
+            request.headers.Accept = (defaultAcceptHeader instanceof ContentType) ?
+                                        defaultAcceptHeader.getAcceptHeader() : defaultAcceptHeader.toString()
+        }
+        if (request.data && !request.headers."Content-Type" && defaultContentTypeHeader) {
+            request.headers."Content-Type" = defaultContentTypeHeader.toString()
+        }
     }
 
     private def buildResponse(HTTPResponse response) {
