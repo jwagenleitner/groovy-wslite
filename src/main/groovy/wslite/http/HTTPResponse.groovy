@@ -15,6 +15,7 @@
 package wslite.http
 
 class HTTPResponse {
+
     URL url
     int statusCode
     String statusMessage
@@ -39,21 +40,8 @@ class HTTPResponse {
             this.charset = null
             return
         }
-        this.contentType = parseContentType(contentType)
-        this.charset = parseCharsetParam(contentType)
+        this.contentType = HTTP.parseMimeTypeFromContentType(contentType)
+        this.charset = HTTP.parseCharsetParamFromContentType(contentType)
     }
 
-    private String parseContentType(String contentType) {
-        int delim = contentType.indexOf(';')
-        this.contentType = (delim < 1) ? contentType : contentType[0..delim-1]
-    }
-
-    private String parseCharsetParam(String contentType) {
-        int start = contentType.toLowerCase().indexOf("charset=")
-        if (start == -1) return null
-        String charset = contentType.substring(start)
-        int end = charset.indexOf(' ')
-        if (end != -1) charset = charset.substring(0, end)
-        this.charset = charset.split("=")[1]
-    }
 }

@@ -26,8 +26,6 @@ class RequestBuilder {
     private def path
     private def query
     private def accept
-    private def contentType
-    private def charset
     private def headers
     private def targetURL
 
@@ -40,8 +38,6 @@ class RequestBuilder {
         this.path = this.params?.remove("path")
         this.query = this.params?.remove("query")
         this.accept = this.params?.remove("accept")
-        this.contentType = this.params?.remove("contentType")
-        this.charset = this.params?.remove("charset")
         this.headers = new HTTPHeaderMap(this.params?.remove("headers") ?: [:])
     }
 
@@ -67,39 +63,16 @@ class RequestBuilder {
         }
         if (query) {
             target.toString().indexOf("?") > 0 ? target.append("&") : target.append("?")
-            target.append(toQueryString(query))
+            target.append(HTTP.mapToURLEncodedString(query))
         }
         targetURL = new URL(target.toString())
     }
 
-    private String toQueryString(params) {
-        params?.collect { k, v ->
-            "${URLEncoder.encode(k.toString())}=${URLEncoder.encode(v.toString())}"
-        }.join('&')
-    }
-
     private void buildHeaders() {
-        buildAcceptHeader()
-        buildContentType()
-    }
-
-    private void buildAcceptHeader() {
         if (!accept || headers.containsKey("Accept")) {
             return
         }
         headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
-    }
-
-    private void buildContentType() {
-        if (headers.containsKey("Content-Type")) {
-            return
-        }
-        if (data && contentType) {
-            headers."Content-Type" = contentType.toString()
-            if (charset) {
-                headers."Content-Type" += "; charset=${charset}"
-            }
-        }
     }
 
 }

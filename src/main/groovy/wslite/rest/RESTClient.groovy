@@ -59,33 +59,11 @@ class RESTClient {
         return executeMethod(HTTPMethod.DELETE, params)
     }
 
-    def post(Map params=[:]) {
-        // make a defensive copy of the params since getBodyContent is destructive
-        def requestParams = new LinkedHashMap(params)
-        String body =  getBodyContent(requestParams)
-        return post(requestParams, body)
-    }
-
-    def post(Map params=[:], String content) {
-        return post(params, content.getBytes(getCharset(params)))
-    }
-
-    def post(Map params=[:], byte[] content) {
+    def post(Map params=[:], Closure content) {
         return executeMethod(HTTPMethod.POST, params, content)
     }
 
-    def put(Map params=[:]) {
-        // make a defensive copy of the params since getBodyContent is destructive
-        def requestParams = new LinkedHashMap(params)
-        String body =  getBodyContent(requestParams)
-        return put(requestParams, body)
-    }
-
-    def put(Map params=[:], String content) {
-        return put(params, content.getBytes(getCharset(params)))
-    }
-
-    def put(Map params=[:], byte[] content) {
+    def put(Map params=[:], Closure content) {
         return executeMethod(HTTPMethod.PUT, params, content)
     }
 
@@ -93,17 +71,22 @@ class RESTClient {
         executeMethod(method, params, null)
     }
 
-    def executeMethod(HTTPMethod method, Map params, byte[] content) {
+    def executeMethod(HTTPMethod method, Map params, Closure content) {
         // make a defensive copy of the params since setDefault* methods are destructive
         def requestParams = new LinkedHashMap(params)
         setDefaultAcceptParam(requestParams)
+        byte[] data = null
         if (content) {
-            setDefaultContentTypeParam(requestParams)
-            setDefaultCharsetParam(requestParams)
+            def contentBuilder = new ContentBuilder(defaultContentTypeHeader, defaultCharset)
+            content.resolveStrategy = Closure.DELEGATE_FIRST
+            content.delegate = contentBuilder
+            content.call()
+            setDefaultContentHeader(contentBuilder, requestParams)
+            data = contentBuilder.getData()
         }
-        RequestBuilder builder = new RequestBuilder(method, url, requestParams, content)
+        RequestBuilder builder = new RequestBuilder(method, url, requestParams, data)
         HTTPRequest request = builder.build()
-        def response = httpClient.execute(request)
+        HTTPResponse response = httpClient.execute(request)
         return buildResponse(response)
     }
 
@@ -117,20 +100,14 @@ class RESTClient {
         }
     }
 
-    private void setDefaultContentTypeParam(params) {
-        if (params.containsKey("contentType")) {
+    private void setDefaultContentHeader(contentBuilder, requestParams) {
+        if (requestParams?.headers?."Content-Type") {
             return
         }
-        if (defaultContentTypeHeader) {
-            params.contentType = defaultContentTypeHeader.toString()
+        if (!requestParams.headers) {
+            requestParams.headers = [:]
         }
-    }
-
-    private void setDefaultCharsetParam(params) {
-        if (params.containsKey("charset")) {
-            return
-        }
-        params.charset = getCharset(params)
+        requestParams.headers."Content-Type" = contentBuilder.getContentTypeHeader()
     }
 
     private def buildResponse(HTTPResponse response) {
@@ -147,62 +124,6 @@ class RESTClient {
                  return handler
              }
         }
-    }
-
-    private String getBodyContent(params) {
-        def body = params.remove("xml")
-        if (body)
-            return closureToXmlString(body)
-        body = params.remove("json")
-        if (body)
-            return body
-        body = params.remove("urlenc")
-        if (body)
-            return mapToURLEncodedString(body)
-        return ""
-    }
-
-    private String closureToXmlString(content) {
-        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
-        return xml.toString()
-    }
-
-    private String mapToURLEncodedString(params) {
-        if (!params || !(params instanceof Map)) {
-            return null
-        }
-        def encodedList = []
-        for (entry in params) {
-            if (entry.value != null && entry.value instanceof List) {
-                for (item in entry.value) {
-                    encodedList << urlEncodePair(entry.key, item)
-                }
-                continue
-            }
-            encodedList << urlEncodePair(entry.key, entry.value)
-        }
-        return encodedList.join('&')
-    }
-
-    private String urlEncodePair(key, value) {
-        if (!key) return ""
-        value = value ?: ""
-        return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
-    }
-
-    private String getCharset(params) {
-        if (params?.headers?."Content-Type") {
-            String charset = getCharsetFromContentTypeHeader(params.headers."Content-Type")
-            if (charset) return charset
-        }
-        return params?.charset ?: defaultCharset
-    }
-
-    private String getCharsetFromContentTypeHeader(contentType) {
-        // TODO: need to move parsing of content-type and its parameters, this is just ugly
-        def response = new HTTPResponse()
-        response.contentType = contentType
-        return response.charset
     }
 
 }

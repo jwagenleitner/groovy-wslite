@@ -14,6 +14,45 @@
  */
 package wslite.http
 
-interface HTTP {
+class HTTP {
+
     static final String DEFAULT_CHARSET = "ISO-8859-1" // http://tools.ietf.org/html/rfc2616#section-3.7.1
+
+    static String parseMimeTypeFromContentType(String contentType) {
+        int delim = contentType.indexOf(';')
+        return (delim < 1) ? contentType : contentType[0..delim-1]
+    }
+
+    static String parseCharsetParamFromContentType(String contentType) {
+        int start = contentType.toLowerCase().indexOf("charset=")
+        if (start == -1) return null
+        String charset = contentType.substring(start)
+        int end = charset.indexOf(' ')
+        if (end != -1) charset = charset.substring(0, end)
+        return charset.split("=")[1]
+    }
+
+    static String mapToURLEncodedString(params) {
+        if (!params || !(params instanceof Map)) {
+            return null
+        }
+        def encodedList = []
+        for (entry in params) {
+            if (entry.value != null && entry.value instanceof List) {
+                for (item in entry.value) {
+                    encodedList << urlEncodePair(entry.key, item)
+                }
+                continue
+            }
+            encodedList << urlEncodePair(entry.key, entry.value)
+        }
+        return encodedList.join('&')
+    }
+
+    private static String urlEncodePair(key, value) {
+        if (!key) return ""
+        value = value ?: ""
+        return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
+    }
+
 }

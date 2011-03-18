@@ -142,14 +142,6 @@ class RESTClientSpec extends Specification {
         "text/csv" == client.httpClient.request.headers.Accept
     }
 
-    def "content type ignored if no data"() {
-        when:
-        def response = client.get(contentType: "application/json")
-
-        then:
-        null == client.httpClient.request.headers."Content-Type"
-    }
-
     def "content type header sets header even if no data"() {
         when:
         def response = client.get(headers:["Content-Type": "application/json"])
@@ -161,7 +153,9 @@ class RESTClientSpec extends Specification {
     def "default content type"() {
         when:
         client.setDefaultContentTypeHeader("application/xml")
-        def response = client.post("foo".bytes)
+        def response = client.post() {
+            text "foo"
+        }
 
         then:
         "application/xml; charset=${client.defaultCharset}" == client.httpClient.request.headers."Content-Type"
@@ -170,7 +164,10 @@ class RESTClientSpec extends Specification {
     def "content type param overrides default content type"() {
         when:
         client.setDefaultContentTypeHeader("application/xml")
-        def response = client.post(contentType: "text/plain", "foo".bytes)
+        def response = client.post() {
+            type "text/plain"
+            text "foo"
+        }
 
         then:
         "text/plain; charset=${client.defaultCharset}" == client.httpClient.request.headers."Content-Type"
@@ -179,7 +176,10 @@ class RESTClientSpec extends Specification {
     def "content type header overrides param and default content type"() {
         when:
         client.setDefaultContentTypeHeader("application/xml")
-        def response = client.post(contentType: "text/plain", headers:["Content-Type":"text/csv"], "foo".bytes)
+        def response = client.post(headers:["Content-Type":"text/csv"]) {
+            type "text/plain"
+            text "foo"
+        }
 
         then:
         "text/csv" == client.httpClient.request.headers."Content-Type"
@@ -187,7 +187,10 @@ class RESTClientSpec extends Specification {
 
     def "default charset is applied when content-type param is set"() {
         when:
-        def response = client.post(contentType: "text/plain", "foo")
+        def response = client.post() {
+            type "text/plain"
+            text "foo"
+        }
 
         then:
         "text/plain; charset=UTF-8" == client.httpClient.request.headers."Content-Type"
@@ -196,7 +199,11 @@ class RESTClientSpec extends Specification {
     def "charset param overrides default charset when content-type param is set"() {
         when:
         client.defaultCharset = "UTF-8"
-        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", "foo")
+        def response = client.post() {
+            type "text/plain"
+            charset "ISO-8859-1"
+            text "foo"
+        }
 
         then:
         "text/plain; charset=ISO-8859-1" == client.httpClient.request.headers."Content-Type"
@@ -205,7 +212,11 @@ class RESTClientSpec extends Specification {
     def "charset in content-type header overrides all"() {
         when:
         client.defaultCharset = "UTF-8"
-        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", headers:["Content-Type":"text/csv; charset=US-ASCII"], "foo")
+        def response = client.post(headers:["Content-Type":"text/csv; charset=US-ASCII"]) {
+            type "text/plain"
+            charset "ISO-8859-1"
+            text "foo"
+        }
 
         then:
         "text/csv; charset=US-ASCII" == client.httpClient.request.headers."Content-Type"
@@ -214,7 +225,11 @@ class RESTClientSpec extends Specification {
     def "charset not set if not specified in content-type header"() {
         when:
         client.defaultCharset = "UTF-8"
-        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", headers:["Content-Type":"text/csv"], "foo")
+        def response = client.post(headers:["Content-Type":"text/csv"]) {
+            type "text/plain"
+            charset = "ISO-8859-1"
+            text "foo"
+        }
 
         then:
         "text/csv" == client.httpClient.request.headers."Content-Type"
@@ -224,7 +239,9 @@ class RESTClientSpec extends Specification {
         when:
         client.defaultContentTypeHeader = "application/vnd+json"
         client.defaultCharset = "ISO-8859-1"
-        def response = client.post("foo")
+        def response = client.post() {
+            text "foo"
+        }
 
         then:
         "application/vnd+json; charset=ISO-8859-1" == client.httpClient.request.headers."Content-Type"
@@ -234,7 +251,9 @@ class RESTClientSpec extends Specification {
         when:
         def params = [path: "/foo"]
         client.defaultContentTypeHeader = "application/vnd+json"
-        def response = client.post(params, "foo")
+        def response = client.post(params) {
+            text "foo"
+        }
 
         then:
         null == params.contentType
