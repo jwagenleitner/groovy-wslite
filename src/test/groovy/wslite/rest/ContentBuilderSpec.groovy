@@ -104,4 +104,57 @@ class ContentBuilderSpec extends Specification {
         "<root/>" == new String(builder.getData(), builder.charset)
     }
 
+    def "no default charset"() {
+        when:
+        def builder = getBuilder("text/plain", null) {
+            xml {
+                root()
+            }
+        }
+
+        then:
+        "text/plain" == builder.getContentTypeHeader()
+    }
+
+    def "guesses content type for bytes"() {
+        when:
+        def builder = getBuilder(null, null) {
+            bytes "foo".bytes
+        }
+
+        then:
+        ContentType.BINARY.toString() == builder.getContentTypeHeader()
+    }
+
+    def "guesses content type for text"() {
+        when:
+        def builder = getBuilder(null, null) {
+            text "foo"
+        }
+
+        then:
+        ContentType.TEXT.toString() == builder.getContentTypeHeader()
+    }
+
+    def "guesses content type for urlenc"() {
+        when:
+        def builder = getBuilder(null, null) {
+            urlenc "foo":"bar"
+        }
+
+        then:
+        ContentType.URLENC.toString() == builder.getContentTypeHeader()
+    }
+
+    def "guesses content type for xml"() {
+        when:
+        def builder = getBuilder(null, null) {
+            xml {
+                foo()
+            }
+        }
+
+        then:
+        ContentType.XML.toString() == builder.getContentTypeHeader()
+    }
 }

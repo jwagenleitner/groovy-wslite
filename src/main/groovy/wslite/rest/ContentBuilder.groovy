@@ -61,7 +61,25 @@ class ContentBuilder {
     }
 
     String getContentTypeHeader() {
-        return "${contentType}; charset=${charset}"
+        String contentTypeHeader = getContentType()
+        if (charset) {
+            contentTypeHeader += "; charset=${charset}"
+        }
+        return contentTypeHeader
+    }
+
+    private String getContentType() {
+        if (contentType) {
+            return contentType
+        }
+        return guessContentType()
+    }
+
+    private String guessContentType() {
+        if (contents["bytes"]) return ContentType.BINARY.toString()
+        if (contents["urlenc"]) return ContentType.URLENC.toString()
+        if (contents["xml"]) return ContentType.XML.toString()
+        return ContentType.TEXT.toString()
     }
 
     private String closureToXmlString(content) {
