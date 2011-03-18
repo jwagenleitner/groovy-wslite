@@ -60,13 +60,14 @@ class RESTClient {
     }
 
     def post(Map params=[:]) {
-        def p = new LinkedHashMap(params)
-        return post(p, getBodyContent(p))
+        // make a defensive copy of the params since getBodyContent is destructive
+        def requestParams = new LinkedHashMap(params)
+        String body =  getBodyContent(requestParams)
+        return post(requestParams, body)
     }
 
     def post(Map params=[:], String content) {
-        // TODO: charset handling
-        return post(params, content.bytes)
+        return post(params, content.getBytes(getCharset(params)))
     }
 
     def post(Map params=[:], byte[] content) {
@@ -74,13 +75,14 @@ class RESTClient {
     }
 
     def put(Map params=[:]) {
-        def p = new LinkedHashMap(params)
-        return put(p, getBodyContent(p))
+        // make a defensive copy of the params since getBodyContent is destructive
+        def requestParams = new LinkedHashMap(params)
+        String body =  getBodyContent(requestParams)
+        return put(requestParams, body)
     }
 
     def put(Map params=[:], String content) {
-        // TODO: charset handling
-        return put(params, content.bytes)
+        return put(params, content.getBytes(getCharset(params)))
     }
 
     def put(Map params=[:], byte[] content) {
@@ -92,21 +94,43 @@ class RESTClient {
     }
 
     def executeMethod(HTTPMethod method, Map params, byte[] content) {
-        RequestBuilder builder = new RequestBuilder(method, url, params, content)
+        // make a defensive copy of the params since setDefault* methods are destructive
+        def requestParams = new LinkedHashMap(params)
+        setDefaultAcceptParam(requestParams)
+        if (content) {
+            setDefaultContentTypeParam(requestParams)
+            setDefaultCharsetParam(requestParams)
+        }
+        RequestBuilder builder = new RequestBuilder(method, url, requestParams, content)
         HTTPRequest request = builder.build()
-        assignDefaultsToRequest(request)
         def response = httpClient.execute(request)
         return buildResponse(response)
     }
 
-    private void assignDefaultsToRequest(request) {
-        if (!request.headers.Accept && defaultAcceptHeader) {
-            request.headers.Accept = (defaultAcceptHeader instanceof ContentType) ?
-                                        defaultAcceptHeader.getAcceptHeader() : defaultAcceptHeader.toString()
+    private void setDefaultAcceptParam(params) {
+        if (params?.containsKey("accept")) {
+            return
         }
-        if (request.data && !request.headers."Content-Type" && defaultContentTypeHeader) {
-            request.headers."Content-Type" = defaultContentTypeHeader.toString()
+        if (defaultAcceptHeader) {
+            params.accept = (defaultAcceptHeader instanceof ContentType) ?
+                             defaultAcceptHeader.getAcceptHeader() : defaultAcceptHeader.toString()
         }
+    }
+
+    private void setDefaultContentTypeParam(params) {
+        if (params.containsKey("contentType")) {
+            return
+        }
+        if (defaultContentTypeHeader) {
+            params.contentType = defaultContentTypeHeader.toString()
+        }
+    }
+
+    private void setDefaultCharsetParam(params) {
+        if (params.containsKey("charset")) {
+            return
+        }
+        params.charset = getCharset(params)
     }
 
     private def buildResponse(HTTPResponse response) {
@@ -164,6 +188,21 @@ class RESTClient {
         if (!key) return ""
         value = value ?: ""
         return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
+    }
+
+    private String getCharset(params) {
+        if (params?.headers?."Content-Type") {
+            String charset = getCharsetFromContentTypeHeader(params.headers."Content-Type")
+            if (charset) return charset
+        }
+        return params?.charset ?: defaultCharset
+    }
+
+    private String getCharsetFromContentTypeHeader(contentType) {
+        // TODO: need to move parsing of content-type and its parameters, this is just ugly
+        def response = new HTTPResponse()
+        response.contentType = contentType
+        return response.charset
     }
 
 }

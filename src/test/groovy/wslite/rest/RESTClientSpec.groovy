@@ -164,7 +164,7 @@ class RESTClientSpec extends Specification {
         def response = client.post("foo".bytes)
 
         then:
-        "application/xml" == client.httpClient.request.headers."Content-Type"
+        "application/xml; charset=${client.defaultCharset}" == client.httpClient.request.headers."Content-Type"
     }
 
     def "content type param overrides default content type"() {
@@ -173,7 +173,7 @@ class RESTClientSpec extends Specification {
         def response = client.post(contentType: "text/plain", "foo".bytes)
 
         then:
-        "text/plain" == client.httpClient.request.headers."Content-Type"
+        "text/plain; charset=${client.defaultCharset}" == client.httpClient.request.headers."Content-Type"
     }
 
     def "content type header overrides param and default content type"() {
@@ -183,6 +183,61 @@ class RESTClientSpec extends Specification {
 
         then:
         "text/csv" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "default charset is applied when content-type param is set"() {
+        when:
+        def response = client.post(contentType: "text/plain", "foo")
+
+        then:
+        "text/plain; charset=UTF-8" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "charset param overrides default charset when content-type param is set"() {
+        when:
+        client.defaultCharset = "UTF-8"
+        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", "foo")
+
+        then:
+        "text/plain; charset=ISO-8859-1" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "charset in content-type header overrides all"() {
+        when:
+        client.defaultCharset = "UTF-8"
+        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", headers:["Content-Type":"text/csv; charset=US-ASCII"], "foo")
+
+        then:
+        "text/csv; charset=US-ASCII" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "charset not set if not specified in content-type header"() {
+        when:
+        client.defaultCharset = "UTF-8"
+        def response = client.post(contentType: "text/plain", charset: "ISO-8859-1", headers:["Content-Type":"text/csv"], "foo")
+
+        then:
+        "text/csv" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "default content-type and charset"() {
+        when:
+        client.defaultContentTypeHeader = "application/vnd+json"
+        client.defaultCharset = "ISO-8859-1"
+        def response = client.post("foo")
+
+        then:
+        "application/vnd+json; charset=ISO-8859-1" == client.httpClient.request.headers."Content-Type"
+    }
+
+    def "original parameters are not modified"() {
+        when:
+        def params = [path: "/foo"]
+        client.defaultContentTypeHeader = "application/vnd+json"
+        def response = client.post(params, "foo")
+
+        then:
+        null == params.contentType
     }
 
     def setup() {

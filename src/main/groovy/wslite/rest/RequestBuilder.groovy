@@ -91,8 +91,14 @@ class RequestBuilder {
     }
 
     private void buildContentType() {
-        if (data && contentType && !headers.containsKey("Content-Type")) {
+        if (headers.containsKey("Content-Type")) {
+            return
+        }
+        if (data && contentType) {
             headers."Content-Type" = contentType.toString()
+            if (charset) {
+                headers."Content-Type" += "; charset=${charset}"
+            }
         }
     }
 
