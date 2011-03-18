@@ -88,7 +88,11 @@ class HTTPClient {
 
     private void setupSSLTrustManager(conn) {
         if (!trustAllSSLCerts) return
-        def trustingTrustManager = [getAcceptedIssuers:{}, checkClientTrusted:{arg0, arg1 -> }, checkServerTrusted:{arg0, arg1 -> }] as X509TrustManager
+        def trustingTrustManager = [
+                getAcceptedIssuers: {},
+                checkClientTrusted: { arg0, arg1 -> },
+                checkServerTrusted: {arg0, arg1 -> }
+        ] as X509TrustManager
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, [trustingTrustManager] as TrustManager[], null)
         conn.setSSLSocketFactory(sc.getSocketFactory())
