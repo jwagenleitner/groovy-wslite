@@ -27,6 +27,7 @@ class RESTClient {
 
     def defaultAcceptHeader
     def defaultContentTypeHeader
+    String defaultCharset = "UTF-8"
 
     RESTClient(HTTPClient client=new HTTPClient()) {
         this.httpClient = client
@@ -59,14 +60,8 @@ class RESTClient {
     }
 
     def post(Map params=[:]) {
-        // TODO: handle urlencoding a map ex. params.body
-        throw new UnsupportedOperationException("URLEncoded body POST not support yet.")
-    }
-
-    def post(Map params=[:], Closure content) {
-        // TODO: automatic content type assignment
-        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
-        return post(params, xml.toString())
+        def p = new LinkedHashMap(params)
+        return post(p, getBodyContent(p))
     }
 
     def post(Map params=[:], String content) {
@@ -79,14 +74,8 @@ class RESTClient {
     }
 
     def put(Map params=[:]) {
-        // TODO: handle urlencoding a map ex. params.body
-        throw new UnsupportedOperationException("URLEncoded body PUT not support yet.")
-    }
-
-    def put(Map params=[:], Closure content) {
-        // TODO: automatic content type assignment
-        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
-        return put(params, xml.toString())
+        def p = new LinkedHashMap(params)
+        return put(p, getBodyContent(p))
     }
 
     def put(Map params=[:], String content) {
@@ -134,6 +123,47 @@ class RESTClient {
                  return handler
              }
         }
+    }
+
+    private String getBodyContent(params) {
+        def body = params.remove("xml")
+        if (body)
+            return closureToXmlString(body)
+        body = params.remove("json")
+        if (body)
+            return body
+        body = params.remove("urlenc")
+        if (body)
+            return mapToURLEncodedString(body)
+        return ""
+    }
+
+    private String closureToXmlString(content) {
+        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
+        return xml.toString()
+    }
+
+    private String mapToURLEncodedString(params) {
+        if (!params || !(params instanceof Map)) {
+            return null
+        }
+        def encodedList = []
+        for (entry in params) {
+            if (entry.value != null && entry.value instanceof List) {
+                for (item in entry.value) {
+                    encodedList << urlEncodePair(entry.key, item)
+                }
+                continue
+            }
+            encodedList << urlEncodePair(entry.key, entry.value)
+        }
+        return encodedList.join('&')
+    }
+
+    private String urlEncodePair(key, value) {
+        if (!key) return ""
+        value = value ?: ""
+        return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
     }
 
 }
