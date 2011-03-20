@@ -60,7 +60,7 @@ class HTTPHeaderMapSpec extends Specification {
         h instanceof Map
     }
 
-    def "be able to delete the given key case-sensitively"() {
+    def "be able to delete the given key case-insensitively"() {
         when:
         def h = new HTTPHeaderMap("Content-Type":"text/xml")
         h.remove("content-type")

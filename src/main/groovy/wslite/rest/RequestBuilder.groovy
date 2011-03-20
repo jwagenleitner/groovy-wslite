@@ -58,11 +58,11 @@ class RequestBuilder {
     private void buildURL() {
         def target = new StringBuilder(url)
         if (path && path != "/") {
-            target.toString().endsWith("/") ?: target.append('/')
+            url.endsWith("/") ?: target.append('/')
             path.startsWith("/") ? target.append(path[1..-1]) : target.append(path)
         }
         if (query) {
-            target.toString().indexOf("?") > 0 ? target.append("&") : target.append("?")
+            target.indexOf("?") == -1 ? target.append("?") : target.append("&")
             target.append(HTTP.mapToURLEncodedString(query))
         }
         targetURL = new URL(target.toString())

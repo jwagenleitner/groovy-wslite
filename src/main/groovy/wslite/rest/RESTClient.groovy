@@ -21,7 +21,6 @@ class RESTClient {
 
     String url
     HTTPClient httpClient
-    HTTPAuthorization authorization
 
     def responseHandlers = [XmlResponse.class, TextResponse.class]
 
@@ -40,10 +39,6 @@ class RESTClient {
 
     void setAuthorization(HTTPAuthorization authorization) {
         this.httpClient.authorization = authorization
-    }
-
-    HTTPAuthorization getAuthorization() {
-        return this.authorization
     }
 
     void addResponseHandler(Class clazz) {
