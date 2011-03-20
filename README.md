@@ -1,9 +1,8 @@
 # groovy-wslite
 
-Library for Groovy that aims to provide no-frills SOAP webservice client (and eventually REST)
-for interacting with SOAP and REST based webservices.
+Library for Groovy that aims to provide no-frills SOAP and REST webservice clients.
 
-All request/responses are buffered in memory.  No magic is involved, this library assumes you know exactly what messages you want to send to your services.
+No magic is involved, this library assumes you know exactly what messages you want to send to your services and want full control over the request.  No streams are used and all request/responses are buffered in memory for convenience.
 
 ## SOAP
 
