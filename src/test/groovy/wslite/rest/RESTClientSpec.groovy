@@ -16,6 +16,7 @@ package wslite.rest
 
 import spock.lang.*
 import wslite.http.*
+import wslite.json.*
 
 class RESTClientSpec extends Specification {
 
@@ -74,9 +75,41 @@ class RESTClientSpec extends Specification {
         contentType                 | foo
         "text/plain"                | "bar"
         "text/html"                 | "bar"
-        "application/json"          | "bar"
-        "application/javascript"    | "bar"
+        "text/csv"                  | "bar"
+    }
+
+    def "response parsing of JSONObject responses"() {
+        expect:
+        client.httpClient.response.contentType = contentType
+        client.httpClient.response.data = """{"foo":"bar"}""".bytes
+        def response = client.get()
+        response.JSON.foo == foo
+        assert response.JSON instanceof JSONObject
+        assert response instanceof JsonResponse
+
+        where:
+        contentType                 | foo
         "text/javascript"           | "bar"
+        "text/json"                 | "bar"
+        "application/json"          | "bar"
+    }
+
+    def "response parsing of JSONArray responses"() {
+        expect:
+        client.httpClient.response.contentType = contentType
+        client.httpClient.response.data = """[{"foo":"bar"},{"foo":"baz"}]""".bytes
+        def response = client.get()
+        response.JSON[0].foo == foo0
+        response.JSON[1].foo == foo1
+        assert response.JSON.size() == 2
+        assert response.JSON instanceof JSONArray
+        assert response instanceof JsonResponse
+
+        where:
+        contentType                 | foo0      | foo1
+        "text/javascript"           | "bar"     | "baz"
+        "text/json"                 | "bar"     | "baz"
+        "application/json"          | "bar"     | "baz"
     }
 
     def "custom response handler"() {
@@ -89,7 +122,7 @@ class RESTClientSpec extends Specification {
         then:
         response instanceof MockCustomResponse
         "bar" == response.CUSTOM
-        3 == client.responseHandlers.size()
+        4 == client.responseHandlers.size()
         MockCustomResponse == client.responseHandlers.first()
     }
 
@@ -103,7 +136,7 @@ class RESTClientSpec extends Specification {
         then:
         response instanceof MockXmlResponse
         "bar" == response.MOCK_XML
-        3 == client.responseHandlers.size()
+        4 == client.responseHandlers.size()
         MockXmlResponse == client.responseHandlers.first()
     }
 

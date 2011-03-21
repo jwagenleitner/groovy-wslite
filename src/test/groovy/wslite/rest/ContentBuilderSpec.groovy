@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package wslite.rest
+package wslite.rest
 
 import spock.lang.*
 
@@ -102,6 +102,16 @@ class ContentBuilderSpec extends Specification {
 
         then:
         "<root/>" == new String(builder.getData(), builder.charset)
+    }
+
+    def "json"() {
+        when:
+        def builder = getBuilder("text/plain", "UTF-8") {
+            json employee: [job:[title:"Nuclear Technician", department:"Sector 7g"]]
+        }
+
+        then:
+        """{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}""" == new String(builder.getData(), builder.charset)
     }
 
     def "no default charset"() {

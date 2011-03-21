@@ -15,6 +15,7 @@
 package wslite.rest
 
 import wslite.http.*
+import wslite.json.*
 
 class ContentBuilder {
 
@@ -52,11 +53,16 @@ class ContentBuilder {
         contents["xml"] = data
     }
 
+    void json(data) {
+        contents["json"] = data
+    }
+
     byte[] getData() {
         if (contents["bytes"]) return contents["bytes"]
         if (contents["text"]) return contents["text"].getBytes(charset)
         if (contents["urlenc"]) return HTTP.mapToURLEncodedString(contents["urlenc"]).getBytes(charset)
         if (contents["xml"]) return closureToXmlString(contents["xml"]).getBytes(charset)
+        if (contents["json"]) return objectToJson(contents["json"]).getBytes(charset)
         return null
     }
 
@@ -85,6 +91,16 @@ class ContentBuilder {
     private String closureToXmlString(content) {
         def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
         return xml.toString()
+    }
+
+    private String objectToJson(content) {
+        if (content instanceof Map) {
+            return new JSONObject(content).toString()
+        }
+        if (content instanceof List) {
+            return new JSONArray(content).toString()
+        }
+        return content
     }
 
 }

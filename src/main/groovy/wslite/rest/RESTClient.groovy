@@ -22,7 +22,7 @@ class RESTClient {
     String url
     HTTPClient httpClient
 
-    def responseHandlers = [XmlResponse.class, TextResponse.class]
+    def responseHandlers = [XmlResponse.class, JsonResponse.class, TextResponse.class]
 
     def defaultAcceptHeader
     def defaultContentTypeHeader

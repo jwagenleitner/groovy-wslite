@@ -15,23 +15,26 @@
 package wslite.rest
 
 import wslite.http.*
+import wslite.json.*
 
-class TextResponse {
+class JsonResponse extends TextResponse {
 
-    @Delegate
-    HTTPResponse response
+    def JSON
 
-    String TEXT
-
-    TextResponse(HTTPResponse response) {
-        this.response = response
-        TEXT = new String(response.data, response.charset ?: HTTP.DEFAULT_CHARSET)
+    JsonResponse(HTTPResponse response) {
+        super(response)
+        if (!TEXT) {
+            JSON = new JSONObject("{}")
+        }
+        if (TEXT.trim().startsWith("[")) {
+            JSON = new JSONArray(TEXT)
+        } else {
+            JSON = new JSONObject(TEXT)
+        }
     }
 
     static boolean handles(String contentType) {
-        return contentType in ( ContentType.TEXT.getContentTypeList() +
-                                ContentType.HTML.getContentTypeList() +
-                                ContentType.JSON.getContentTypeList() ) ||
-               contentType?.startsWith("text/")
+        return contentType in ContentType.JSON.getContentTypeList()
     }
+
 }
