@@ -90,6 +90,7 @@ When sending content you can also send byte[], text, url encoded parameters, and
         text "hello world"
         urlenc username: "homer", password: "simpson", timezone: "EST"
         xml { root() }
+        json [employee:[title:"Manager", department:"Finance"]]
     }
 
 ### Client Defaults
@@ -134,6 +135,8 @@ In addition to the above response properties, there are handlers for text and xm
 For all text based responses (content type starts with "text/") there will be a *TEXT* (i.e., `response.TEXT`) property available for the response.
 
 For xml based responses, an *XML* (i.e., `response.XML`) property is available that is of type *GPathResult*.
+
+For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type JSONObject or JSONArray.
 
 ## Dependencies
 
