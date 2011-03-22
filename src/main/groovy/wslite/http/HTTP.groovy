@@ -32,6 +32,28 @@ class HTTP {
         return charset.split("=")[1]
     }
 
+    static Map urlEncodedStringToMap(String urlencoded) {
+        Map params = [:]
+        def pairs = urlencoded.split("&")
+        String key, value
+        for (pair in pairs) {
+            (key, value) = pair.split("=")
+            key = URLDecoder.decode(key)
+            value = URLDecoder.decode(value)
+            if (!params.containsKey(key)) {
+                params[key] = value
+                continue
+            }
+            def existingValue = params[key]
+            if (existingValue && existingValue instanceof List) {
+                params[key] << value
+            } else {
+                params[key] = [existingValue, value]
+            }
+        }
+        return params
+    }
+
     static String mapToURLEncodedString(params) {
         if (!params || !(params instanceof Map)) {
             return null
