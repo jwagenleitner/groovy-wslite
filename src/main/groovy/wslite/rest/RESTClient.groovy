@@ -68,7 +68,7 @@ class RESTClient {
 
     def executeMethod(HTTPMethod method, Map params, Closure content) {
         // make a defensive copy of the params since setDefault* methods are destructive
-        def requestParams = new LinkedHashMap(params)
+        def requestParams = new LinkedHashMap(params ?: [:])
         setDefaultAcceptParam(requestParams)
         byte[] data = null
         if (content) {
@@ -80,29 +80,22 @@ class RESTClient {
             data = contentBuilder.getData()
         }
         RequestBuilder builder = new RequestBuilder(method, url, requestParams, data)
-        HTTPRequest request = builder.build()
-        HTTPResponse response = httpClient.execute(request)
+        HTTPResponse response = httpClient.execute(builder.build())
         return buildResponse(response)
     }
 
     private void setDefaultAcceptParam(params) {
-        if (params?.containsKey("accept")) {
-            return
-        }
-        if (defaultAcceptHeader) {
+        if (!params.containsKey("accept") && defaultAcceptHeader) {
             params.accept = (defaultAcceptHeader instanceof ContentType) ?
                              defaultAcceptHeader.getAcceptHeader() : defaultAcceptHeader.toString()
         }
     }
 
-    private void setDefaultContentHeader(contentBuilder, requestParams) {
-        if (requestParams?.headers?."Content-Type") {
-            return
+    private void setDefaultContentHeader(contentBuilder, params) {
+        if (!params.headers) params.headers = [:]
+        if (!params.headers.containsKey("Content-Type")) {
+            params.headers."Content-Type" = contentBuilder.getContentTypeHeader()
         }
-        if (!requestParams.headers) {
-            requestParams.headers = [:]
-        }
-        requestParams.headers."Content-Type" = contentBuilder.getContentTypeHeader()
     }
 
     private def buildResponse(HTTPResponse response) {
