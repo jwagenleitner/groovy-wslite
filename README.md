@@ -79,7 +79,7 @@ In addition to a Map, the `post/put` methods take an additional parameter of a C
         }
     }
 
-When sending content you can also send byte[], text, url encoded parameters, and xml.
+When sending content you can also send byte[], text, url encoded parameters, xml and json.
 
     def repsonse = client.post() {
         type "application/vnd.lock-in-proprietary-format"  // String or ContentType
@@ -90,7 +90,7 @@ When sending content you can also send byte[], text, url encoded parameters, and
         text "hello world"
         urlenc username: "homer", password: "simpson", timezone: "EST"
         xml { root() }
-        json [employee:[title:"Manager", department:"Finance"]]
+        json id:"525", department:"Finance"
     }
 
 ### Client Defaults

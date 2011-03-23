@@ -167,4 +167,14 @@ class ContentBuilderSpec extends Specification {
         then:
         ContentType.XML.toString() == builder.getContentTypeHeader()
     }
+
+    def "guesses content type for json"() {
+        when:
+        def builder = getBuilder(null, null) {
+            json id: "12345", department: "Finance"
+        }
+
+        then:
+        ContentType.JSON.toString() == builder.getContentTypeHeader()
+    }
 }

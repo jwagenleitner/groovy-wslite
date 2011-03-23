@@ -85,6 +85,7 @@ class ContentBuilder {
         if (contents["bytes"]) return ContentType.BINARY.toString()
         if (contents["urlenc"]) return ContentType.URLENC.toString()
         if (contents["xml"]) return ContentType.XML.toString()
+        if (contents["json"]) return ContentType.JSON.toString()
         return ContentType.TEXT.toString()
     }
 
