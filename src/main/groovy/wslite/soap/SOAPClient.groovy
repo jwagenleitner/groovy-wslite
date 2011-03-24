@@ -24,7 +24,6 @@ class SOAPClient {
 
     String serviceURL
     HTTPClient httpClient
-    HTTPAuthorization authorization
 
     SOAPClient() {
         this.httpClient = new HTTPClient()
@@ -36,10 +35,6 @@ class SOAPClient {
 
     void setAuthorization(HTTPAuthorization authorization) {
         this.httpClient.authorization = authorization
-    }
-
-    HTTPAuthorization getAuthorization() {
-        return this.authorization
     }
 
     SOAPResponse send(Map requestParams=[:], Closure content) {
