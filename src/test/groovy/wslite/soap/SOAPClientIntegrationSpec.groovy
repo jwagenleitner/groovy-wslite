@@ -20,7 +20,7 @@ class SOAPClientIntegrationSpec extends Specification {
 
     def "accessing a public SOAP 1.1 service"() {
         given:
-        def soapClient = new SOAPClient(serviceURL:'http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
+        def soapClient = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
 
         when:
         def resp = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
@@ -41,7 +41,7 @@ class SOAPClientIntegrationSpec extends Specification {
 
     def "accessing a public SOAP 1.2 service"() {
         given:
-        def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")
+        def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
 
         when:
         def response = soapClient.send {

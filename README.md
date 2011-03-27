@@ -1,8 +1,8 @@
 # groovy-wslite
 
-Library for Groovy that aims to provide no-frills SOAP and REST webservice clients.
+Library for Groovy that provides no-frills SOAP and REST webservice clients.
 
-No magic is involved, this library assumes you know exactly what messages you want to send to your services and want full control over the request.  No streams are used and all request/responses are buffered in memory for convenience.
+This library assumes you know exactly what messages you want to send to your services and want full control over the request.  No streams are used and all request/responses are buffered in memory for convenience.
 
 ## SOAP
 
@@ -10,8 +10,8 @@ No magic is involved, this library assumes you know exactly what messages you wa
 
     import wslite.soap.*
 
-    def soapClient = new SOAPClient(serviceURL: "http://www.webservicex.net/WeatherForecast.asmx")
-    def response = soapClient.send(connectTimeout:5000, readTimeout:10000) {
+    def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+    def response = soapClient.send {
         version SOAPVersion.V1_2
         body {
             GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
@@ -24,6 +24,53 @@ No magic is involved, this library assumes you know exactly what messages you wa
     assert 200 == resp.http.statusCode
     assert "OK" == resp.http.statusMessage
     assert "ASP.NET" == resp.http.headers["X-Powered-By"]
+
+### Usage
+
+    def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+    def response = soapClient.send(SOAPAction: "GetWeatherByZipCode",
+                                   connectTimeout:5000,
+                                   readTimeout:10000,
+                                   useCaches:false,
+                                   followRedirects:false,
+                                   trustAllSSLCerts:true) {
+        version SOAPVersion.V1_2        // SOAPVersion.V1_1 is default
+        soapNamespacePrefix "soap-env"  // "SOAP" is default
+        encoding "ISO-8859-1"           // "UTF-8" is default encoding for xml
+        envelopeAttributes "xmlns:hr":"http://example.org/hr"
+        header(mustUnderstand:false) {
+            auth {
+                apiToken("1234567890")
+            }
+        }
+        body {
+            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+                ZipCode("93657")
+            }
+        }
+    }
+
+### Response
+
+The response is automatically parsed by XmlSlurper and provides several convenient methods for access the SOAP Envelope.
+
+`response.Envelope`
+
+To get straight to the Header or Body element...
+
+`response.header` or `response.body`
+
+You can access the first child element of the Body by name `response.GetWeatherByZipCodeResponse`
+
+For response with SOAP Faults `response.hasFault()` and `response.fault`.
+
+If you just want the text of the response use `response.text`.
+
+You can also access the HTTPResponse `response.http.statusCode`.
+
+### SOAP Faults
+
+If the server response with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` and also includes the parsed SOAPResponse via a `response` property.
 
 ## REST
 
@@ -137,6 +184,63 @@ For all text based responses (content type starts with "text/") there will be a 
 For xml based responses, an *XML* (i.e., `response.XML`) property is available that is of type *GPathResult*.
 
 For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type JSONObject or JSONArray.
+
+## Using with Grails
+
+The SOAP/RESTClients can easily be configured and used in your Grails application.
+
+* Copy the groovy-wslite-*.jar into the `lib/` directory
+
+* Configure the clients in `grails-app/conf/spring/resources.groovy`
+
+For example:
+
+    clientBasicAuth(wslite.http.auth.HTTPBasicAuthorization) {
+        username = "Aladdin"
+        password = "open sesame"
+    }
+
+    httpClient(wslite.http.HTTPClient) {
+        connectTimeout = 5000
+        readTimeout = 10000
+        useCaches = false
+        followRedirects = false
+        trustAllSSLCerts = false
+        // authorization = ref('clientBasicAuth')
+    }
+
+    soapClient(wslite.soap.SOAPClient) {
+        serviceURL = "http://example.org/soap"
+        httpClient = ref('httpClient')
+        // authorization = ref('clientBasicAuth')
+    }
+
+    restClient(wslite.rest.RESTClient) {
+        url = "http://example.org/services"
+        httpClient = ref('httpClient')
+        authorization = ref('clientBasicAuth')
+    }
+
+* In your controller/service/taglib/etc. you can access the configured client as you would any grails service.
+
+For example:
+
+    package org.example
+
+    class MyService {
+
+        def restClient
+        def soapClient
+
+        def someServiceMethod() {
+            def response = restClient.get()
+            ....
+        }
+
+        def someOtherServiceMethod() {
+            def response soapClient.send { ... }
+        }
+    }
 
 ## Dependencies
 

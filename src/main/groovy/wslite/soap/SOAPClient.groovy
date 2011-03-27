@@ -29,6 +29,11 @@ class SOAPClient {
         this.httpClient = new HTTPClient()
     }
 
+    SOAPClient(String url, HTTPClient httpClient=new HTTPClient()) {
+        this.serviceURL = url
+        this.httpClient = httpClient
+    }
+
     SOAPClient(HTTPClient httpClient) {
         this.httpClient = httpClient
     }
