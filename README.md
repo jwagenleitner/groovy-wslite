@@ -1,4 +1,3 @@
-
 # groovy-wslite
 
 Library for Groovy that provides no-frills SOAP and REST webservice clients.
@@ -9,6 +8,7 @@ This library assumes you know exactly what messages you want to send to your ser
 
 ### Example
 
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.1')
     import wslite.soap.*
 
     def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
@@ -22,9 +22,9 @@ This library assumes you know exactly what messages you want to send to your ser
     }
 
     assert "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
-    assert 200 == resp.http.statusCode
-    assert "OK" == resp.http.statusMessage
-    assert "ASP.NET" == resp.http.headers["X-Powered-By"]
+    assert 200 == response.http.statusCode
+    assert "OK" == response.http.statusMessage
+    assert "ASP.NET" == response.http.headers["X-Powered-By"]
 
 ### Usage
 
@@ -111,6 +111,7 @@ If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown. 
 
 ### Example
 
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.1')
     import wslite.rest.*
 
     def client = new RESTClient("http://www.fresnostatenews.com/feed/")
@@ -220,11 +221,70 @@ For xml based responses, an *XML* (i.e., `response.XML`) property is available t
 
 For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type *JSONObject* or *JSONArray*.
 
+## Using groovy-wslite in your project
+
+__groovy-wslite__ is available in Maven Central.
+
+### Maven
+
+#### Releases
+
+    <dependency>
+        <groupId>com.github.groovy-wslite</groupId>
+        <artifactId>groovy-wslite</artifactId>
+        <version>0.1</version>
+    </dependency>
+
+#### Snapshots
+
+    <repositories>
+        <repository>
+            <id>groovy-wslite</id>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.groovy-wslite</groupId>
+            <artifactId>groovy-wslite</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+### Groovy Grape
+
+#### Releases
+
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.1')
+
+#### Snapshots
+
+    @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT')
+
 ## Using with Grails
 
 The SOAP/RESTClients can easily be configured and used in your Grails application.
 
-* Copy the groovy-wslite-*.jar into the `lib/` directory
+* Add the dependency to `grails-app/conf/BuildConfig.groovy`.
+
+*Note: You must enable the mavenCentral() repository.*
+
+    grails.project.dependency.resolution = {
+        ....
+        ....
+        repositories {
+            ....
+            ....
+            mavenCentral()
+            // uncomment below in order to use snapshots
+            //mavenRepo "https://oss.sonatype.org/content/groups/public"
+        }
+        dependencies {
+            runtime 'com.github.groovy-wslite:groovy-wslite:0.1'
+        }
+    }
 
 * Configure the clients in `grails-app/conf/spring/resources.groovy`
 

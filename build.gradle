@@ -1,7 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.3'
+    }
+}
+
 apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 apply plugin: 'idea'
 
 version = '0.2-SNAPSHOT'
+group = 'com.github.groovy-wslite'
 
 repositories {
     mavenCentral()
@@ -11,4 +24,72 @@ repositories {
 dependencies {
     groovy 'org.codehaus.groovy:groovy-all:1.7.6'
     testCompile "org.spockframework:spock-core:0.4-groovy-1.7"
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives groovydocJar
+    archives sourcesJar
+
+}
+
+pgp {
+    secretKeyRingFile = new File(pgpSecretKeyRingFile)
+    keyId = pgpKeyId
+    password = pgpPassword
+}
+
+def deployer = null
+def installer = install.repositories.mavenInstaller
+
+uploadArchives {
+    // Checks if login information for the logon repo is set correctly.
+    // Should be set in gradle.properties (check gradle.properties.sample)
+    if(project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+       repositories {
+            deployer = mavenDeployer {
+                configureAuth = {
+                    authentication(userName: mavenUsername, password: mavenPassword)
+                }
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/", configureAuth) 
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/", configureAuth)
+            }
+        }
+    }
+}
+
+[installer, deployer]*.pom*.whenConfigured {pom ->
+    pom.project {
+        name "groovy-wslite"
+        description "Lightweight SOAP and REST webservice clients for Groovy"
+        url "https://github.com/jwagenleitner/groovy-wslite"
+        inceptionYear "2011"
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+            }
+        }
+        scm {
+            url "scm:git:git@github.com:jwagenleitner/groovy-wslite.git"
+            connection "https://github.com/jwagenleitner/groovy-wslite"
+        }
+        developers {
+            developer {
+                id "jwagenleitner"
+                name "John Wagenleitner"
+                email "john.wagenleitner@gmail.com"
+            }
+        }
+    }
 }
