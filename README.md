@@ -52,7 +52,7 @@ This library assumes you know exactly what messages you want to send to your ser
 
 ### Response
 
-The response is automatically parsed by XmlSlurper and provides several convenient methods for access the SOAP Envelope.
+The response is automatically parsed by XmlSlurper and provides several convenient methods for accessing the SOAP response.
 
 `response.Envelope`
 
@@ -62,15 +62,15 @@ To get straight to the Header or Body element...
 
 You can access the first child element of the Body by name `response.GetWeatherByZipCodeResponse`
 
-For response with SOAP Faults `response.hasFault()` and `response.fault`.
+For a response with a SOAP Fault `response.hasFault()` and `response.fault`.
 
 If you just want the text of the response use `response.text`.
 
-You can also access the HTTPResponse `response.http.statusCode`.
+You can also access the underlying HTTPResponse `response.http`.
 
 ### SOAP Faults
 
-If the server response with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` and also includes the parsed SOAPResponse via a `response` property.
+If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` properties and also includes the parsed SOAPResponse via a `response` property.
 
 ## REST
 
@@ -177,13 +177,13 @@ The response has the following properties:
 
 ### Content Type Handling
 
-In addition to the above response properties, there are handlers for text and xml responses.
+In addition to the above response properties, there are handlers for text, xml and json responses.
 
 For all text based responses (content type starts with "text/") there will be a *TEXT* (i.e., `response.TEXT`) property available for the response.
 
 For xml based responses, an *XML* (i.e., `response.XML`) property is available that is of type *GPathResult*.
 
-For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type JSONObject or JSONArray.
+For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type *JSONObject* or *JSONArray*.
 
 ## Using with Grails
 
@@ -221,7 +221,7 @@ For example:
         authorization = ref('clientBasicAuth')
     }
 
-* In your controller/service/taglib/etc. you can access the configured client as you would any grails service.
+* In your controller/service/taglib/etc. you can access the configured client(s) as you would any Grails service.
 
 For example:
 
@@ -249,12 +249,12 @@ For example:
 ## Building
 
 groovy-wslite uses Gradle for building. Gradle handles the dependencies
-for you so all you need to do is install gradle and then build the
+for you so all you need to do is install Gradle and then build the
 code.
 
-**Build instruction**
+**Build Instructions**
 
-1. Download and install [Gradle 0.9.2](http://www.gradle.org/downloads.html)
+1. Download and install [Gradle](http://www.gradle.org/downloads.html)
 2. Fetch the latest code: `git clone git://github.com/jwagenleitner/groovy-wslite.git`
 3. (Optional) Run the tests using `gradle test`
 4. Go to the project directory and run: `gradle jar`
