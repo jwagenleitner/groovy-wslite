@@ -1,3 +1,4 @@
+
 # groovy-wslite
 
 Library for Groovy that provides no-frills SOAP and REST webservice clients.
@@ -49,6 +50,40 @@ This library assumes you know exactly what messages you want to send to your ser
             }
         }
     }
+
+The `header` and `body` closures are passed to a MarkupBuilder in order to create the SOAP message.  
+You can also pass a raw string to the send method if you want absolute control over the resulting message.
+
+    soapClient.send(
+        """<?xml version='1.0' encoding='UTF-8'?>
+           <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+               <SOAP:Body>
+                   <GetFoo>bar</GetFoo>
+               </SOAP:Body>
+           </SOAP:Envelope>"""
+    )
+
+The default when sending a raw string is SOAP v1.1, you can override this by specifying a SOAPVersion.
+
+    soapClient.send(SOAPVersion.V1_2,
+                    """<?xml version='1.0' encoding='UTF-8'?>
+                       <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                           <SOAP:Body>
+                               <GetFoo>bar</GetFoo>
+                            </SOAP:Body>
+                        </SOAP:Envelope>""")
+
+You can also specify connection settings.
+
+    soapClient.send(SOAPVersion.V1_2,
+                    connectTimeout:7000,
+                    readTimeout:9000,
+                    """<?xml version='1.0' encoding='UTF-8'?>
+                       <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                           <SOAP:Body>
+                               <GetFoo>bar</GetFoo>
+                           </SOAP:Body>
+                       </SOAP:Envelope>""")
 
 ### Response
 
