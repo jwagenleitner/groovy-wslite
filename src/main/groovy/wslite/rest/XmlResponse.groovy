@@ -22,7 +22,11 @@ class XmlResponse extends TextResponse {
 
     XmlResponse(HTTPResponse response) {
         super(response)
-        XML = new XmlSlurper().parseText(TEXT)
+        try {
+            XML = new XmlSlurper().parseText(TEXT)
+        } catch (Exception ex) {
+            throw new RuntimeException("${ex.message}\nResponse:\n${response}\nOriginal Text:\n${TEXT}\n", ex)
+        }
     }
 
     static boolean handles(String contentType) {
