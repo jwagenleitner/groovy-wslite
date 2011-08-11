@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     groovy 'org.codehaus.groovy:groovy-all:1.7.6'
-    testCompile "org.spockframework:spock-core:0.4-groovy-1.7"
+    testCompile "org.spockframework:spock-core:0.5-groovy-1.7"
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {

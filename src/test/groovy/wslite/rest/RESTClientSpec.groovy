@@ -46,10 +46,12 @@ class RESTClientSpec extends Specification {
     }
 
     def "xml response parsing"() {
-        expect:
+        given:
         client.httpClient.response.contentType = contentType
         client.httpClient.response.data = """<?xml version="1.0"?><test><foo>bar</foo></test>""".bytes
         def response = client.get()
+
+        expect:
         response.XML.foo.text() == foo
         assert 0 < response.TEXT.size()
         assert response instanceof XmlResponse
@@ -64,10 +66,12 @@ class RESTClientSpec extends Specification {
     }
 
     def "response parsing of text responses"() {
-        expect:
+        given:
         client.httpClient.response.contentType = contentType
         client.httpClient.response.data = """bar""".bytes
         def response = client.get()
+
+        expect:
         response.TEXT == foo
         assert response instanceof TextResponse
 
@@ -79,10 +83,12 @@ class RESTClientSpec extends Specification {
     }
 
     def "response parsing of JSONObject responses"() {
-        expect:
+        given:
         client.httpClient.response.contentType = contentType
         client.httpClient.response.data = """{"foo":"bar"}""".bytes
         def response = client.get()
+
+        expect:
         response.JSON.foo == foo
         assert response.JSON instanceof JSONObject
         assert response instanceof JsonResponse
@@ -95,10 +101,12 @@ class RESTClientSpec extends Specification {
     }
 
     def "response parsing of JSONArray responses"() {
-        expect:
+        given:
         client.httpClient.response.contentType = contentType
         client.httpClient.response.data = """[{"foo":"bar"},{"foo":"baz"}]""".bytes
         def response = client.get()
+
+        expect:
         response.JSON[0].foo == foo0
         response.JSON[1].foo == foo1
         assert response.JSON.size() == 2
