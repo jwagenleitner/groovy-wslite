@@ -44,9 +44,14 @@ class HTTPResponse {
         this.charset = HTTP.parseCharsetParamFromContentType(contentType)
     }
 
+    String getContentAsString() {
+        if (!data) return ""
+        return new String(data, charset ?: HTTP.DEFAULT_CHARSET)
+    }
+
     @Override
     String toString() {
-        "[url: ${url}, statusCode: ${statusCode}, statusMessage: ${statusMessage}, contentType: ${contentType}, charset: ${charset}, contentLength: ${contentLength}, headers: ${headers}]"
+        "[url: ${url}, statusCode: ${statusCode}, statusMessage: ${statusMessage}, contentType: ${contentType}, charset: ${charset}, contentLength: ${contentLength}, headers: ${headers}, data: ${data != null}]"
     }
 
 }

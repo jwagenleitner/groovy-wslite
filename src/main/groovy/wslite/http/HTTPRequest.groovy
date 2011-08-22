@@ -55,4 +55,14 @@ class HTTPRequest {
         this.trustAllSSLCerts = trustAllSSLCerts
         this.isTrustAllSSLCertsSet = true
     }
+
+    String getContentAsString() {
+        if (!data) return ""
+        return new String(data, headers['Content-Type'] ?: HTTP.DEFAULT_CHARSET)
+    }
+
+    @Override
+    String toString() {
+         "[url: ${url}, method: ${method}, connectTimeout: ${connectTimeout}, readTimeout: ${readTimeout}, useCaches: ${useCaches}, followRedirects: ${followRedirects}, trustAllSSLCerts: ${trustAllSSLCerts}, headers: ${headers}, data: ${data != null}]"
+    }
 }

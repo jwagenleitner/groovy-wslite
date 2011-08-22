@@ -16,11 +16,25 @@ package wslite.http
 
 class HTTPClientException extends Exception {
 
+    HTTPRequest request
     HTTPResponse response
 
-    HTTPClientException(String message, Throwable cause, HTTPResponse response) {
+    HTTPClientException(String message) {
+        super(message)
+    }
+
+    HTTPClientException(String message, Throwable cause) {
         super(message, cause)
-        this.response = response
+    }
+
+    HTTPClientException(Throwable cause) {
+        super(cause)
+    }
+
+    HTTPClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, cause)
+        this.request = httpRequest
+        this.response = httpResponse
     }
 
 }
