@@ -14,11 +14,14 @@
  */
 package wslite.soap
 
+import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
 import groovy.util.slurpersupport.GPathResult
 
 class SOAPResponse {
-    HTTPResponse http
+
+    HTTPRequest httpRequest
+    HTTPResponse httpResponse
     GPathResult Envelope
     String text
 
@@ -40,5 +43,12 @@ class SOAPResponse {
 
     def propertyMissing(String name) {
         return getBody()."${name}"
+    }
+
+    /**
+     * @deprecated - For backwards compat between v0.1 and 0.2
+      */
+    HTTPResponse getHttp() {
+        return httpResponse
     }
 }

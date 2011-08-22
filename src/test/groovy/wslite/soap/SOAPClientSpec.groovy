@@ -136,6 +136,33 @@ class SOAPClientSpec extends Specification {
         then: thrown(SOAPMessageParseException)
     }
 
+    def "parse exception contains soap response text"() {
+        given: "a SOAP response with no Body element"
+        def soapResponse = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+              <SOAP:Header>
+                <token>foo</token>
+              </SOAP:Header>
+              <SOAP:Torso>
+                <GetFoo>
+                  <result>bar</result>
+                </GetFoo>
+              </SOAP:Torso>
+            </SOAP:Envelope>""".trim()
+
+        and: "a soap client configured to receive this response"
+        def httpc = [execute:{req -> [data:soapResponse.bytes]}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a message is sent"
+        def response = soapClient.send(testSoapMessage)
+
+        then:
+        def smpe = thrown(SOAPMessageParseException)
+        smpe.soapMessageText.contains("<result>bar</result>")
+    }
+
     def "throws exception if SOAP Fault response is returned from server"() {
         given: "a SOAP Fault response"
         def soapResponse = """
@@ -176,7 +203,7 @@ class SOAPClientSpec extends Specification {
         def response = soapClient.send(SOAPAction:"http://foo/bar", testSoapMessage)
 
         then:
-        "http://foo/bar" == response.http.headers.SOAPAction
+        "http://foo/bar" == response.httpResponse.headers.SOAPAction
     }
 
     def "send should pass arguments in the http request"() {

@@ -14,7 +14,14 @@
  */
 package wslite.soap
 
+import wslite.http.HTTPRequest
+import wslite.http.HTTPResponse
+
 class SOAPMessageParseException extends Exception {
+
+    String soapMessageText
+    HTTPRequest httpRequest
+    HTTPResponse httpResponse
 
     SOAPMessageParseException(String message) {
         super(message)
@@ -27,4 +34,5 @@ class SOAPMessageParseException extends Exception {
     SOAPMessageParseException(Throwable cause) {
         super(cause)
     }
+
 }

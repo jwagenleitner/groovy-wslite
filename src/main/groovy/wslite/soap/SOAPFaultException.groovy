@@ -14,24 +14,35 @@
  */
 package wslite.soap
 
+import wslite.http.HTTPRequest
+import wslite.http.HTTPResponse
+
 class SOAPFaultException extends Exception {
 
     String faultcode
     String faultstring
     String faultactor
     String detail
-    def response
+    SOAPResponse response
 
     SOAPFaultException(String message) {
         super(message)
     }
 
-    SOAPFaultException(faultcode, faultstring, faultactor, detail) {
-        super(faultstring + " [" + faultcode + "]")
-        this.faultcode = faultcode
-        this.faultstring = faultstring
-        this.faultactor = faultactor
-        this.detail = detail
+    SOAPFaultException(String message, Throwable cause) {
+        super(message, cause)
+    }
+
+    SOAPFaultException(Throwable cause) {
+        super(cause)
+    }
+
+    HTTPRequest getHttpRequest() {
+        return response.httpRequest
+    }
+
+    HTTPResponse getHttpResponse() {
+        return response.httpResponse
     }
 
 }

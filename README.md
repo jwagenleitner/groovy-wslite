@@ -8,7 +8,8 @@ This library assumes you know exactly what messages you want to send to your ser
 
 ### Example
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.1')
+    @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT')
     import wslite.soap.*
 
     def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
@@ -22,9 +23,9 @@ This library assumes you know exactly what messages you want to send to your ser
     }
 
     assert "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
-    assert 200 == response.http.statusCode
-    assert "OK" == response.http.statusMessage
-    assert "ASP.NET" == response.http.headers["X-Powered-By"]
+    assert 200 == response.httpResponse.statusCode
+    assert "OK" == response.httpResponse.statusMessage
+    assert "ASP.NET" == response.httpResponse.headers["X-Powered-By"]
 
 ### Usage
 
@@ -51,7 +52,18 @@ This library assumes you know exactly what messages you want to send to your ser
         }
     }
 
-The `header` and `body` closures are passed to a MarkupBuilder in order to create the SOAP message.  
+The `header` and `body` closures are passed to a MarkupBuilder in order to create the SOAP message.
+
+If you have a string with XML content you want to include in you can use `mkp`.
+
+    def response = soapClient.send {
+        body {
+            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+                mkp.yieldUnescaped "<ZipCode>93657</ZipCode>"
+            }
+        }
+    }
+
 You can also pass a raw string to the send method if you want absolute control over the resulting message.
 
     soapClient.send(
@@ -101,11 +113,11 @@ For a response with a SOAP Fault `response.hasFault()` and `response.fault`.
 
 If you just want the text of the response use `response.text`.
 
-You can also access the underlying HTTPResponse `response.http`.
+You can also access the underlying HTTPRequest `response.httpRequest` and HTTPResponse `response.httpResponse` objects.
 
 ### SOAP Faults
 
-If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` properties and also includes the parsed SOAPResponse via a `response` property.
+If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` properties and also includes the parsed SOAPResponse via a `response` property.  You can also access the underlying HTTPRequest `response.httpRequest` and HTTPResponse `response.httpResponse` objects.
 
 ## REST
 

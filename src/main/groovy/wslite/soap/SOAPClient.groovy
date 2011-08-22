@@ -53,18 +53,15 @@ class SOAPClient {
 
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
         def httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
-        def response = httpClient.execute(httpRequest)
-        String soapMessage = new String(response.data ?: "".bytes, response.charset ?: HTTP.DEFAULT_CHARSET)
-        def soapResponse = new SOAPResponse(http:response, Envelope:parseEnvelope(soapMessage), text:soapMessage)
+        def httpResponse = httpClient.execute(httpRequest)
+        SOAPResponse soapResponse = buildSOAPResponse(httpRequest, httpResponse)
         if (soapResponse.hasFault()) {
-            def soapFault = buildSOAPFaultException(soapResponse.fault)
-            soapFault.response = soapResponse
-            throw soapFault
+            throw buildSOAPFaultException(soapResponse)
         }
         return soapResponse
     }
 
-    private def buildSOAPMessage(content) {
+    private SOAPMessageBuilder buildSOAPMessage(content) {
         def builder = new SOAPMessageBuilder()
         content.resolveStrategy = Closure.DELEGATE_FIRST
         content.delegate = builder
@@ -72,7 +69,7 @@ class SOAPClient {
         return builder
     }
 
-    private def buildHTTPRequest(requestParams, soapVersion, message) {
+    private HTTPRequest buildHTTPRequest(requestParams, soapVersion, message) {
         def soapAction = requestParams.remove("SOAPAction")
         def httpRequest = new HTTPRequest(requestParams)
         httpRequest.url = new URL(serviceURL)
@@ -88,7 +85,24 @@ class SOAPClient {
         return httpRequest
     }
 
-    private def parseEnvelope(soapMessageText) {
+    private SOAPResponse buildSOAPResponse(httpRequest, httpResponse) {
+        String soapMessageText = httpResponse.getContentAsString()
+        SOAPResponse response
+        try {
+            response = new SOAPResponse(httpRequest:httpRequest,
+                                        httpResponse:httpResponse,
+                                        Envelope:parseEnvelope(soapMessageText),
+                                        text:soapMessageText)
+        } catch (SOAPMessageParseException parseException) {
+            parseException.soapMessageText = soapMessageText
+            parseException.httpRequest = httpRequest
+            parseException.httpResponse = httpResponse
+            throw parseException
+        }
+        return response
+    }
+
+    private def parseEnvelope(String soapMessageText) {
         def envelopeNode
         try {
             envelopeNode = new XmlSlurper().parseText(soapMessageText)
@@ -106,10 +120,13 @@ class SOAPClient {
         return envelopeNode
     }
 
-    private def buildSOAPFaultException(fault) {
-        return new SOAPFaultException(  fault.faultcode.text(),
-                                        fault.faultstring.text(),
-                                        fault.faultactor.text(),
-                                        fault.detail.text() )
+    private SOAPFaultException buildSOAPFaultException(soapResponse) {
+        SOAPFaultException sfe = new SOAPFaultException("${soapResponse.fault.faultstring.text()} [$soapResponse.fault.faultcode.text()]".toString())
+        sfe.response = soapResponse
+        sfe.faultcode = soapResponse.fault.faultcode.text()
+        sfe.faultstring = soapResponse.fault.faultstring.text()
+        sfe.faultactor = soapResponse.fault.faultactor.text()
+        sfe.detail = soapResponse.fault.detail.text()
+        return sfe
     }
 }
