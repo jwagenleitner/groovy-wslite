@@ -42,12 +42,6 @@ artifacts {
 
 }
 
-pgp {
-    secretKeyRingFile = new File(pgpSecretKeyRingFile)
-    keyId = pgpKeyId
-    password = pgpPassword
-}
-
 def deployer = null
 def installer = install.repositories.mavenInstaller
 
