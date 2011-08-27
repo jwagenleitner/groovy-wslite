@@ -22,15 +22,15 @@ class SOAPResponse {
 
     HTTPRequest httpRequest
     HTTPResponse httpResponse
-    GPathResult Envelope
+    GPathResult envelope
     String text
 
     def getBody() {
-        return Envelope.Body
+        return envelope.Body
     }
 
     def getHeader() {
-        return Envelope.Header
+        return envelope.Header
     }
 
     def getFault() {
@@ -45,10 +45,4 @@ class SOAPResponse {
         return getBody()."${name}"
     }
 
-    /**
-     * @deprecated - For backwards compat between v0.1 and 0.2
-      */
-    HTTPResponse getHttp() {
-        return httpResponse
-    }
 }

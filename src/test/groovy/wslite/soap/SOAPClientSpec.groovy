@@ -60,8 +60,8 @@ class SOAPClientSpec extends Specification {
         def response = soapClient.send(testSoapMessage)
 
         then: "the parsed response is accessible"
-        "foo" == response.Envelope.Header.token.text()
-        "bar" == response.Envelope.Body.GetFoo.result.text()
+        "foo" == response.envelope.Header.token.text()
+        "bar" == response.envelope.Body.GetFoo.result.text()
     }
 
     def "throws parse exception if no response"() {
@@ -191,7 +191,7 @@ class SOAPClientSpec extends Specification {
         then:
         def sfe = thrown(SOAPFaultException)
         "742" == sfe.faultcode
-        "742" == sfe.response.Envelope.Body.Fault.faultcode.text()
+        "742" == sfe.response.envelope.Body.Fault.faultcode.text()
     }
 
     def "should add SOAPAction to request headers"() {
@@ -294,7 +294,7 @@ class SOAPClientSpec extends Specification {
                                 </SOAP:Envelope>""")
 
         then:
-        "bar" == response.Envelope.Body.GetFoo.text()
+        "bar" == response.envelope.Body.GetFoo.text()
     }
 
     def "send raw string with soap message and override the soap version used"() {
@@ -314,7 +314,7 @@ class SOAPClientSpec extends Specification {
                                 </SOAP:Envelope>""")
 
         then:
-        "bar" == response.Envelope.Body.GetFoo.text()
+        "bar" == response.envelope.Body.GetFoo.text()
     }
 
     def "can send raw soap message with http params"() {
@@ -336,7 +336,7 @@ class SOAPClientSpec extends Specification {
 
         then:
         notThrown(ConditionNotSatisfiedError)
-        "bar" == response.Envelope.Body.GetFoo.text()
+        "bar" == response.envelope.Body.GetFoo.text()
     }
 
     def "can send raw soap message with http params and overriding soap version"() {
@@ -361,7 +361,7 @@ class SOAPClientSpec extends Specification {
 
         then:
         notThrown(ConditionNotSatisfiedError)
-        "bar" == response.Envelope.Body.GetFoo.text()
+        "bar" == response.envelope.Body.GetFoo.text()
     }
 
 }

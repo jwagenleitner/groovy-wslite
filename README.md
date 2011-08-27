@@ -4,12 +4,16 @@ Library for Groovy that provides no-frills SOAP and REST webservice clients.
 
 This library assumes you know exactly what messages you want to send to your services and want full control over the request.  No streams are used and all request/responses are buffered in memory for convenience.
 
+**Note**
+
+Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/blob/master/CHANGELOG.md) for any breaking changes.
+
 ## SOAP
 
 ### Example
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT', changing=true)
     import wslite.soap.*
 
     def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
@@ -101,7 +105,7 @@ You can also specify connection settings.
 
 The response is automatically parsed by XmlSlurper and provides several convenient methods for accessing the SOAP response.
 
-`response.Envelope`
+`response.envelope`
 
 To get straight to the Header or Body element...
 
@@ -133,8 +137,7 @@ If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown. 
     assert "text/xml" == response.contentType
     assert "UTF-8" == response.charset
     assert "text/xml; charset=UTF-8" == response.headers."Content-Type"
-    assert response instanceof XmlResponse
-    assert "FresnoStateNews.com" == response.XML.channel.title.text()
+    assert "FresnoStateNews.com" == response.xml.channel.title.text()
 
 ### Methods
 
@@ -176,7 +179,7 @@ In addition to a Map, the `post/put` methods take an additional parameter of a C
 
 When sending content you can also send byte[], text, url encoded parameters, xml and json.
 
-    def repsonse = client.post() {
+    def response = client.post() {
         type "application/vnd.lock-in-proprietary-format"  // String or ContentType
         charset "US-ASCII"
 
@@ -210,28 +213,30 @@ Currently only *Basic Auth* is supported.
 
 The response has the following properties:
 
-* url
-* statusCode // 200
-* statusMessage // "Ok"
-* contentType // "text/xml" (parameters are not included such as charset)
-* charset // UTF-8 (charset parameter parsed from the returned Content-Type header)
-* contentEncoding // from headers
-* contentLength // from headers
-* date // from headers
-* expiration // from headers
-* lastModified // from headers
-* headers // Map (case insensitive) of all headers
-* data // byte[] of any content returned from the server
+* `url`
+* `statusCode`        // 200
+* `statusMessage`     // "Ok"
+* `contentType`       // "text/xml" (parameters are not included such as charset)
+* `charset`           // UTF-8 (charset parameter parsed from the returned Content-Type header)
+* `contentEncoding`   // from headers
+* `contentLength`     // from headers
+* `date`              // from headers
+* `expiration`        // from headers
+* `lastModified`      // from headers
+* `headers`           // Map (case insensitive) of all headers
+* `data`              // byte[] of any content returned from the server
+
+The response also includes the original *HTTPReqeust* (ex. `response.request`).
 
 ### Content Type Handling
 
 In addition to the above response properties, there are handlers for text, xml and json responses.
 
-For all text based responses (content type starts with "text/") there will be a *TEXT* (i.e., `response.TEXT`) property available for the response.
+For all text based responses (content type starts with "text/") there will be a *text* (i.e., `response.text`) property available for the response.
 
-For xml based responses, an *XML* (i.e., `response.XML`) property is available that is of type *GPathResult*.
+For xml based responses, an *xml* (i.e., `response.xml`) property is available that is of type *GPathResult*.
 
-For json based responses, a *JSON* (i.e., `response.JSON`) property is available that is of type *JSONObject* or *JSONArray*.
+For json based responses, a *json* (i.e., `response.json`) property is available that is of type *JSONObject* or *JSONArray*.
 
 ## Using groovy-wslite in your project
 
@@ -273,7 +278,7 @@ __groovy-wslite__ is available in Maven Central.
 #### Snapshots
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2-SNAPSHOT', changing=true)
 
 ## Using with Grails
 
@@ -351,7 +356,7 @@ For example:
 
 ## Dependencies
 
-* [Groovy 1.7.x](http://groovy.codehaus.org)
+* [Groovy 1.7.6] (http://groovy.codehaus.org) or higher
 
 ## Building
 

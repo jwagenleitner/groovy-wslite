@@ -28,7 +28,6 @@ class RESTClientIntegrationSpec extends Specification {
         "text/xml" == response.contentType
         "UTF-8" == response.charset
         "text/xml; charset=UTF-8" == response.headers."Content-Type"
-        response instanceof XmlResponse
-        "FresnoStateNews.com" == response.XML.channel.title.text()
+        "FresnoStateNews.com" == response.xml.channel.title.text()
     }
 }

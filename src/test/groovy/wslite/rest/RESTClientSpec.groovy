@@ -52,10 +52,8 @@ class RESTClientSpec extends Specification {
         def response = client.get()
 
         expect:
-        response.XML.foo.text() == foo
-        assert 0 < response.TEXT.size()
-        assert response instanceof XmlResponse
-        assert response instanceof TextResponse
+        response.xml.foo.text() == foo
+        assert 0 < response.text.size()
 
         where:
         contentType                 | foo
@@ -72,8 +70,7 @@ class RESTClientSpec extends Specification {
         def response = client.get()
 
         expect:
-        response.TEXT == foo
-        assert response instanceof TextResponse
+        response.text == foo
 
         where:
         contentType                 | foo
@@ -89,9 +86,8 @@ class RESTClientSpec extends Specification {
         def response = client.get()
 
         expect:
-        response.JSON.foo == foo
-        assert response.JSON instanceof JSONObject
-        assert response instanceof JsonResponse
+        response.json.foo == foo
+        assert response.json instanceof JSONObject
 
         where:
         contentType                 | foo
@@ -107,45 +103,16 @@ class RESTClientSpec extends Specification {
         def response = client.get()
 
         expect:
-        response.JSON[0].foo == foo0
-        response.JSON[1].foo == foo1
-        assert response.JSON.size() == 2
-        assert response.JSON instanceof JSONArray
-        assert response instanceof JsonResponse
+        response.json[0].foo == foo0
+        response.json[1].foo == foo1
+        assert response.json.size() == 2
+        assert response.json instanceof JSONArray
 
         where:
         contentType                 | foo0      | foo1
         "text/javascript"           | "bar"     | "baz"
         "text/json"                 | "bar"     | "baz"
         "application/json"          | "bar"     | "baz"
-    }
-
-    def "custom response handler"() {
-        when:
-        client.addResponseHandler(MockCustomResponse)
-        client.httpClient.response.contentType = "application/foo"
-        client.httpClient.response.data = """bar""".bytes
-        def response = client.get()
-
-        then:
-        response instanceof MockCustomResponse
-        "bar" == response.CUSTOM
-        4 == client.responseHandlers.size()
-        MockCustomResponse == client.responseHandlers.first()
-    }
-
-    def "custom response handler takes precedence over default handlers"() {
-        when:
-        client.addResponseHandler(MockXmlResponse)
-        client.httpClient.response.contentType = "application/xml"
-        client.httpClient.response.data = """bar""".bytes
-        def response = client.get()
-
-        then:
-        response instanceof MockXmlResponse
-        "bar" == response.MOCK_XML
-        4 == client.responseHandlers.size()
-        MockXmlResponse == client.responseHandlers.first()
     }
 
     def "no accept header if no accept param specified"() {
@@ -300,6 +267,17 @@ class RESTClientSpec extends Specification {
         null == params.contentType
     }
 
+    def "invalid url throws exception"() {
+        when:
+        def client = new RESTClient("foo:bar")
+        client.get()
+
+        then:
+        def ex = thrown(RESTClientException)
+        null == ex.request
+        null == ex.response
+    }
+
     def setup() {
         def httpClient = new MockHTTPClient()
         httpClient.response = getMockResponse()
@@ -331,31 +309,5 @@ class MockHTTPClient extends HTTPClient {
         response.url = request.url
         response.date = new Date()
         return response
-    }
-}
-
-class MockCustomResponse extends TextResponse {
-    def CUSTOM
-
-    MockCustomResponse(HTTPResponse response) {
-        super(response)
-        CUSTOM = TEXT
-    }
-
-    static boolean handles(String contentType) {
-        return "application/foo" == contentType
-    }
-}
-
-class MockXmlResponse extends TextResponse {
-    def MOCK_XML
-
-    MockXmlResponse(HTTPResponse response) {
-        super(response)
-        MOCK_XML = TEXT
-    }
-
-    static boolean handles(String contentType) {
-        return XmlResponse.handles(contentType)
     }
 }

@@ -56,16 +56,16 @@ class SOAPResponseSpec extends Specification {
 
     def "access first Body element if it exists"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soap11Response))
+        def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
         "Springfield" == response.GetAddressResponse.City.text()
-        "Springfield" == response.Envelope.Body.GetAddressResponse.City.text()
+        "Springfield" == response.envelope.Body.GetAddressResponse.City.text()
     }
 
     def "access first Body element that does not exist returns empty string"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soap11Response))
+        def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
         "" == response.GetAddressResponse2.City.text()
@@ -73,7 +73,7 @@ class SOAPResponseSpec extends Specification {
 
     def "should report soap fault is present"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soapFaultResponse))
+        def response = new SOAPResponse(envelope: parseText(soapFaultResponse))
 
         then:
         response.hasFault()
@@ -81,7 +81,7 @@ class SOAPResponseSpec extends Specification {
 
     def "should return soap fault if present"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soapFaultResponse))
+        def response = new SOAPResponse(envelope: parseText(soapFaultResponse))
 
         then:
         response.hasFault()
@@ -90,7 +90,7 @@ class SOAPResponseSpec extends Specification {
 
     def "should not report soap fault is present for a valid response"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soap11Response))
+        def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
         !response.hasFault()
@@ -98,7 +98,7 @@ class SOAPResponseSpec extends Specification {
 
     def "should access the soap body directly"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soap11Response))
+        def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
         "742 Evergreen Terrace" == response.body.GetAddressResponse.Address1.text()
@@ -106,7 +106,7 @@ class SOAPResponseSpec extends Specification {
 
     def "should access the soap header directly"() {
         when:
-        def response = new SOAPResponse(Envelope: parseText(soap11Response))
+        def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
         "742ABC" == response.header.apiToken.text()

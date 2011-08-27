@@ -18,44 +18,31 @@ import wslite.http.*
 
 class RequestBuilder {
 
-    HTTPMethod method
-    String url
-    Map params
-    byte[] data
+    RequestBuilder() {
 
-    private def path
-    private def query
-    private def accept
-    private def headers
-    private def targetURL
-
-    RequestBuilder(HTTPMethod method, String url, Map params, byte[] data) {
-        this.method = method
-        this.url = url
-        this.params = new LinkedHashMap(params ?: [:])
-        this.data = data
-
-        this.path = this.params?.remove("path")
-        this.query = this.params?.remove("query")
-        this.accept = this.params?.remove("accept")
-        this.headers = new HTTPHeaderMap(this.params?.remove("headers") ?: [:])
     }
 
-    HTTPRequest build() {
+    HTTPRequest build(HTTPMethod method, String url, Map params, byte[] data) {
         if (!method || !url) {
-            throw new IllegalStateException("URL and Method are required")
+            throw new IllegalArgumentException("URL and Method are required")
+        }
+        params = new LinkedHashMap(params ?: [:])
+        def path = params?.remove("path")
+        def query = params?.remove("query")
+        def accept = params?.remove("accept")
+        def headers = new HTTPHeaderMap(params?.remove("headers") ?: [:])
+        if (accept && !headers.containsKey("Accept")) {
+            headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
         }
         HTTPRequest request = new HTTPRequest(params ?: [:])
-        buildURL()
-        buildHeaders()
-        request.method = this.method
-        request.url = this.targetURL
-        request.headers = this.headers
-        request.data = this.data
+        request.method = method
+        request.url = buildURL(url, path, query)
+        request.headers = headers
+        request.data = data
         return request
     }
 
-    private void buildURL() {
+    private URL buildURL(url, path, query) {
         def target = new StringBuilder(url)
         if (path && path != "/") {
             url.endsWith("/") ?: target.append('/')
@@ -65,14 +52,7 @@ class RequestBuilder {
             target.indexOf("?") == -1 ? target.append("?") : target.append("&")
             target.append(HTTP.mapToURLEncodedString(query))
         }
-        targetURL = new URL(target.toString())
-    }
-
-    private void buildHeaders() {
-        if (!accept || headers.containsKey("Accept")) {
-            return
-        }
-        headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
+        return new URL(target.toString())
     }
 
 }

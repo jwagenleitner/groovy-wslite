@@ -15,26 +15,22 @@
 package wslite.rest
 
 import wslite.http.*
-import wslite.json.*
 
-class JsonResponse extends TextResponse {
+class RESTClientException extends HTTPClientException {
 
-    def JSON
-
-    JsonResponse(HTTPResponse response) {
-        super(response)
-        if (!TEXT) {
-            JSON = new JSONObject("{}")
-        }
-        if (TEXT.trim().startsWith("[")) {
-            JSON = new JSONArray(TEXT)
-        } else {
-            JSON = new JSONObject(TEXT)
-        }
+    RESTClientException(String message) {
+        super(message)
     }
 
-    static boolean handles(String contentType) {
-        return contentType in ContentType.JSON.getContentTypeList()
+    RESTClientException(String message, Throwable cause) {
+        super(message, cause)
     }
 
+    RESTClientException(Throwable cause) {
+        super(cause)
+    }
+
+    RESTClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, cause, httpRequest, httpResponse)
+    }
 }

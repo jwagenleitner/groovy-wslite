@@ -91,7 +91,7 @@ class SOAPClient {
         try {
             response = new SOAPResponse(httpRequest:httpRequest,
                                         httpResponse:httpResponse,
-                                        Envelope:parseEnvelope(soapMessageText),
+                                        envelope:parseEnvelope(soapMessageText),
                                         text:soapMessageText)
         } catch (SOAPMessageParseException parseException) {
             parseException.soapMessageText = soapMessageText

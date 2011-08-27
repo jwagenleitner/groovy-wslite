@@ -21,8 +21,8 @@ class RESTClient {
 
     String url
     HTTPClient httpClient
-
-    def responseHandlers = [XmlResponse.class, JsonResponse.class, TextResponse.class]
+    RequestBuilder requestBuilder = new RequestBuilder()
+    ResponseBuilder responseBuilder = new ResponseBuilder()
 
     def defaultAcceptHeader
     def defaultContentTypeHeader
@@ -39,11 +39,6 @@ class RESTClient {
 
     void setAuthorization(HTTPAuthorization authorization) {
         this.httpClient.authorization = authorization
-    }
-
-    void addResponseHandler(Class clazz) {
-        responseHandlers.remove(clazz)
-        responseHandlers = [clazz] + responseHandlers
     }
 
     def get(Map params=[:]) {
@@ -79,9 +74,17 @@ class RESTClient {
             setDefaultContentHeader(contentBuilder, requestParams)
             data = contentBuilder.getData()
         }
-        RequestBuilder builder = new RequestBuilder(method, url, requestParams, data)
-        HTTPResponse response = httpClient.execute(builder.build())
-        return buildResponse(response)
+        HTTPRequest request
+        HTTPResponse response
+        try {
+            request = requestBuilder.build(method, url, requestParams, data)
+            response = httpClient.execute(request)
+            return responseBuilder.build(request, response)
+        } catch (HTTPClientException httpException) {
+            throw new RESTClientException(httpException)
+        } catch (Exception ex) {
+            throw new RESTClientException(ex.message, ex, request, response)
+        }
     }
 
     private void setDefaultAcceptParam(params) {
@@ -95,22 +98,6 @@ class RESTClient {
         if (!params.headers) params.headers = [:]
         if (!params.headers.containsKey("Content-Type")) {
             params.headers."Content-Type" = contentBuilder.getContentTypeHeader()
-        }
-    }
-
-    private def buildResponse(HTTPResponse response) {
-        def handler = getResponseHandler(response.contentType)
-        if (!handler) {
-            return response
-        }
-        return handler.newInstance(response)
-    }
-
-    private Class getResponseHandler(String contentType) {
-        for (handler in responseHandlers) {
-             if (handler.handles(contentType)) {
-                 return handler
-             }
         }
     }
 

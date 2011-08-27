@@ -16,20 +16,23 @@ package wslite.rest
 
 import wslite.http.*
 
-class XmlResponse extends TextResponse {
+class Response {
 
-    def XML
+    HTTPRequest request
+    @Delegate HTTPResponse response
 
-    XmlResponse(HTTPResponse response) {
-        super(response)
-        try {
-            XML = new XmlSlurper().parseText(TEXT)
-        } catch (Exception ex) {
-            throw new RuntimeException("${ex.message}\nResponse:\n${response}\nOriginal Text:\n${TEXT}\n", ex)
-        }
+    private Map parsedResponseContent = [:]
+
+    Response(HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        this.request = httpRequest
+        this.response = httpResponse
     }
 
-    static boolean handles(String contentType) {
-        return contentType in ContentType.XML.getContentTypeList()
+    def propertyMissing(String name) {
+        return parsedResponseContent[name]
+    }
+
+    def propertyMissing(String name, value) {
+        parsedResponseContent[name] = value
     }
 }
