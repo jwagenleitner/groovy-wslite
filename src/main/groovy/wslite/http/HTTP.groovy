@@ -29,7 +29,8 @@ class HTTP {
         String charset = contentType.substring(start)
         int end = charset.indexOf(' ')
         if (end != -1) charset = charset.substring(0, end)
-        return charset.split("=")[1]
+        charset = charset.split("=")[1]
+        return charset?.replaceAll(/[^A-Za-z0-9-.:_]/, "")
     }
 
     static Map urlEncodedStringToMap(String urlencoded) {

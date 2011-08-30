@@ -68,4 +68,17 @@ class HTTPSpec extends Specification {
         [path:"/hr/departments"]            | "path=%2Fhr%2Fdepartments"
         [title:"Homer & Sally"]             | "title=Homer+%26+Sally"
     }
+
+    def "parses charset from content-type header and removes invalid characters"() {
+        expect:
+        charset == HTTP.parseCharsetParamFromContentType(contentType)
+
+        // See http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
+        // for list of valid characters in a Charset name
+        where:
+        contentType                                     | charset
+        'text/xml;charset="utf-8"'                      | "utf-8"
+        "text/xml;charset='UTF-8'"                      | "UTF-8"
+        'text/xml;charset=JIS_X0212-1990'               | "JIS_X0212-1990"
+    }
 }
