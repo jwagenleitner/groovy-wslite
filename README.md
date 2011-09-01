@@ -100,6 +100,21 @@ You can also specify connection settings.
                                <GetFoo>bar</GetFoo>
                            </SOAP:Body>
                        </SOAP:Envelope>""")
+### Authorization
+
+#### Using an SSL Keystore
+
+    import wslite.http.auth.*
+    import wslite.soap.*
+
+    def httpClient = new HTTPClient()
+    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService?WSDL", httpClient)
+    
+    // ...
+
+    // Must supply trustAllSSLCerts:false to use authorization
+    soapClient.send(/* ... */, trustAllSSLCerts:false)
 
 ### Response
 
@@ -201,7 +216,7 @@ When interacting with a service that requires a particular Accept header or when
 
 ### HTTP Authorization
 
-Currently only *Basic Auth* is supported.
+#### Basic Auth
 
     import wslite.http.auth.*
     import wslite.rest.*
@@ -209,6 +224,14 @@ Currently only *Basic Auth* is supported.
     def client = new RESTClient("http://some.service.net")
     client.authorization = new HTTPBasicAuthorization("homer", "simpson")
 
+#### Using an SSL Keystore
+
+    import wslite.http.auth.*
+    import wslite.rest.*
+
+    def client = new RESTClient("http://some.service.net")
+    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
+   
 ### Response
 
 The response has the following properties:
