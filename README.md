@@ -201,13 +201,30 @@ When interacting with a service that requires a particular Accept header or when
 
 ### HTTP Authorization
 
-Currently only *Basic Auth* is supported.
+#### Basic Auth
 
     import wslite.http.auth.*
     import wslite.rest.*
 
     def client = new RESTClient("http://some.service.net")
     client.authorization = new HTTPBasicAuthorization("homer", "simpson")
+
+#### SSL Keystring Support
+
+    # Example using REST:
+    import wslite.http.auth.*
+    import wslite.rest.*
+
+    def client = new RESTClient("http://some.service.net")
+    client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "mypassword")
+   
+    # Example using SOAP:
+    import wslite.http.auth.*
+    import wslite.soap.*
+
+    def httpClient = new HTTPClient()
+    client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "mypassword")
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService?WSDL", httpClient)
 
 ### Response
 
