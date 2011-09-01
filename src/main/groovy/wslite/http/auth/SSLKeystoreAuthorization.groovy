@@ -18,24 +18,24 @@ import javax.net.ssl.*
 import java.security.*
 
 class SSLKeystoreAuthorization implements HTTPAuthorization {
-  String keystoreFilePath
-  String password
+    String keystoreFilePath
+    String password
 
     SSLKeystoreAuthorization() {
-  }
+    }
 
     SSLKeystoreAuthorization(String keystoreFilePath, String password) {
         this.keystoreFilePath = keystoreFilePath
         this.password = password
     }
   
-  void setKeystoreFilePath(String keystoreFilePath) {
-    this.keystoreFilePath = keystoreFilePath
-  }
+    void setKeystoreFilePath(String keystoreFilePath) {
+        this.keystoreFilePath = keystoreFilePath
+    }
   
-  String getKeystoreFilePath() {
-    return keystoreFilePath
-  }
+    String getKeystoreFilePath() {
+        return keystoreFilePath
+    }
   
     void setPassword(String password) {
         this.password = password
@@ -46,23 +46,23 @@ class SSLKeystoreAuthorization implements HTTPAuthorization {
     }
 
     void authorize(conn) {
-    char[] keystorepass = password.getChars()
-    def keystoreFile = new FileInputStream(new File(keystoreFilePath))
-    
-    // create required keystores and their corresponding manager objects
-    def keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+        char[] keystorepass = password.getChars()
+        def keystoreFile = new FileInputStream(new File(keystoreFilePath))
+        
+        // create required keystores and their corresponding manager objects
+        def keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
 
-    keyStore.load(keystoreFile, keystorepass)
+        keyStore.load(keystoreFile, keystorepass)
 
-    def kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-    kmf.init(keyStore, keystorepass)
+        def kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+        kmf.init(keyStore, keystorepass)
 
-    def tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-    tmf.init(keyStore)
-    
-    // congifure a local SSLContext to use created keystores
-    def sc = SSLContext.getInstance("SSL")
-    sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom())
-    conn.setSSLSocketFactory(sc.getSocketFactory())
+        def tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        tmf.init(keyStore)
+        
+        // congifure a local SSLContext to use created keystores
+        def sc = SSLContext.getInstance("SSL")
+        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom())
+        conn.setSSLSocketFactory(sc.getSocketFactory())
     }
 }
