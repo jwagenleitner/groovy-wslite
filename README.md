@@ -209,7 +209,7 @@ When interacting with a service that requires a particular Accept header or when
     def client = new RESTClient("http://some.service.net")
     client.authorization = new HTTPBasicAuthorization("homer", "simpson")
 
-#### SSL Keystring Support
+#### SSL Keystore Support
 
     # Example using REST:
     import wslite.http.auth.*
