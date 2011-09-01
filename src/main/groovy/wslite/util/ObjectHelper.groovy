@@ -21,22 +21,32 @@ class ObjectHelper {
     }
 
     static String dump(Map fieldList, Object delegate) {
+        if (delegate == null) {
+            return "null"
+        }
         def excludedProps = ['metaClass', 'class'] + fieldList.exclude
         def includedProps = fieldList.include
         def sb = new StringBuilder()
         sb.append "<"
         sb.append delegate.getClass().getName()
         sb.append "@"
-        sb.append Integer.toHexString(hashCode())
-        for (prop in delegate.properties) {
-            if (excludedProps.contains(prop.key)) {
+        sb.append Integer.toHexString(delegate.hashCode())
+        def props = delegate.properties
+        for (propName in props.keySet()) {
+            if (excludedProps.contains(propName)) {
                 continue
             }
-            if (includedProps && !includedProps.contains(prop.key)) {
+            if (includedProps && !includedProps.contains(propName)) {
                 continue
             }
             sb.append " "
-            sb.append prop
+            sb.append propName
+            sb.append "="
+            try {
+                sb.append props[propName]
+            } catch (Exception ex) {
+                sb.append ex
+            }
         }
         sb.append ">"
         return sb.toString()
