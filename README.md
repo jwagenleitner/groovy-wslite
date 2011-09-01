@@ -211,14 +211,16 @@ When interacting with a service that requires a particular Accept header or when
 
 #### SSL Keystore Support
 
-    # Example using REST:
+##### Example using REST:
+
     import wslite.http.auth.*
     import wslite.rest.*
 
     def client = new RESTClient("http://some.service.net")
     client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "mypassword")
    
-    # Example using SOAP:
+##### Example using SOAP:
+
     import wslite.http.auth.*
     import wslite.soap.*
 
