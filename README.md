@@ -110,6 +110,11 @@ You can also specify connection settings.
     def httpClient = new HTTPClient()
     client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "myKeystorePassword")
     def soapClient = new SOAPClient("https://www.example.com/ExampleService?WSDL", httpClient)
+    
+    // ...
+
+    // Must supply trustAllSSLCerts:false to use authorization
+    soapClient.send(/* ... */, trustAllSSLCerts:false)
 
 ### Response
 
