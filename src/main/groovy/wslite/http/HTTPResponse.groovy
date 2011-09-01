@@ -14,6 +14,8 @@
  */
 package wslite.http
 
+import wslite.util.ObjectHelper
+
 class HTTPResponse {
 
     URL url
@@ -51,7 +53,8 @@ class HTTPResponse {
 
     @Override
     String toString() {
-        "[url: ${url}, statusCode: ${statusCode}, statusMessage: ${statusMessage}, contentType: ${contentType}, charset: ${charset}, contentLength: ${contentLength}, headers: ${headers}, data: ${data != null}]"
+        def excludes = ['data', 'contentAsString']
+        ObjectHelper.dump(this, exclude:excludes)
     }
 
 }

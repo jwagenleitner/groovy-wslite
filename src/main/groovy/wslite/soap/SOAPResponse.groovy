@@ -17,6 +17,7 @@ package wslite.soap
 import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
 import groovy.util.slurpersupport.GPathResult
+import wslite.util.ObjectHelper
 
 class SOAPResponse {
 
@@ -43,6 +44,12 @@ class SOAPResponse {
 
     def propertyMissing(String name) {
         return getBody()."${name}"
+    }
+
+    @Override
+    String toString() {
+        def includes = ['httpRequest', 'httpResponse']
+        ObjectHelper.dump(this, include:includes)
     }
 
 }

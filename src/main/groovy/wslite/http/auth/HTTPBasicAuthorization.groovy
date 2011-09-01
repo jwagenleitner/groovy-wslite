@@ -14,6 +14,8 @@
  */
 package wslite.http.auth
 
+import wslite.util.ObjectHelper
+
 class HTTPBasicAuthorization implements HTTPAuthorization {
 
     String username
@@ -57,5 +59,10 @@ class HTTPBasicAuthorization implements HTTPAuthorization {
             this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
         }
         return this.authorization
+    }
+
+    @Override
+    String toString() {
+        ObjectHelper.dump(this, include:['username'])
     }
 }

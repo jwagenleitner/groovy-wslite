@@ -15,6 +15,7 @@
 package wslite.rest
 
 import wslite.http.*
+import wslite.util.ObjectHelper
 
 class Response {
 
@@ -34,5 +35,11 @@ class Response {
 
     def propertyMissing(String name, value) {
         parsedResponseContent[name] = value
+    }
+
+    @Override
+    String toString() {
+        def excludes = ['response', 'data', 'contentAsString'] + parsedResponseContent.keySet()
+        ObjectHelper.dump(this, exclude:excludes)
     }
 }

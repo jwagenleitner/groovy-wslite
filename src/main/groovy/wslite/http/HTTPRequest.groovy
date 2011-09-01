@@ -14,6 +14,8 @@
  */
 package wslite.http
 
+import wslite.util.ObjectHelper
+
 class HTTPRequest {
     URL url
     HTTPMethod method
@@ -63,6 +65,8 @@ class HTTPRequest {
 
     @Override
     String toString() {
-         "[url: ${url}, method: ${method}, connectTimeout: ${connectTimeout}, readTimeout: ${readTimeout}, useCaches: ${useCaches}, followRedirects: ${followRedirects}, trustAllSSLCerts: ${trustAllSSLCerts}, headers: ${headers}, data: ${data != null}]"
+        def excludes = ['isConnectTimeoutSet', 'isReadTimeoutSet', 'isUseCachesSet',
+                        'isFollowRedirectsSet', 'isTrustAllSSLCertsSet', 'data', 'contentAsString']
+        ObjectHelper.dump(this, exclude:excludes)
     }
 }
