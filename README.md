@@ -108,7 +108,7 @@ You can also specify connection settings.
     import wslite.soap.*
 
     def httpClient = new HTTPClient()
-    client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "myKeystorePassword")
+    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
     def soapClient = new SOAPClient("https://www.example.com/ExampleService?WSDL", httpClient)
     
     // ...
@@ -230,7 +230,7 @@ When interacting with a service that requires a particular Accept header or when
     import wslite.rest.*
 
     def client = new RESTClient("http://some.service.net")
-    client.authorization = new SSLKeystoreAuthentication("mykeystore.jks", "myKeystorePassword")
+    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
    
 ### Response
 
