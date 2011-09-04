@@ -17,22 +17,18 @@ package wslite.soap
 import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
 
-class SOAPMessageParseException extends Exception {
+class SOAPMessageParseException extends SOAPClientException {
 
-    String soapMessageText
-    HTTPRequest httpRequest
-    HTTPResponse httpResponse
-
-    SOAPMessageParseException(String message) {
-        super(message)
+    SOAPMessageParseException(String message, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, httpRequest, httpResponse)
     }
 
-    SOAPMessageParseException(String message, Throwable cause) {
-        super(message, cause)
+    SOAPMessageParseException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, cause, httpRequest, httpResponse)
     }
 
-    SOAPMessageParseException(Throwable cause) {
-        super(cause)
+    String getSoapMessageText() {
+        return response?.contentAsString
     }
 
 }

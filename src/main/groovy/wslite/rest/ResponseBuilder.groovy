@@ -27,19 +27,15 @@ class ResponseBuilder {
 
     Response build(HTTPRequest httpRequest, HTTPResponse httpResponse) {
         Response response = new Response(httpRequest, httpResponse)
-        try {
-            if (isTextResponse(httpResponse)) {
-                String responseText = httpResponse.getContentAsString()
-                response.text = responseText
-                if (isXmlResponse(httpResponse)) {
-                    response.xml = parseXmlContent(responseText)
-                }
-                if (isJsonResponse(httpResponse)) {
-                    response.json = parseJsonContent(responseText)
-                }
+        if (isTextResponse(httpResponse)) {
+            String responseText = httpResponse.getContentAsString()
+            response.text = responseText
+            if (isXmlResponse(httpResponse)) {
+                response.xml = parseXmlContent(responseText)
             }
-        } catch (Exception ex) {
-            throw new RESTClientException(ex.message, ex, httpRequest, httpResponse)
+            if (isJsonResponse(httpResponse)) {
+                response.json = parseJsonContent(responseText)
+            }
         }
         return response
     }

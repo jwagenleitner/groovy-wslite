@@ -278,6 +278,52 @@ class RESTClientSpec extends Specification {
         null == ex.response
     }
 
+    def "throws exception if fails to build a request and request and response are null on exception"() {
+        given:
+        def restClient = new RESTClient()
+
+        when:
+        restClient.get()
+
+        then:
+        def ex = thrown(RESTClientException)
+        ex.request == null
+        ex.response == null
+    }
+
+    def "throws exception if HTTP exception is thrown and request and response are not null on exception"() {
+        given:
+        def restClient = new RESTClient("http://foo.org")
+        restClient.httpClient = [execute:{ request ->
+            throw new HTTPClientException("fail", null, request, null)
+        }] as HTTPClient
+
+        when:
+        restClient.get()
+
+        then:
+        def ex = thrown(RESTClientException)
+        ex.request != null
+        ex.response == null
+        ex.request.url.toString() == "http://foo.org"
+    }
+
+    def "throws exception if fails to handle response content and request and response are not null on exception"() {
+        given:
+        client.httpClient.response.contentType = "text/xml"
+        client.httpClient.response.data = "<foo><name></foo>".bytes
+
+        when:
+        client.get()
+
+        then:
+        def ex = thrown(RESTContentParseException)
+        ex.request != null
+        ex.response != null
+        ex.response.contentType == "text/xml"
+        ex.response.contentAsString == "<foo><name></foo>"
+    }
+
     def setup() {
         def httpClient = new MockHTTPClient()
         httpClient.response = getMockResponse()

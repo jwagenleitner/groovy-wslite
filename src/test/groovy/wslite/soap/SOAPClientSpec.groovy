@@ -83,7 +83,9 @@ class SOAPClientSpec extends Specification {
         when: "a message is sent"
         def response = soapClient.send(testSoapMessage)
 
-        then: thrown(SOAPMessageParseException)
+        then:
+        def ex = thrown(SOAPMessageParseException)
+        "foo" == ex.response.contentAsString
     }
 
     def "throws exception if SOAP response message has invalid root element"() {
@@ -362,6 +364,21 @@ class SOAPClientSpec extends Specification {
         then:
         notThrown(ConditionNotSatisfiedError)
         "bar" == response.envelope.Body.GetFoo.text()
+    }
+
+    def "throws exception if an HTTP exception is thrown"() {
+        given:
+        def httpc = [execute:{req ->
+                throw new HTTPClientException("fail", null, req, new HTTPResponse(statusCode: 404))
+        }] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when:
+        def response = soapClient.send("")
+
+        then:
+        def ex = thrown(SOAPClientException)
+        ex.response.statusCode == 404
     }
 
 }

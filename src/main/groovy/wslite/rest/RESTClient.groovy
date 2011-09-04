@@ -74,17 +74,27 @@ class RESTClient {
             setDefaultContentHeader(contentBuilder, requestParams)
             data = contentBuilder.getData()
         }
-        HTTPRequest request
-        HTTPResponse response
+        HTTPRequest httpRequest
+        HTTPResponse httpResponse
         try {
-            request = requestBuilder.build(method, url, requestParams, data)
-            response = httpClient.execute(request)
-            return responseBuilder.build(request, response)
-        } catch (HTTPClientException httpException) {
-            throw new RESTClientException(httpException)
+            httpRequest = requestBuilder.build(method, url, requestParams, data)
+            httpResponse = httpClient.execute(httpRequest)
+        } catch (HTTPClientException httpEx) {
+            throw new RESTClientException(httpEx.message, httpEx, httpEx.request, httpEx.response)
         } catch (Exception ex) {
-            throw new RESTClientException(ex.message, ex, request, response)
+            throw new RESTClientException(ex.message, ex, httpRequest, httpResponse)
         }
+        return buildResponse(httpRequest, httpResponse)
+    }
+
+    private Response buildResponse(httpRequest, httpResponse) {
+        Response response
+        try {
+            response = responseBuilder.build(httpRequest, httpResponse)
+        } catch (Exception ex) {
+            throw new RESTContentParseException(ex.message, ex, httpRequest, httpResponse)
+        }
+        return response
     }
 
     private void setDefaultAcceptParam(params) {

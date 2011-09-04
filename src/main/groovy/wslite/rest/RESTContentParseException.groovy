@@ -12,21 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wslite.http
+package wslite.rest
 
-class HTTPClientException extends Exception {
+import wslite.http.HTTPRequest
+import wslite.http.HTTPResponse
 
-    HTTPRequest request
-    HTTPResponse response
+class RESTContentParseException extends RESTClientException {
 
-    HTTPClientException(String message, HTTPRequest request, HTTPResponse response) {
-        super(message)
+    RESTContentParseException(String message, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, httpRequest, httpResponse)
     }
 
-    HTTPClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
-        super(message, cause)
-        this.request = httpRequest
-        this.response = httpResponse
+    RESTContentParseException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, cause, httpRequest, httpResponse)
     }
-
 }

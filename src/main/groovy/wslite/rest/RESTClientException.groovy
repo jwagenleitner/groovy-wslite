@@ -18,16 +18,8 @@ import wslite.http.*
 
 class RESTClientException extends HTTPClientException {
 
-    RESTClientException(String message) {
-        super(message)
-    }
-
-    RESTClientException(String message, Throwable cause) {
-        super(message, cause)
-    }
-
-    RESTClientException(Throwable cause) {
-        super(cause)
+    RESTClientException(String message, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, httpRequest, httpResponse)
     }
 
     RESTClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {

@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wslite.http
+package wslite.soap
 
-class HTTPClientException extends Exception {
+import wslite.http.HTTPClientException
+import wslite.http.HTTPRequest
+import wslite.http.HTTPResponse
 
-    HTTPRequest request
-    HTTPResponse response
+class SOAPClientException extends HTTPClientException {
 
-    HTTPClientException(String message, HTTPRequest request, HTTPResponse response) {
-        super(message)
+    SOAPClientException(String message, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, httpRequest, httpResponse)
     }
 
-    HTTPClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
-        super(message, cause)
-        this.request = httpRequest
-        this.response = httpResponse
+    SOAPClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
+        super(message, cause, httpRequest, httpResponse)
     }
 
 }

@@ -77,8 +77,7 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        def ex = thrown(RESTClientException)
-        null ==  ex.response.data
+        thrown(Exception)
     }
 
     def "throws exception when content-type is json and there is no content"() {
@@ -89,8 +88,7 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        def ex = thrown(RESTClientException)
-        null ==  ex.response.data
+        def ex = thrown(Exception)
     }
 
     def "throws exception when content-type is xml and content contains invalid markup"() {
@@ -101,7 +99,7 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        thrown(RESTClientException)
+        thrown(Exception)
     }
 
     def "throws exception when content-type is json and content contains invalid json"() {
@@ -112,6 +110,6 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        thrown(RESTClientException)
+        thrown(Exception)
     }
 }

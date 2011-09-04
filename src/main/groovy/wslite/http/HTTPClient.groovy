@@ -70,7 +70,7 @@ class HTTPClient {
     }
 
     private boolean isSecureConnection(conn) {
-        return (conn.getURL().getProtocol().toLowerCase() == "https") ? true : false
+        return (conn.getURL().getProtocol().toLowerCase() == "https")
     }
 
     private boolean shouldTrustAllSSLCerts(request) {

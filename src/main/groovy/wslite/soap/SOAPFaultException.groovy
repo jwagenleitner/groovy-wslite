@@ -29,14 +29,6 @@ class SOAPFaultException extends Exception {
         super(message)
     }
 
-    SOAPFaultException(String message, Throwable cause) {
-        super(message, cause)
-    }
-
-    SOAPFaultException(Throwable cause) {
-        super(cause)
-    }
-
     HTTPRequest getHttpRequest() {
         return response.httpRequest
     }
