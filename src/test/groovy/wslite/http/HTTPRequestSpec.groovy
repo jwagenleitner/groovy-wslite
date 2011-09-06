@@ -52,10 +52,10 @@ class HTTPRequestSpec extends Specification {
 
     def "track when trust all SSL certs is set"() {
         when:
-        def req = new HTTPRequest(trustAllSSLCerts:false)
+        def req = new HTTPRequest(sslTrustAllCerts:false)
 
         then:
-        req.isTrustAllSSLCertsSet
+        req.isSSLTrustAllCertsSet
     }
 
     def "is set flags should all be false for a new request"() {
@@ -67,7 +67,7 @@ class HTTPRequestSpec extends Specification {
         !req.isReadTimeoutSet
         !req.isUseCachesSet
         !req.isFollowRedirectsSet
-        !req.isTrustAllSSLCertsSet
+        !req.isSSLTrustAllCertsSet
     }
 
     def "headers retrieved case insensitively"() {

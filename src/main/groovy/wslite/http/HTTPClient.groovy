@@ -14,8 +14,7 @@
  */
 package wslite.http
 
-import javax.net.ssl.*
-import wslite.http.auth.*;
+import wslite.http.auth.*
 
 class HTTPClient {
 
@@ -24,7 +23,9 @@ class HTTPClient {
 
     boolean useCaches = false
     boolean followRedirects = true
-    boolean trustAllSSLCerts = true
+    boolean sslTrustAllCerts
+    String sslTrustStoreFile
+    String sslTrustStorePassword
 
     def defaultHeaders = [Connection:"Close"]
 
@@ -32,7 +33,7 @@ class HTTPClient {
     HTTPAuthorization authorization
 
     HTTPClient() {
-        this.httpConnectionFactory = new HTTPConnectionFactory()
+        httpConnectionFactory = new HTTPConnectionFactory()
     }
 
     HTTPClient(HTTPConnectionFactory httpConnectionFactory) {
@@ -40,7 +41,8 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
-        def conn = setupConnection(request)
+        def conn = createConnection(request)
+        setupConnection(conn, request)
         HTTPResponse response
         try {
             doOutput(conn, request.data)
@@ -54,11 +56,40 @@ class HTTPClient {
         return response
     }
 
-    private def setupConnection(HTTPRequest request) {
-        def conn = httpConnectionFactory.getConnection(request.url)
-        if (isSecureConnection(conn) && shouldTrustAllSSLCerts(request)) {
-            setupSSLTrustManager(conn)
+    private def createConnection(HTTPRequest request) {
+        if (isSecureConnectionRequest(request)) {
+            if (shouldTrustAllSSLCerts(request)) {
+                return httpConnectionFactory.getConnectionTrustAllSSLCerts(request.url)
+            }
+            if (shouldTrustSSLCertsUsingTrustStore(request)) {
+                String trustStoreFile
+                String trustStorePassword
+                if (request.sslTrustStoreFile) {
+                    trustStoreFile = request.sslTrustStoreFile
+                    trustStorePassword = request.sslTrustStorePassword
+                } else {
+                    trustStoreFile = sslTrustStoreFile
+                    trustStorePassword = sslTrustStorePassword
+                }
+                return httpConnectionFactory.getConnectionUsingTrustStore(request.url, trustStoreFile, trustStorePassword)
+            }
         }
+        return httpConnectionFactory.getConnection(request.url)
+    }
+
+    private boolean isSecureConnectionRequest(HTTPRequest request) {
+        return request.url.getProtocol().toLowerCase() == "https"
+    }
+
+    private boolean shouldTrustAllSSLCerts(HTTPRequest request) {
+        return request.isSSLTrustAllCertsSet ? request.sslTrustAllCerts : sslTrustAllCerts
+    }
+
+    private boolean shouldTrustSSLCertsUsingTrustStore(HTTPRequest request) {
+        return request.sslTrustStoreFile !=null || sslTrustStoreFile !=null
+    }
+
+    private void setupConnection(conn, HTTPRequest request) {
         conn.setRequestMethod(request.method.toString())
         conn.setConnectTimeout(request.isConnectTimeoutSet ? request.connectTimeout : connectTimeout)
         conn.setReadTimeout(request.isReadTimeoutSet ? request.readTimeout : readTimeout)
@@ -66,37 +97,6 @@ class HTTPClient {
         conn.setInstanceFollowRedirects(request.isFollowRedirectsSet ? request.followRedirects : followRedirects)
         setRequestHeaders(conn, request)
         setAuthorizationHeader(conn)
-        return conn
-    }
-
-    private boolean isSecureConnection(conn) {
-        return (conn.getURL().getProtocol().toLowerCase() == "https")
-    }
-
-    private boolean shouldTrustAllSSLCerts(request) {
-        if (request.isTrustAllSSLCertsSet) {
-            if (request.trustAllSSLCerts) {
-                return true
-            }
-        } else {
-            if (trustAllSSLCerts) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private void setupSSLTrustManager(conn) {
-        if (!trustAllSSLCerts) return
-        def trustingTrustManager = [
-                getAcceptedIssuers: {},
-                checkClientTrusted: { arg0, arg1 -> },
-                checkServerTrusted: {arg0, arg1 -> }
-        ] as X509TrustManager
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, [trustingTrustManager] as TrustManager[], null)
-        conn.setSSLSocketFactory(sc.getSocketFactory())
-        conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
     }
 
     private void setRequestHeaders(conn, request) {

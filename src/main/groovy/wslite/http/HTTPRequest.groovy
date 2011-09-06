@@ -25,13 +25,15 @@ class HTTPRequest {
 
     boolean useCaches = false
     boolean followRedirects = true
-    boolean trustAllSSLCerts = true
+    boolean sslTrustAllCerts
+    String sslTrustStoreFile
+    String sslTrustStorePassword
 
     HTTPHeaderMap headers = [:] as HTTPHeaderMap
 
     byte[] data = null
 
-    boolean isConnectTimeoutSet, isReadTimeoutSet, isUseCachesSet, isFollowRedirectsSet, isTrustAllSSLCertsSet
+    boolean isConnectTimeoutSet, isReadTimeoutSet, isUseCachesSet, isFollowRedirectsSet, isSSLTrustAllCertsSet
 
     void setConnectTimeout(int timeout) {
         this.connectTimeout = timeout
@@ -53,9 +55,9 @@ class HTTPRequest {
         this.isFollowRedirectsSet = true
     }
 
-    void setTrustAllSSLCerts(boolean trustAllSSLCerts) {
-        this.trustAllSSLCerts = trustAllSSLCerts
-        this.isTrustAllSSLCertsSet = true
+    void setSslTrustAllCerts(boolean sslTrustAllCerts) {
+        this.sslTrustAllCerts = sslTrustAllCerts
+        this.isSSLTrustAllCertsSet = true
     }
 
     String getContentAsString() {
@@ -65,8 +67,8 @@ class HTTPRequest {
 
     @Override
     String toString() {
-        def excludes = ['isConnectTimeoutSet', 'isReadTimeoutSet', 'isUseCachesSet',
-                        'isFollowRedirectsSet', 'isTrustAllSSLCertsSet', 'data', 'contentAsString']
+        def excludes = ['isConnectTimeoutSet', 'isReadTimeoutSet', 'isUseCachesSet', 'isFollowRedirectsSet',
+                        'isSSLTrustAllCertsSet', 'sslTrustStorePassword', 'data', 'contentAsString']
         ObjectHelper.dump(this, exclude:excludes)
     }
 }

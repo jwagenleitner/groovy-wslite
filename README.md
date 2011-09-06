@@ -39,7 +39,7 @@ Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/b
                                    readTimeout:10000,
                                    useCaches:false,
                                    followRedirects:false,
-                                   trustAllSSLCerts:true) {
+                                   sslTrustAllCerts:true) {
         version SOAPVersion.V1_2        // SOAPVersion.V1_1 is default
         soapNamespacePrefix "soap-env"  // "SOAP" is default
         encoding "ISO-8859-1"           // "UTF-8" is default encoding for xml
@@ -100,21 +100,56 @@ You can also specify connection settings.
                                <GetFoo>bar</GetFoo>
                            </SOAP:Body>
                        </SOAP:Envelope>""")
-### Authorization
+### SSL
 
-#### Using an SSL Keystore
+#### Using a custom SSL trust store
 
-    import wslite.http.auth.*
+In addition to setting a global trust store and trust store password using the `javax.net.ssl.trustStore` and
+`javax.net.ssl.trustStorePassword` System properties, you can set a custom trust store on a client.
+
     import wslite.soap.*
 
-    def httpClient = new HTTPClient()
-    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
-    def soapClient = new SOAPClient("https://www.example.com/ExampleService?WSDL", httpClient)
-    
-    // ...
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService")
+    soapClient.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
+    soapClient.httpClient.sslTrustStorePassword = "secret"
 
-    // Must supply trustAllSSLCerts:false to use authorization
-    soapClient.send(/* ... */, trustAllSSLCerts:false)
+    def response = soapClient.send() {
+        ....
+    }
+
+You can also specify a custom trust store on a per request basis, this will override any custom trust store that may be
+set on the client.
+
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService")
+    def response = soapClient.send(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret") {
+        ....
+    }
+
+Note: sslTrustStorePassword is optional.
+
+#### Trusting all SSL certs
+
+When in development mode and dealing with lots of servers with self-signed certs it can be helpful to bypass a custom
+trust store and trust all certs automatically.
+
+    import wslite.soap.*
+
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+    soapClient.httpClient.sslTrustAllCerts = true
+
+    def response = soapClient.send() {
+        ....
+    }
+
+You can also specify a the same parameter on a per request basis.
+
+    def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+    def response = soapClient.send(sslTrustAllCerts:true) {
+        ....
+    }
+
+Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set on the client or
+the request.
 
 ### Response
 
@@ -176,7 +211,7 @@ The methods can all take a map as a parameter (though not required) that give yo
                                readTimeout: 10000,
                                followRedirects: false,
                                useCaches: false,
-                               trustAllSSLCerts: false )
+                               sslTrustAllCerts: true )
 
 ### Sending Content
 
@@ -216,6 +251,8 @@ When interacting with a service that requires a particular Accept header or when
 
 ### HTTP Authorization
 
+Currently only *Basic Auth* is supported.
+
 #### Basic Auth
 
     import wslite.http.auth.*
@@ -224,14 +261,49 @@ When interacting with a service that requires a particular Accept header or when
     def client = new RESTClient("http://some.service.net")
     client.authorization = new HTTPBasicAuthorization("homer", "simpson")
 
-#### Using an SSL Keystore
+### SSL
 
-    import wslite.http.auth.*
+#### Using a custom SSL trust store
+
+In addition to setting a global trust store and trust store password using the `javax.net.ssl.trustStore` and
+`javax.net.ssl.trustStorePassword` System properties, you can set a custom trust store on a client.
+
     import wslite.rest.*
 
     def client = new RESTClient("http://some.service.net")
-    client.authorization = new SSLKeystoreAuthorization("mykeystore.jks", "myKeystorePassword")
-   
+    client.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
+    client.httpClient.sslTrustStorePassword = "myKeystorePassword"
+
+    def response = client.get()
+
+You can also specify a custom trust store on a per request basis, this will override any custom trust store that may be
+set on the client.
+
+    def client = new RESTClient("http://some.service.net")
+    client.get(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret")
+
+Note: sslTrustStorePassword is optional.
+
+#### Trusting all SSL certs
+
+When in development mode and dealing with lots of servers with self-signed certs it can be helpful to bypass a custom
+trust store and trust all certs automatically.
+
+    import wslite.rest.*
+
+    def client = new RESTClient("http://some.service.net")
+    client.httpClient.sslTrustAllCerts = true
+
+    def response = client.get()
+
+You can also specify a the same parameter on a per request basis.
+
+    def client = new RESTClient("http://some.service.net")
+    def response = client.get(sslTrustAllCerts:true)
+
+Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set on the client or
+the request.
+
 ### Response
 
 The response has the following properties:
@@ -340,7 +412,7 @@ For example:
         readTimeout = 10000
         useCaches = false
         followRedirects = false
-        trustAllSSLCerts = false
+        sslTrustAllCerts = true
         // authorization = ref('clientBasicAuth')
     }
 

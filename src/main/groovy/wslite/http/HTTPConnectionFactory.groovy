@@ -14,9 +14,50 @@
  */
 package wslite.http
 
+import javax.net.ssl.*
+import java.security.KeyStore
+import java.security.SecureRandom
+
 class HTTPConnectionFactory {
 
     def getConnection(URL url, Proxy proxy=Proxy.NO_PROXY) {
         return url.openConnection(proxy)
     }
+
+    def getConnectionTrustAllSSLCerts(URL url, Proxy proxy=Proxy.NO_PROXY) {
+        def trustingTrustManager = [
+                getAcceptedIssuers: {},
+                checkClientTrusted: { arg0, arg1 -> },
+                checkServerTrusted: {arg0, arg1 -> }
+        ] as X509TrustManager
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, [trustingTrustManager] as TrustManager[], null)
+        def conn = getConnection(url)
+        conn.setSSLSocketFactory(sc.getSocketFactory())
+        conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
+        return conn
+    }
+
+    def getConnectionUsingTrustStore(URL url, String trustStoreFile, String trustStorePassword, Proxy proxy=Proxy.NO_PROXY) {
+        InputStream tsFile = new FileInputStream(new File(trustStoreFile))
+        char[] tsPassword = trustStorePassword?.getChars()
+
+        def keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+        keyStore.load(tsFile, tsPassword)
+
+        def kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+        kmf.init(keyStore, tsPassword)
+
+        def tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        tmf.init(keyStore)
+
+        def sc = SSLContext.getInstance("SSL")
+        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom())
+
+        def conn = getConnection(url)
+        conn.setSSLSocketFactory(sc.getSocketFactory())
+
+        return conn
+    }
+
 }
