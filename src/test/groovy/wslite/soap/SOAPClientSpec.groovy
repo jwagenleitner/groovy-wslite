@@ -381,4 +381,20 @@ class SOAPClientSpec extends Specification {
         ex.response.statusCode == 404
     }
 
+    def "original parameters are not modified"() {
+        given:
+        def httpc = [execute:{req -> return new HTTPResponse(headers:req.headers, data:simpleSoap11Response.bytes)}] as HTTPClient
+        soapClient.httpClient = httpc
+        def origParams = [SOAPAction:'urn:foo', connectTimeout:5000, readTimeout:10000]
+
+        when: "a message is sent that includes a SOAPAction"
+        def response = soapClient.send(origParams, testSoapMessage)
+
+        then:
+        3 == origParams.size()
+        'urn:foo' == origParams.SOAPAction
+        5000 == origParams.connectTimeout
+        10000 == origParams.readTimeout
+    }
+
 }

@@ -54,8 +54,9 @@ class SOAPClient {
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
         HTTPRequest httpRequest
         HTTPResponse httpResponse
+        def httpRequestParams = new LinkedHashMap(requestParams ?: [:])
         try {
-            httpRequest = buildHTTPRequest(requestParams, soapVersion, content)
+            httpRequest = buildHTTPRequest(httpRequestParams, soapVersion, content)
             httpResponse = httpClient.execute(httpRequest)
         } catch (HTTPClientException httpEx) {
             throw new SOAPClientException(httpEx.message, httpEx, httpEx.request, httpEx.response)
