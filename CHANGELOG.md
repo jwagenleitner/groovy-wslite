@@ -6,7 +6,7 @@
 
 * SOAPClient
  * responses now include both the HTTPRequest `response.httpRequest` and HTTPResponse `response.httpResponse`
- * `response.http` was changed to `response.httpRequest`
+ * `response.http` was changed to `response.httpResponse`
  * `response.Envelope` was changed to `response.envelope`
  * exceptions now include `httpRequest` and `httpResponse` objects.
  * a `SOAPFaultException` is now being thrown anytime there is a Envelope/Body/Fault element in the response.  The
