@@ -14,27 +14,40 @@
  */
 package wslite.soap
 
-import wslite.http.HTTPRequest
-import wslite.http.HTTPResponse
-
 class SOAPFaultException extends Exception {
 
-    String faultcode
-    String faultstring
-    String faultactor
-    String detail
+    @Delegate
     SOAPResponse response
 
-    SOAPFaultException(String message) {
-        super(message)
+    SOAPFaultException(SOAPResponse response) {
+        super(parseFaultCode(response) + " - " + parseFaultReason(response))
+        this.response = response
     }
 
-    HTTPRequest getHttpRequest() {
-        return response.httpRequest
+    private static String parseFaultCode(SOAPResponse faultResponse) {
+        String faultCode
+        switch (faultResponse.soapVersion) {
+            case SOAPVersion.V1_1:
+                faultCode = faultResponse.fault.':faultcode'.text()
+                break
+            case SOAPVersion.V1_2:
+                faultCode = faultResponse.fault.'soap-env:Code'.'soap-env:Value'.text()
+                break
+        }
+        return faultCode
     }
 
-    HTTPResponse getHttpResponse() {
-        return response.httpResponse
+    private static String parseFaultReason(SOAPResponse faultResponse) {
+        String faultReason
+        switch (faultResponse.soapVersion) {
+            case SOAPVersion.V1_1:
+                faultReason = faultResponse.fault.':faultstring'.text()
+                break
+            case SOAPVersion.V1_2:
+                faultReason = faultResponse.fault.'soap-env:Reason'.'soap-env:Text'.text()
+                break
+        }
+        return faultReason
     }
 
 }

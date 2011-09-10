@@ -2,11 +2,13 @@
 
 Library for Groovy that provides no-frills SOAP and REST webservice clients.
 
-This library assumes you know exactly what messages you want to send to your services and want full control over the request.  No streams are used and all request/responses are buffered in memory for convenience.
+This library assumes you know exactly what messages you want to send to your services and want full control over the
+request.  No streams are used and all request/responses are buffered in memory for convenience.
 
 **Note**
 
-Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/blob/master/CHANGELOG.md) for any breaking changes.
+Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/blob/master/CHANGELOG.md) for any
+breaking changes.
 
 ## SOAP
 
@@ -153,7 +155,8 @@ the request.
 
 ### Response
 
-The response is automatically parsed by XmlSlurper and provides several convenient methods for accessing the SOAP response.
+The response is automatically parsed by XmlSlurper and provides several convenient properties for accessing the SOAP
+message.
 
 `response.envelope`
 
@@ -163,15 +166,30 @@ To get straight to the Header or Body element...
 
 You can access the first child element of the Body by name `response.GetWeatherByZipCodeResponse`
 
-For a response with a SOAP Fault `response.hasFault()` and `response.fault`.
-
 If you just want the text of the response use `response.text`.
 
 You can also access the underlying HTTPRequest `response.httpRequest` and HTTPResponse `response.httpResponse` objects.
 
 ### SOAP Faults
 
-If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` provides access to the `faultcode/faultstring/faultactor/details` properties and also includes the parsed SOAPResponse via a `response` property.  You can also access the underlying HTTPRequest `response.httpRequest` and HTTPResponse `response.httpResponse` objects.
+If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` wraps a
+`SOAPResponse` that contains the Fault.
+
+    import wslite.soap.*
+
+    def client = new SOAPClient("("http://www.webservicex.net/WeatherForecast2.asmx")
+    try {
+        def response = client.send {
+            ....
+        }
+    } catch (SOAPFaultException sfe) {
+        println sfe.message // faultcode/faultstring for 1.1 or Code/Reason for 1.2
+        println sfe.text    // prints SOAP Envelope
+        println sfe.httpResponse.statusCode
+        println sfe.fault.detail.text() // sfe.fault is a GPathResult of Envelope/Body/Fault
+    } catch (SOAPClientException sce) {
+        // This indicates an error with underlying HTTP Client (i.e., 404 Not Found)
+    }
 
 ## REST
 

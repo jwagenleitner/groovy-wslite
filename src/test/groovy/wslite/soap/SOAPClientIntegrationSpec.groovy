@@ -36,7 +36,23 @@ class SOAPClientIntegrationSpec extends Specification {
         200 == resp.httpResponse.statusCode
         "OK" == resp.httpResponse.statusMessage
         "ASP.NET" == resp.httpResponse.headers['X-Powered-By']
+    }
 
+    def "accessing a public SOAP 1.1 service that throws a fault"() {
+        given:
+        def soapClient = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
+
+        when:
+        def resp = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
+            body {
+                GetHomerSimposonDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
+                    year(2011)
+                }
+            }
+        }
+
+        then:
+        thrown(SOAPFaultException)
     }
 
     def "accessing a public SOAP 1.2 service"() {
@@ -55,6 +71,24 @@ class SOAPClientIntegrationSpec extends Specification {
 
         then:
         "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
+    }
+
+    def "accessing a public SOAP 1.2 service that throws a fault"() {
+        given:
+        def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+
+        when:
+        def response = soapClient.send {
+            version SOAPVersion.V1_2
+            body {
+                GetWeatherByReadingMyMind(xmlns:"http://www.webservicex.net") {
+                    ZipCode("93657")
+                }
+            }
+        }
+
+        then:
+        thrown(SOAPFaultException)
     }
 
 }

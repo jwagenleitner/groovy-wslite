@@ -16,8 +16,8 @@ package wslite.soap
 
 class SOAPMessageBuilder {
 
-    Map xmlnsSoap = [(SOAPVersion.V1_1):'http://schemas.xmlsoap.org/soap/envelope/',
-                     (SOAPVersion.V1_2):'http://www.w3.org/2003/05/soap-envelope']
+    Map xmlnsSoap = [(SOAPVersion.V1_1):SOAP.SOAP11_NS,
+                     (SOAPVersion.V1_2):SOAP.SOAP12_NS]
 
     String soapNamespacePrefix = 'SOAP'
     SOAPVersion version = SOAPVersion.V1_1

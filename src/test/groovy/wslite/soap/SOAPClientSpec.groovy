@@ -165,37 +165,6 @@ class SOAPClientSpec extends Specification {
         smpe.soapMessageText.contains("<result>bar</result>")
     }
 
-    def "throws exception if SOAP Fault response is returned from server"() {
-        given: "a SOAP Fault response"
-        def soapResponse = """
-             <?xml version='1.0' encoding='UTF-8'?>
-             <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
-               <SOAP:Header />
-               <SOAP:Body>
-                 <SOAP:Fault>
-                   <faultcode>742</faultcode>
-                   <faultstring>client error</faultstring>
-                   <details>
-                         <error>over quantity limit</error>
-                         <error>out of stock</error>
-                   </details>
-                 </SOAP:Fault>
-               </SOAP:Body>
-             </SOAP:Envelope>""".trim()
-
-        and: "a soap client configured to receive this response"
-        def httpc = [execute:{req -> [data:soapResponse.bytes]}] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when: "a message is sent"
-        def response = soapClient.send(testSoapMessage)
-
-        then:
-        def sfe = thrown(SOAPFaultException)
-        "742" == sfe.faultcode
-        "742" == sfe.response.envelope.Body.Fault.faultcode.text()
-    }
-
     def "should add SOAPAction to request headers"() {
         setup:
         def httpc = [execute:{req -> return new HTTPResponse(headers:req.headers, data:simpleSoap11Response.bytes)}] as HTTPClient

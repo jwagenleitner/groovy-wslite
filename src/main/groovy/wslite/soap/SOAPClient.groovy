@@ -59,11 +59,15 @@ class SOAPClient {
             httpRequest = buildHTTPRequest(httpRequestParams, soapVersion, content)
             httpResponse = httpClient.execute(httpRequest)
         } catch (HTTPClientException httpEx) {
-            throw new SOAPClientException(httpEx.message, httpEx, httpEx.request, httpEx.response)
+            generateSOAPFaultException(httpEx)
         } catch (Exception ex) {
             throw new SOAPClientException(ex.message, ex, httpRequest, httpResponse)
         }
-        return buildSOAPResponse(httpRequest, httpResponse)
+        SOAPResponse soapResponse = buildSOAPResponse(httpRequest, httpResponse)
+        if (soapResponse.hasFault()) {
+            throw new SOAPFaultException(soapResponse)
+        }
+        return soapResponse
     }
 
     private SOAPMessageBuilder buildSOAPMessage(content) {
@@ -102,15 +106,11 @@ class SOAPClient {
         } catch (Exception ex) {
             throw new SOAPMessageParseException(ex.message, ex, httpRequest, httpResponse)
         }
-        if (response.hasFault()) {
-            throw buildSOAPFaultException(response)
-        }
         return response
     }
 
     private def parseEnvelope(String soapMessageText) {
-        def envelopeNode
-        envelopeNode = new XmlSlurper().parseText(soapMessageText)
+        def envelopeNode = new XmlSlurper().parseText(soapMessageText)
         if (envelopeNode.name() != "Envelope") {
             throw new IllegalStateException("Root element is " + envelopeNode.name() + ", expected 'Envelope'")
         }
@@ -120,13 +120,18 @@ class SOAPClient {
         return envelopeNode
     }
 
-    private SOAPFaultException buildSOAPFaultException(soapResponse) {
-        SOAPFaultException sfe = new SOAPFaultException("${soapResponse.fault.faultstring.text()} [$soapResponse.fault.faultcode.text()]".toString())
-        sfe.response = soapResponse
-        sfe.faultcode = soapResponse.fault.faultcode.text()
-        sfe.faultstring = soapResponse.fault.faultstring.text()
-        sfe.faultactor = soapResponse.fault.faultactor.text()
-        sfe.detail = soapResponse.fault.detail.text()
-        return sfe
+    private void generateSOAPFaultException(HTTPClientException httpEx) {
+        SOAPFaultException soapFaultException
+        try {
+            SOAPResponse soapResponse = buildSOAPResponse(httpEx.request, httpEx.response)
+            if (!soapResponse.hasFault()) {
+                throw httpEx
+            }
+            soapFaultException = new SOAPFaultException(soapResponse)
+        } catch (Exception) {
+            throw new SOAPClientException(httpEx.message, httpEx, httpEx.request, httpEx.response)
+        }
+        throw soapFaultException
     }
+
 }
