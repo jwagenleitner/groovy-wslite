@@ -13,7 +13,7 @@ apply plugin: 'maven'
 apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 apply plugin: 'idea'
 
-version = '0.2'
+version = '0.3-SNAPSHOT'
 group = 'com.github.groovy-wslite'
 
 repositories {
