@@ -138,4 +138,38 @@ class HTTPRequestSpec extends Specification {
         0 == req.headers.size()
         null == req.headers."Content-Type"
     }
+
+    def "can get content as string if not content type set"() {
+        given:
+        def request = new HTTPRequest(data:"foo".bytes)
+
+        when:
+        String content = request.getContentAsString()
+
+        then:
+        "foo" == content
+   }
+
+   def "can get content as string if headers has content type with charset"() {
+       given:
+       def request = new HTTPRequest(data:"foo".bytes, headers:['Content-Type':'text/xml; charset=UTF-8'])
+
+       when:
+       String content = request.getContentAsString()
+
+       then:
+       "foo" == content
+    }
+
+   def "can get content as string if headers has content type with no charset"() {
+       given:
+       def request = new HTTPRequest(data:"foo".bytes, headers:['Content-Type':'text/xml'])
+
+       when:
+       String content = request.getContentAsString()
+
+       then:
+       "foo" == content
+    }
+
 }

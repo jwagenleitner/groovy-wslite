@@ -62,7 +62,11 @@ class HTTPRequest {
 
     String getContentAsString() {
         if (!data) return ""
-        return new String(data, headers['Content-Type'] ?: HTTP.DEFAULT_CHARSET)
+        String charset = HTTP.DEFAULT_CHARSET
+        if (headers['Content-Type']) {
+            charset = HTTP.parseCharsetParamFromContentType(headers['Content-Type']) ?: charset
+        }
+        return new String(data, charset)
     }
 
     @Override
