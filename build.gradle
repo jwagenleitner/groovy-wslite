@@ -2,7 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
     dependencies {
         classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.3'
     }
@@ -26,6 +25,21 @@ dependencies {
     testCompile "org.spockframework:spock-core:0.5-groovy-1.7"
 }
 
+sourceSets {
+    integrationTest {
+        compileClasspath = sourceSets.main.classes + configurations.testRuntime
+        runtimeClasspath = classes + sourceSets.main.classes + configurations.testRuntime
+        groovy {
+            srcDir 'src/integrationTest/groovy'
+        }
+    }
+}
+
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
@@ -36,10 +50,11 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+build.dependsOn integrationTest
+
 artifacts {
     archives groovydocJar
     archives sourcesJar
-
 }
 
 def deployer = null
