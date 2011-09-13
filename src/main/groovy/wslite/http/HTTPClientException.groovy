@@ -21,6 +21,8 @@ class HTTPClientException extends Exception {
 
     HTTPClientException(String message, HTTPRequest request, HTTPResponse response) {
         super(message)
+        this.request = request
+        this.response = response
     }
 
     HTTPClientException(String message, Throwable cause, HTTPRequest httpRequest, HTTPResponse httpResponse) {
