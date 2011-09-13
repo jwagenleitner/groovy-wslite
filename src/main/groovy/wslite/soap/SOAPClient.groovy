@@ -83,7 +83,7 @@ class SOAPClient {
         def httpRequest = new HTTPRequest(requestParams)
         httpRequest.url = new URL(serviceURL)
         httpRequest.method = HTTPMethod.POST
-        httpRequest.data = message.bytes
+        httpRequest.data = message.getBytes("UTF-8")
         if (!httpRequest.headers."Content-Type") {
             httpRequest.headers["Content-Type"] = (soapVersion == SOAPVersion.V1_1) ?
                                                    SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
