@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package wslite.http
+package wslite.http
 
 import spock.lang.*
 
@@ -28,6 +28,7 @@ class HTTPSpec extends Specification {
         "application/xml;charset=UTF-8"         | "application/xml"
         "application/soap+xml; charset=UTF-8"   | "application/soap+xml"
         "application/vnd.json+xml"              | "application/vnd.json+xml"
+//        'application/soap+xml; action="urn:echoResponse";charset=UTF-16' | "application/soap+xml"
     }
 
     def "parses charset from content-type header"() {
@@ -43,6 +44,7 @@ class HTTPSpec extends Specification {
         "application/xml;   charset=UTF-8"              | "UTF-8"
         "application/xml;   charset=UTF-8  "            | "UTF-8"
         "application/xml;   charset=UTF-8 mode=RW"      | "UTF-8"
+//        'application/soap+xml; charset=UTF-16;action="urn:echoResponse"' | "UTF-16"
     }
 
     def "parses map to url encoded string"() {
