@@ -366,25 +366,5 @@ class SOAPClientSpec extends Specification {
         10000 == origParams.readTimeout
     }
 
-    def "soap message encoded with content-type charset if specified"() {
-        given:
-        def httpc = [execute:{req ->
-            assert req.contentAsString.contains("Ãmelia")
-            [data:req.data]
-        }] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when:
-        def response = soapClient.send(headers:['Content-Type':'text/xml; charset=ISO-8859-1'],
-                             """<?xml version='1.0' encoding='ISO-8859-1'?>
-                                <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
-                                  <SOAP:Body>
-                                    <GetFoo>Ãmelia</GetFoo>
-                                  </SOAP:Body>
-                                </SOAP:Envelope>""")
-
-        then:
-        notThrown(ConditionNotSatisfiedError)
-    }
 
 }
