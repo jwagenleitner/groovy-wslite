@@ -14,93 +14,106 @@ breaking changes.
 
 ### Example
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2')
-    import wslite.soap.*
+``` groovy
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2')
+import wslite.soap.*
 
-    def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
-    def response = soapClient.send {
-        version SOAPVersion.V1_2
-        body {
-            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
-                ZipCode("93657")
-            }
+def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+def response = soapClient.send {
+    version SOAPVersion.V1_2
+    body {
+        GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+            ZipCode("93657")
         }
     }
+}
 
-    assert "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
-    assert 200 == response.httpResponse.statusCode
-    assert "OK" == response.httpResponse.statusMessage
-    assert "ASP.NET" == response.httpResponse.headers["X-Powered-By"]
+assert "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
+assert 200 == response.httpResponse.statusCode
+assert "OK" == response.httpResponse.statusMessage
+assert "ASP.NET" == response.httpResponse.headers["X-Powered-By"]
+```
 
 ### Usage
 
-    def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
-    def response = soapClient.send(SOAPAction: "GetWeatherByZipCode",
-                                   connectTimeout:5000,
-                                   readTimeout:10000,
-                                   useCaches:false,
-                                   followRedirects:false,
-                                   sslTrustAllCerts:true) {
-        version SOAPVersion.V1_2        // SOAPVersion.V1_1 is default
-        soapNamespacePrefix "soap-env"  // "SOAP" is default
-        encoding "ISO-8859-1"           // "UTF-8" is default encoding for xml
-        envelopeAttributes "xmlns:hr":"http://example.org/hr"
-        header(mustUnderstand:false) {
-            auth {
-                apiToken("1234567890")
-            }
-        }
-        body {
-            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
-                ZipCode("93657")
-            }
+``` groovy
+def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+def response = soapClient.send(SOAPAction: "GetWeatherByZipCode",
+                               connectTimeout:5000,
+                               readTimeout:10000,
+                               useCaches:false,
+                               followRedirects:false,
+                               sslTrustAllCerts:true) {
+    version SOAPVersion.V1_2        // SOAPVersion.V1_1 is default
+    soapNamespacePrefix "soap-env"  // "SOAP" is default
+    encoding "ISO-8859-1"           // "UTF-8" is default encoding for xml
+    envelopeAttributes "xmlns:hr":"http://example.org/hr"
+    header(mustUnderstand:false) {
+        auth {
+            apiToken("1234567890")
         }
     }
+    body {
+        GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+            ZipCode("93657")
+        }
+    }
+}
+```
 
 The `header` and `body` closures are passed to a MarkupBuilder in order to create the SOAP message.
 
 If you have a string with XML content you want to include in you can use `mkp`.
 
-    def response = soapClient.send {
-        body {
-            GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
-                mkp.yieldUnescaped "<ZipCode>93657</ZipCode>"
-            }
+``` groovy
+def response = soapClient.send {
+    body {
+        GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
+            mkp.yieldUnescaped "<ZipCode>93657</ZipCode>"
         }
     }
+}
+```
 
 You can also pass a raw string to the send method if you want absolute control over the resulting message.
 
-    soapClient.send(
-        """<?xml version='1.0' encoding='UTF-8'?>
-           <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
-               <SOAP:Body>
-                   <GetFoo>bar</GetFoo>
-               </SOAP:Body>
-           </SOAP:Envelope>"""
-    )
+``` groovy
+soapClient.send(
+    """<?xml version='1.0' encoding='UTF-8'?>
+       <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+           <SOAP:Body>
+               <GetFoo>bar</GetFoo>
+           </SOAP:Body>
+       </SOAP:Envelope>"""
+)
+```
 
 The default when sending a raw string is SOAP v1.1, you can override this by specifying a SOAPVersion.
 
-    soapClient.send(SOAPVersion.V1_2,
-                    """<?xml version='1.0' encoding='UTF-8'?>
-                       <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
-                           <SOAP:Body>
-                               <GetFoo>bar</GetFoo>
-                            </SOAP:Body>
-                        </SOAP:Envelope>""")
+``` groovy
+soapClient.send(SOAPVersion.V1_2,
+                """<?xml version='1.0' encoding='UTF-8'?>
+                   <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                       <SOAP:Body>
+                           <GetFoo>bar</GetFoo>
+                        </SOAP:Body>
+                    </SOAP:Envelope>""")
+```
 
 You can also specify connection settings.
 
-    soapClient.send(SOAPVersion.V1_2,
-                    connectTimeout:7000,
-                    readTimeout:9000,
-                    """<?xml version='1.0' encoding='UTF-8'?>
-                       <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
-                           <SOAP:Body>
-                               <GetFoo>bar</GetFoo>
-                           </SOAP:Body>
-                       </SOAP:Envelope>""")
+``` groovy
+soapClient.send(SOAPVersion.V1_2,
+                connectTimeout:7000,
+                readTimeout:9000,
+                """<?xml version='1.0' encoding='UTF-8'?>
+                   <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                       <SOAP:Body>
+                           <GetFoo>bar</GetFoo>
+                       </SOAP:Body>
+                   </SOAP:Envelope>""")
+```
+
 ### SSL
 
 #### Using a custom SSL trust store
@@ -108,23 +121,27 @@ You can also specify connection settings.
 In addition to setting a global trust store and trust store password using the `javax.net.ssl.trustStore` and
 `javax.net.ssl.trustStorePassword` System properties, you can set a custom trust store on a client.
 
-    import wslite.soap.*
+``` groovy
+import wslite.soap.*
 
-    def soapClient = new SOAPClient("https://www.example.com/ExampleService")
-    soapClient.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
-    soapClient.httpClient.sslTrustStorePassword = "secret"
+def soapClient = new SOAPClient("https://www.example.com/ExampleService")
+soapClient.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
+soapClient.httpClient.sslTrustStorePassword = "secret"
 
-    def response = soapClient.send() {
-        ....
-    }
+def response = soapClient.send() {
+    ....
+}
+```
 
 You can also specify a custom trust store on a per request basis, this will override any custom trust store that may be
 set on the client.
 
-    def soapClient = new SOAPClient("https://www.example.com/ExampleService")
-    def response = soapClient.send(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret") {
-        ....
-    }
+``` groovy
+def soapClient = new SOAPClient("https://www.example.com/ExampleService")
+def response = soapClient.send(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret") {
+    ....
+}
+```
 
 Note: sslTrustStorePassword is optional.
 
@@ -133,21 +150,25 @@ Note: sslTrustStorePassword is optional.
 When in development mode and dealing with lots of servers with self-signed certs it can be helpful to bypass a custom
 trust store and trust all certs automatically.
 
-    import wslite.soap.*
+``` groovy
+import wslite.soap.*
 
-    def soapClient = new SOAPClient("https://www.example.com/ExampleService)
-    soapClient.httpClient.sslTrustAllCerts = true
+def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+soapClient.httpClient.sslTrustAllCerts = true
 
-    def response = soapClient.send() {
-        ....
-    }
+def response = soapClient.send() {
+    ....
+}
+```
 
 You can also specify a the same parameter on a per request basis.
 
-    def soapClient = new SOAPClient("https://www.example.com/ExampleService)
-    def response = soapClient.send(sslTrustAllCerts:true) {
-        ....
-    }
+``` groovy
+def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+def response = soapClient.send(sslTrustAllCerts:true) {
+    ....
+}
+```
 
 Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set on the client or
 the request.
@@ -174,37 +195,41 @@ You can also access the underlying HTTPRequest `response.httpRequest` and HTTPRe
 If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown.  The `SOAPFaultException` wraps a
 `SOAPResponse` that contains the Fault.
 
-    import wslite.soap.*
+``` groovy
+import wslite.soap.*
 
-    def client = new SOAPClient("("http://www.webservicex.net/WeatherForecast2.asmx")
-    try {
-        def response = client.send {
-            ....
-        }
-    } catch (SOAPFaultException sfe) {
-        println sfe.message // faultcode/faultstring for 1.1 or Code/Reason for 1.2
-        println sfe.text    // prints SOAP Envelope
-        println sfe.httpResponse.statusCode
-        println sfe.fault.detail.text() // sfe.fault is a GPathResult of Envelope/Body/Fault
-    } catch (SOAPClientException sce) {
-        // This indicates an error with underlying HTTP Client (i.e., 404 Not Found)
+def client = new SOAPClient("("http://www.webservicex.net/WeatherForecast2.asmx")
+try {
+    def response = client.send {
+        ....
     }
+} catch (SOAPFaultException sfe) {
+    println sfe.message // faultcode/faultstring for 1.1 or Code/Reason for 1.2
+    println sfe.text    // prints SOAP Envelope
+    println sfe.httpResponse.statusCode
+    println sfe.fault.detail.text() // sfe.fault is a GPathResult of Envelope/Body/Fault
+} catch (SOAPClientException sce) {
+    // This indicates an error with underlying HTTP Client (i.e., 404 Not Found)
+}
+```
 
 ## REST
 
 ### Example
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2')
-    import wslite.rest.*
+``` groovy
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.2')
+import wslite.rest.*
 
-    def client = new RESTClient("http://www.fresnostatenews.com/feed/")
-    def response = client.get()
+def client = new RESTClient("http://www.fresnostatenews.com/feed/")
+def response = client.get()
 
-    assert 200 == response.statusCode
-    assert "text/xml" == response.contentType
-    assert "UTF-8" == response.charset
-    assert "text/xml; charset=UTF-8" == response.headers."Content-Type"
-    assert "FresnoStateNews.com" == response.xml.channel.title.text()
+assert 200 == response.statusCode
+assert "text/xml" == response.contentType
+assert "UTF-8" == response.charset
+assert "text/xml; charset=UTF-8" == response.headers."Content-Type"
+assert "FresnoStateNews.com" == response.xml.channel.title.text()
+```
 
 ### Methods
 
@@ -219,52 +244,60 @@ If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown. 
 
 The methods can all take a map as a parameter (though not required) that give you control over the request.
 
-    def client = new RESTClient("http://www.fresnostatenews.com/")
-    def response = client.get( path: "/feed",
-                               accept: ContentType.XML,
-                               query:[format:"xml", type:"rss2.0"]
-                               headers:["X-Foo":"bar"],
-                               connectTimeout: 5000,
-                               readTimeout: 10000,
-                               followRedirects: false,
-                               useCaches: false,
-                               sslTrustAllCerts: true )
+``` groovy
+def client = new RESTClient("http://www.fresnostatenews.com/")
+def response = client.get( path: "/feed",
+                           accept: ContentType.XML,
+                           query:[format:"xml", type:"rss2.0"]
+                           headers:["X-Foo":"bar"],
+                           connectTimeout: 5000,
+                           readTimeout: 10000,
+                           followRedirects: false,
+                           useCaches: false,
+                           sslTrustAllCerts: true )
+```
 
 ### Sending Content
 
 In addition to a Map, the `post/put` methods take an additional parameter of a Closure.
 
-    def client = new RESTClient("http://some.service.net/")
-    def response = client.post(path: "/comments") {
-        type ContentType.XML
-        xml {
-            Comment {
-                Text("This is my comment.")
-            }
+``` groovy
+def client = new RESTClient("http://some.service.net/")
+def response = client.post(path: "/comments") {
+    type ContentType.XML
+    xml {
+        Comment {
+            Text("This is my comment.")
         }
     }
+}
+```
 
 When sending content you can also send byte[], text, url encoded parameters, xml and json.
 
-    def response = client.post() {
-        type "application/vnd.lock-in-proprietary-format"  // String or ContentType
-        charset "US-ASCII"
+``` groovy
+def response = client.post() {
+    type "application/vnd.lock-in-proprietary-format"  // String or ContentType
+    charset "US-ASCII"
 
-        // one of the following
-        bytes new File("payload.txt").bytes
-        text "hello world"
-        urlenc username: "homer", password: "simpson", timezone: "EST"
-        xml { root() }
-        json id:"525", department:"Finance"
-    }
+    // one of the following
+    bytes new File("payload.txt").bytes
+    text "hello world"
+    urlenc username: "homer", password: "simpson", timezone: "EST"
+    xml { root() }
+    json id:"525", department:"Finance"
+}
+```
 
 ### Client Defaults
 
 When interacting with a service that requires a particular Accept header or when sending content of the same type/charset, you can set those as defaults so they will be sent for every request (if they are not already specified in the request):
 
-    client.defaultAcceptHeader = "text/xml"
-    client.defaultContentTypeHeader = "application/json"
-    client.defaultCharset = "UTF-8"
+``` groovy
+client.defaultAcceptHeader = "text/xml"
+client.defaultContentTypeHeader = "application/json"
+client.defaultCharset = "UTF-8"
+```
 
 ### HTTP Authorization
 
@@ -272,11 +305,13 @@ Currently only *Basic Auth* is supported.
 
 #### Basic Auth
 
-    import wslite.http.auth.*
-    import wslite.rest.*
+``` groovy
+import wslite.http.auth.*
+import wslite.rest.*
 
-    def client = new RESTClient("http://some.service.net")
-    client.authorization = new HTTPBasicAuthorization("homer", "simpson")
+def client = new RESTClient("http://some.service.net")
+client.authorization = new HTTPBasicAuthorization("homer", "simpson")
+```
 
 ### SSL
 
@@ -285,19 +320,23 @@ Currently only *Basic Auth* is supported.
 In addition to setting a global trust store and trust store password using the `javax.net.ssl.trustStore` and
 `javax.net.ssl.trustStorePassword` System properties, you can set a custom trust store on a client.
 
-    import wslite.rest.*
+``` groovy
+import wslite.rest.*
 
-    def client = new RESTClient("http://some.service.net")
-    client.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
-    client.httpClient.sslTrustStorePassword = "myKeystorePassword"
+def client = new RESTClient("http://some.service.net")
+client.httpClient.sslTrustStoreFile = "~/mykeystore.jks"
+client.httpClient.sslTrustStorePassword = "myKeystorePassword"
 
-    def response = client.get()
+def response = client.get()
+```
 
 You can also specify a custom trust store on a per request basis, this will override any custom trust store that may be
 set on the client.
 
-    def client = new RESTClient("http://some.service.net")
-    client.get(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret")
+``` groovy
+def client = new RESTClient("http://some.service.net")
+client.get(sslTrustStoreFile:"~/mykeystore.jks", sslTrustStorePassword:"secret")
+```
 
 Note: sslTrustStorePassword is optional.
 
@@ -306,17 +345,21 @@ Note: sslTrustStorePassword is optional.
 When in development mode and dealing with lots of servers with self-signed certs it can be helpful to bypass a custom
 trust store and trust all certs automatically.
 
-    import wslite.rest.*
+``` groovy
+import wslite.rest.*
 
-    def client = new RESTClient("http://some.service.net")
-    client.httpClient.sslTrustAllCerts = true
+def client = new RESTClient("http://some.service.net")
+client.httpClient.sslTrustAllCerts = true
 
-    def response = client.get()
+def response = client.get()
+```
 
 You can also specify a the same parameter on a per request basis.
 
-    def client = new RESTClient("http://some.service.net")
-    def response = client.get(sslTrustAllCerts:true)
+``` groovy
+def client = new RESTClient("http://some.service.net")
+def response = client.get(sslTrustAllCerts:true)
+```
 
 Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set on the client or
 the request.
@@ -351,6 +394,8 @@ For xml based responses, an *xml* (i.e., `response.xml`) property is available t
 For json based responses, a *json* (i.e., `response.json`) property is available that is of type *JSONObject* or *JSONArray*.
 
 ## Using groovy-wslite in your project
+
+* [Download JAR Files] (/jwagenleitner/groovy-wslite/archives/master)
 
 __groovy-wslite__ is available in Maven Central.
 
@@ -449,22 +494,24 @@ For example:
 
 For example:
 
-    package org.example
+``` groovy
+package org.example
 
-    class MyService {
+class MyService {
 
-        def restClient
-        def soapClient
+    def restClient
+    def soapClient
 
-        def someServiceMethod() {
-            def response = restClient.get()
-            ....
-        }
-
-        def someOtherServiceMethod() {
-            def response soapClient.send { ... }
-        }
+    def someServiceMethod() {
+        def response = restClient.get()
+        ....
     }
+
+    def someOtherServiceMethod() {
+        def response soapClient.send { ... }
+    }
+}
+```
 
 ## Dependencies
 
@@ -481,6 +528,7 @@ code.
 1. Download and install [Gradle](http://www.gradle.org/downloads.html)
 2. Fetch the latest code: `git clone git://github.com/jwagenleitner/groovy-wslite.git`
 3. (Optional) Run the tests using `gradle test`
-4. Go to the project directory and run: `gradle jar`
+4. (Optional) Run the integration tests using `gradle integrationTest`
+5. Go to the project directory and run: `gradle jar`
 
 You will find the built jar in `./build/libs`.
