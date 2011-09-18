@@ -153,7 +153,7 @@ trust store and trust all certs automatically.
 ``` groovy
 import wslite.soap.*
 
-def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+def soapClient = new SOAPClient("https://www.example.com/ExampleService")
 soapClient.httpClient.sslTrustAllCerts = true
 
 def response = soapClient.send() {
@@ -164,7 +164,7 @@ def response = soapClient.send() {
 You can also specify a the same parameter on a per request basis.
 
 ``` groovy
-def soapClient = new SOAPClient("https://www.example.com/ExampleService)
+def soapClient = new SOAPClient("https://www.example.com/ExampleService")
 def response = soapClient.send(sslTrustAllCerts:true) {
     ....
 }
@@ -198,7 +198,7 @@ If the server responds with a SOAP Fault a `SOAPFaultException` will be thrown. 
 ``` groovy
 import wslite.soap.*
 
-def client = new SOAPClient("("http://www.webservicex.net/WeatherForecast2.asmx")
+def client = new SOAPClient("http://www.webservicex.net/WeatherForecast2.asmx")
 try {
     def response = client.send {
         ....
