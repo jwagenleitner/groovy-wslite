@@ -18,12 +18,17 @@ class HTTP {
 
     static final String DEFAULT_CHARSET = "ISO-8859-1" // http://tools.ietf.org/html/rfc2616#section-3.7.1
 
+    static final String CONTENT_TYPE_HEADER = "Content-Type"
+
     static String parseMimeTypeFromContentType(String contentType) {
         int delim = contentType.indexOf(';')
         return (delim < 1) ? contentType : contentType[0..delim-1]
     }
 
     static String parseCharsetParamFromContentType(String contentType) {
+        if (!contentType) {
+            return null
+        }
         int start = contentType.toLowerCase().indexOf("charset=")
         if (start == -1) return null
         String charset = contentType.substring(start)

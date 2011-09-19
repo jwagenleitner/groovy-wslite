@@ -198,7 +198,7 @@ class SOAPClientSpec extends Specification {
         setup: "an http client expecting a SOAP 1.1 content-type for the request"
         def httpc = [
             execute: {req ->
-                        assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers."content-type"
+                        assert req.headers."content-type".startsWith(SOAP.SOAP_V11_MEDIA_TYPE)
                         [data:simpleSoap11Response.bytes]
         }] as HTTPClient
         soapClient.httpClient = httpc
@@ -216,7 +216,7 @@ class SOAPClientSpec extends Specification {
         setup: "an http client expecting a SOAP 1.2 content-type for the request"
         def httpc = [
             execute: {req ->
-                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
+                        assert req.headers."content-type".startsWith(SOAP.SOAP_V12_MEDIA_TYPE)
                         [data:simpleSoap12Response.bytes]
         }] as HTTPClient
         soapClient.httpClient = httpc
@@ -251,7 +251,7 @@ class SOAPClientSpec extends Specification {
     def "send raw string with soap message"() {
         given: "a soap client configured to echo the soap request to soap response and verifies default soap version 1.1"
         def httpc = [execute:{req ->
-                                assert SOAPClient.SOAP_V11_CONTENT_TYPE == req.headers."content-type"
+                                assert req.headers."content-type".startsWith(SOAP.SOAP_V11_MEDIA_TYPE)
                                 [data:req.data]}] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -271,7 +271,7 @@ class SOAPClientSpec extends Specification {
     def "send raw string with soap message and override the soap version used"() {
         given: "a soap client configured to echo the soap request to soap response"
         def httpc = [execute:{req ->
-                                assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
+                                assert req.headers."content-type".startsWith(SOAP.SOAP_V12_MEDIA_TYPE)
                                 [data:req.data]}] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -313,7 +313,7 @@ class SOAPClientSpec extends Specification {
     def "can send raw soap message with http params and overriding soap version"() {
         given: "a soap client configured to echo the soap request to soap response and verify http params"
         def httpc = [execute:{req ->
-                        assert SOAPClient.SOAP_V12_CONTENT_TYPE == req.headers."content-type"
+                        assert req.headers."content-type".startsWith(SOAP.SOAP_V12_MEDIA_TYPE)
                         assert 7000 == req.connectTimeout
                         assert 9000 == req.readTimeout
                     [data:req.data]}] as HTTPClient
@@ -366,5 +366,98 @@ class SOAPClientSpec extends Specification {
         10000 == origParams.readTimeout
     }
 
+    def "uses default character encoding if none is specified"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send {
+            body {
+                foo()
+            }
+        }
+
+        then:
+        SOAP.DEFAULT_CHAR_ENCODING == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+    }
+
+    def "uses character encoding specified in the message builder"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send {
+            encoding "ISO-8859-1"
+            body {
+                foo()
+            }
+        }
+
+        then:
+        "ISO-8859-1" == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+    }
+
+    def "uses character encoding specified in the Content-Type header"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send(headers:['Content-Type':'text/xml; charset=UTF-16']) {
+            encoding "ISO-8859-1"
+            body {
+                foo()
+            }
+        }
+
+        then:
+        "UTF-16" == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+    }
+
+    def "uses character encoding specified in the xml declaration"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send("""<?xml version='1.0' encoding='ISO-8859-2'?>
+                                <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                                  <SOAP:Body>
+                                    <GetFoo/>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""".trim())
+
+        then:
+        "ISO-8859-2" == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+    }
+
+    def "uses default character encoding if no Content-Type charset or xml declaration encoding"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send("""<?xml version='1.0'?>
+                                <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                                  <SOAP:Body>
+                                    <GetFoo/>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""".trim())
+
+        then:
+        SOAP.DEFAULT_CHAR_ENCODING == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+    }
+
+    def "Content-Type header specified in the request be used as-is and not modified"() {
+        given:
+        soapClient.httpClient = [execute:{req -> return new HTTPResponse(data:simpleSoap11Response.bytes)}] as HTTPClient
+
+        when:
+        def response = soapClient.send(headers:['Content-Type':'application/xml+soap+foo']) {
+            body {
+                foo()
+            }
+        }
+
+        then:
+        "application/xml+soap+foo" == response.httpRequest.headers['Content-Type']
+    }
 
 }

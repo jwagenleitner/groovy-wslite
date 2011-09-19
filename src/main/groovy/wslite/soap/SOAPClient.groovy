@@ -19,9 +19,6 @@ import wslite.http.auth.*
 
 class SOAPClient {
 
-    static final String SOAP_V11_CONTENT_TYPE = "text/xml; charset=UTF-8"
-    static final String SOAP_V12_CONTENT_TYPE = "application/soap+xml; charset=UTF-8"
-
     String serviceURL
     HTTPClient httpClient
 
@@ -43,7 +40,7 @@ class SOAPClient {
     }
 
     SOAPResponse send(Map requestParams=[:], Closure content) {
-        def message = buildSOAPMessage(content)
+        def message = new SOAPMessageBuilder().build(content)
         return send(requestParams, message.version, message.toString())
     }
 
@@ -70,27 +67,15 @@ class SOAPClient {
         return soapResponse
     }
 
-    private SOAPMessageBuilder buildSOAPMessage(content) {
-        def builder = new SOAPMessageBuilder()
-        content.resolveStrategy = Closure.DELEGATE_FIRST
-        content.delegate = builder
-        content.call()
-        return builder
-    }
-
     private HTTPRequest buildHTTPRequest(requestParams, soapVersion, message) {
-        def soapAction = requestParams.remove("SOAPAction")
+        def soapAction = requestParams.remove(SOAP.SOAP_ACTION_HEADER)
         def httpRequest = new HTTPRequest(requestParams)
         httpRequest.url = new URL(serviceURL)
         httpRequest.method = HTTPMethod.POST
-        httpRequest.data = message.getBytes("UTF-8")
-        if (!httpRequest.headers."Content-Type") {
-            httpRequest.headers["Content-Type"] = (soapVersion == SOAPVersion.V1_1) ?
-                                                   SOAP_V11_CONTENT_TYPE : SOAP_V12_CONTENT_TYPE
-        }
-        if (!httpRequest.headers."SOAPAction" && soapAction && soapVersion == SOAPVersion.V1_1) {
-            httpRequest.headers.SOAPAction = soapAction
-        }
+        String charEncoding = getCharacterEncoding(httpRequest, message)
+        setContentTypeHeaderIfNotPresent(httpRequest, soapVersion, charEncoding)
+        setSoapActionHeaderIfNotPresent(httpRequest, soapVersion, soapAction)
+        httpRequest.data = message.getBytes(charEncoding)
         return httpRequest
     }
 
@@ -111,11 +96,12 @@ class SOAPClient {
 
     private def parseEnvelope(String soapMessageText) {
         def envelopeNode = new XmlSlurper().parseText(soapMessageText)
-        if (envelopeNode.name() != "Envelope") {
-            throw new IllegalStateException("Root element is " + envelopeNode.name() + ", expected 'Envelope'")
+        if (envelopeNode.name() != SOAP.ENVELOPE_ELEMENT_NAME) {
+            throw new IllegalStateException("Root element is " + envelopeNode.name() +
+                    ", expected " + SOAP.ENVELOPE_ELEMENT_NAME)
         }
-        if (!envelopeNode.childNodes().find {it.name() == "Body"}) {
-            throw new IllegalStateException("Body element is missing")
+        if (envelopeNode."${SOAP.BODY_ELEMENT_NAME}".isEmpty()) {
+            throw new IllegalStateException(SOAP.BODY_ELEMENT_NAME + " element is missing")
         }
         return envelopeNode
     }
@@ -134,4 +120,35 @@ class SOAPClient {
         throw soapFaultException
     }
 
+    private String getCharacterEncoding(HTTPRequest httpRequest, String message) {
+        String encoding = getCharacterEncodingFromContentTypeHeader(httpRequest.headers[HTTP.CONTENT_TYPE_HEADER])
+        if (encoding) {
+            return encoding
+        }
+        return getCharacterEncodingFromXmlDeclaration(message) ?: SOAP.DEFAULT_CHAR_ENCODING
+    }
+
+    private String getCharacterEncodingFromContentTypeHeader(String contentType) {
+        return HTTP.parseCharsetParamFromContentType(contentType)
+    }
+
+    private String getCharacterEncodingFromXmlDeclaration(String xml) {
+        def m = xml =~ /^<\?xml.*?encoding\s*=\s*["|'](.*)["|'].*\?>/
+        return (m && m[0]?.size() == 2) ? m[0][1] : null
+    }
+
+    private void setContentTypeHeaderIfNotPresent(HTTPRequest httpRequest, SOAPVersion soapVersion, String charset) {
+        if (httpRequest.headers[HTTP.CONTENT_TYPE_HEADER]) {
+            return
+        }
+        httpRequest.headers[HTTP.CONTENT_TYPE_HEADER] = (soapVersion == SOAPVersion.V1_1) ?
+                                               "${SOAP.SOAP_V11_MEDIA_TYPE}; charset=${charset}" :
+                                               "${SOAP.SOAP_V12_MEDIA_TYPE}; charset=${charset}"
+    }
+
+    private void setSoapActionHeaderIfNotPresent(HTTPRequest httpRequest, SOAPVersion soapVersion, String soapAction) {
+        if (!httpRequest.headers[SOAP.SOAP_ACTION_HEADER] && soapAction && soapVersion == SOAPVersion.V1_1) {
+            httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction
+        }
+    }
 }
