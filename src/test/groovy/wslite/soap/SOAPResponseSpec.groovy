@@ -15,7 +15,6 @@
 package wslite.soap
 
 import spock.lang.*
-import com.sun.xml.internal.messaging.saaj.soap.Envelope
 
 class SOAPResponseSpec extends Specification {
 
