@@ -28,10 +28,10 @@ class SOAPFaultException extends Exception {
         String faultCode
         switch (faultResponse.soapVersion) {
             case SOAPVersion.V1_1:
-                faultCode = faultResponse.fault.':faultcode'.text()
+                faultCode = faultResponse.fault.":faultcode".text()
                 break
             case SOAPVersion.V1_2:
-                faultCode = faultResponse.fault.'soap-env:Code'.'soap-env:Value'.text()
+                faultCode = faultResponse.fault."${SOAP.SOAP_NS_PREFIX}:Code"."${SOAP.SOAP_NS_PREFIX}:Value".text()
                 break
         }
         return faultCode
@@ -41,10 +41,10 @@ class SOAPFaultException extends Exception {
         String faultReason
         switch (faultResponse.soapVersion) {
             case SOAPVersion.V1_1:
-                faultReason = faultResponse.fault.':faultstring'.text()
+                faultReason = faultResponse.fault.":faultstring".text()
                 break
             case SOAPVersion.V1_2:
-                faultReason = faultResponse.fault.'soap-env:Reason'.'soap-env:Text'.text()
+                faultReason = faultResponse.fault."${SOAP.SOAP_NS_PREFIX}:Reason"."${SOAP.SOAP_NS_PREFIX}:Text".text()
                 break
         }
         return faultReason

@@ -45,7 +45,7 @@ def response = soapClient.send(SOAPAction: "GetWeatherByZipCode",
                                followRedirects:false,
                                sslTrustAllCerts:true) {
     version SOAPVersion.V1_2        // SOAPVersion.V1_1 is default
-    soapNamespacePrefix "soap-env"  // "SOAP" is default
+    soapNamespacePrefix "SOAP"      // "soap-env" is default
     encoding "ISO-8859-1"           // "UTF-8" is default encoding for xml
     envelopeAttributes "xmlns:hr":"http://example.org/hr"
     header(mustUnderstand:false) {
@@ -80,11 +80,11 @@ You can also pass a raw string to the send method if you want absolute control o
 ``` groovy
 soapClient.send(
     """<?xml version='1.0' encoding='UTF-8'?>
-       <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
-           <SOAP:Body>
+       <soap-env:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+           <soap-env:Body>
                <GetFoo>bar</GetFoo>
-           </SOAP:Body>
-       </SOAP:Envelope>"""
+           </soap-env:Body>
+       </soap-env:Envelope>"""
 )
 ```
 
@@ -93,11 +93,11 @@ The default when sending a raw string is SOAP v1.1, you can override this by spe
 ``` groovy
 soapClient.send(SOAPVersion.V1_2,
                 """<?xml version='1.0' encoding='UTF-8'?>
-                   <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
-                       <SOAP:Body>
+                   <soap-env:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                       <soap-env:Body>
                            <GetFoo>bar</GetFoo>
-                        </SOAP:Body>
-                    </SOAP:Envelope>""")
+                        </soap-env:Body>
+                    </soap-env:Envelope>""")
 ```
 
 You can also specify connection settings.
@@ -107,11 +107,11 @@ soapClient.send(SOAPVersion.V1_2,
                 connectTimeout:7000,
                 readTimeout:9000,
                 """<?xml version='1.0' encoding='UTF-8'?>
-                   <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
-                       <SOAP:Body>
+                   <soap-env:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                       <soap-env:Body>
                            <GetFoo>bar</GetFoo>
-                       </SOAP:Body>
-                   </SOAP:Envelope>""")
+                       </soap-env:Body>
+                   </soap-env:Envelope>""")
 ```
 
 ### SSL

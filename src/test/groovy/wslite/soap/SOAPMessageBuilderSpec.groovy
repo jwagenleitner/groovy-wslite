@@ -18,20 +18,13 @@ import spock.lang.*
 
 class SOAPMessageBuilderSpec extends Specification {
 
-    def buildMessage(message) {
-        def messageBuilder = new SOAPMessageBuilder()
-        message.delegate = messageBuilder
-        message.call()
-        return messageBuilder
-    }
-
     def slurp(message) {
         return new XmlSlurper().parseText(message)
     }
 
     def "default SOAP version is 1.1"() {
         when:"a message with no version is built"
-        def message = buildMessage {
+        def message = new SOAPMessageBuilder().build {
             body {}
         }
 
@@ -41,7 +34,7 @@ class SOAPMessageBuilderSpec extends Specification {
 
     def "overriding SOAP version"() {
         when:"a message specifies v1.2 is built"
-        def message = buildMessage {
+        def message = new SOAPMessageBuilder().build {
             version SOAPVersion.V1_2
         }
 
@@ -51,17 +44,17 @@ class SOAPMessageBuilderSpec extends Specification {
 
     def "default SOAP namespace prefix"() {
         when:"a message doesn't specify a SOAP namespace prefix"
-        def message = buildMessage {
+        def message = new SOAPMessageBuilder().build {
             body {}
         }
 
         then:"SOAP namespace prefix should default to SOAP"
-        assert message.toString().contains("<SOAP:Envelope")
+        assert message.toString().contains("<${SOAP.SOAP_NS_PREFIX}:Envelope")
     }
 
     def "overriding SOAP namespace prefix"() {
         when:"a message specifies an alternative SOAP namespace prefix"
-        def message = buildMessage {
+        def message = new SOAPMessageBuilder().build {
             soapNamespacePrefix "FOOBAR"
             body {}
         }
@@ -72,7 +65,7 @@ class SOAPMessageBuilderSpec extends Specification {
 
     def "custom envelope attributes"() {
         when:"custom envelope attributes are speicified"
-        def message = buildMessage {
+        def message = new SOAPMessageBuilder().build {
             envelopeAttributes foo:'bar'
             body {}
         }

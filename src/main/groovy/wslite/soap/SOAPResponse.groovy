@@ -29,28 +29,29 @@ class SOAPResponse {
 
     void setEnvelope(GPathResult soapEnvelope) {
         envelope = soapEnvelope
-        envelope.declareNamespace(soap11:SOAP.SOAP11_NS, soap12:SOAP.SOAP12_NS)
         def namespace = [:]
-        if (!envelope.'soap11:Body'.isEmpty()) {
-            namespace.'soap-env' = SOAP.SOAP11_NS
-            soapVersion = SOAPVersion.V1_1
-        }
-        if (!envelope.'soap12:Body'.isEmpty()) {
-            namespace.'soap-env' = SOAP.SOAP12_NS
-            soapVersion = SOAPVersion.V1_2
+        switch (envelope.namespaceURI()) {
+            case SOAP.SOAP11_NS:
+                namespace[SOAP.SOAP_NS_PREFIX] = SOAP.SOAP11_NS
+                soapVersion = SOAPVersion.V1_1
+                break
+            case SOAP.SOAP12_NS:
+                namespace[SOAP.SOAP_NS_PREFIX] = SOAP.SOAP12_NS
+                soapVersion = SOAPVersion.V1_2
+                break
         }
         if (!namespace) {
-            throw new IllegalStateException("No SOAP 1.1 or 1.2 Body element found.")
+            throw new IllegalStateException("No SOAP 1.1 or 1.2 Envelope found")
         }
         envelope.declareNamespace(namespace)
     }
 
     def getBody() {
-        return envelope.'soap-env:Body'
+        return envelope."${SOAP.SOAP_NS_PREFIX}:${SOAP.BODY_ELEMENT_NAME}"
     }
 
     def getHeader() {
-        return envelope.'soap-env:Header'
+        return envelope."${SOAP.SOAP_NS_PREFIX}:${SOAP.HEADER_ELEMENT_NAME}"
     }
 
     boolean hasHeader() {
@@ -58,7 +59,7 @@ class SOAPResponse {
     }
 
     def getFault() {
-        return getBody().'soap-env:Fault'
+        return getBody()."${SOAP.SOAP_NS_PREFIX}:${SOAP.FAULT_ELEMENT_NAME}"
     }
 
     boolean hasFault() {
