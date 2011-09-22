@@ -213,6 +213,19 @@ try {
 }
 ```
 
+### Proxy
+
+If behind proxy, you can set it in the request.
+
+``` groovy
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080) 
+
+def soapClient = new SOAPClient("https://www.example.com/ExampleService")
+def response = soapClient.send(proxy:proxy) {
+    ....
+}
+```
+
 ## REST
 
 ### Example
@@ -476,6 +489,7 @@ For example:
         followRedirects = false
         sslTrustAllCerts = true
         // authorization = ref('clientBasicAuth')
+        // proxy = myproxy
     }
 
     soapClient(wslite.soap.SOAPClient) {

@@ -28,6 +28,8 @@ class HTTPRequest {
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
+    
+    Proxy proxy
 
     HTTPHeaderMap headers = [:] as HTTPHeaderMap
 

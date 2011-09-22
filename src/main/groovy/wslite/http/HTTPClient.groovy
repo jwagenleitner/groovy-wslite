@@ -26,6 +26,8 @@ class HTTPClient {
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
+    
+    Proxy proxy = Proxy.NO_PROXY
 
     def defaultHeaders = [Connection:"Close"]
 
@@ -57,9 +59,10 @@ class HTTPClient {
     }
 
     private def createConnection(HTTPRequest request) {
+        def usedProxy = request.proxy ?: proxy
         if (isSecureConnectionRequest(request)) {
             if (shouldTrustAllSSLCerts(request)) {
-                return httpConnectionFactory.getConnectionTrustAllSSLCerts(request.url)
+                return httpConnectionFactory.getConnectionTrustAllSSLCerts(request.url, usedProxy)
             }
             if (shouldTrustSSLCertsUsingTrustStore(request)) {
                 String trustStoreFile
@@ -71,10 +74,10 @@ class HTTPClient {
                     trustStoreFile = sslTrustStoreFile
                     trustStorePassword = sslTrustStorePassword
                 }
-                return httpConnectionFactory.getConnectionUsingTrustStore(request.url, trustStoreFile, trustStorePassword)
+                return httpConnectionFactory.getConnectionUsingTrustStore(request.url, trustStoreFile, trustStorePassword, usedProxy)
             }
         }
-        return httpConnectionFactory.getConnection(request.url)
+        return httpConnectionFactory.getConnection(request.url, usedProxy)
     }
 
     private boolean isSecureConnectionRequest(HTTPRequest request) {
