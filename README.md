@@ -519,16 +519,14 @@ class MyService {
 
 ## Building
 
-groovy-wslite uses Gradle for building. Gradle handles the dependencies
-for you so all you need to do is install Gradle and then build the
-code.
+groovy-wslite uses [Gradle](http://www.gradle.org/downloads.html) for the build process.
 
 **Build Instructions**
 
-1. Download and install [Gradle](http://www.gradle.org/downloads.html)
-2. Fetch the latest code: `git clone git://github.com/jwagenleitner/groovy-wslite.git`
-3. (Optional) Run the tests using `gradle test`
-4. (Optional) Run the integration tests using `gradle integrationTest`
-5. Go to the project directory and run: `gradle jar`
+1. Fetch the latest code: `git clone git://github.com/jwagenleitner/groovy-wslite.git`
+2. (Optional) Run the unit tests using `gradlew test`
+3. (Optional) Run the integration tests using `gradlew integrationTest`
+4. (Optional) Run the code quality checks `gradlew codenarcMain codenarcTest`
+5. Go to the project directory and run: `gradlew jar`
 
 You will find the built jar in `./build/libs`.
