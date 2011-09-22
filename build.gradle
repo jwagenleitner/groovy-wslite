@@ -9,11 +9,14 @@ buildscript {
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'code-quality'
 apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 apply plugin: 'idea'
 
 version = '0.3-SNAPSHOT'
 group = 'com.github.groovy-wslite'
+
+codeNarcConfigFileName = "./config/codenarc/codenarc.groovy"
 
 repositories {
     mavenCentral()
