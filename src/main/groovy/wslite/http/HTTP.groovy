@@ -21,21 +21,11 @@ class HTTP {
     static final String CONTENT_TYPE_HEADER = "Content-Type"
 
     static String parseMimeTypeFromContentType(String contentType) {
-        int delim = contentType.indexOf(';')
-        return (delim < 1) ? contentType : contentType[0..delim-1]
+        return new ContentTypeHeader(contentType).mediaType
     }
 
     static String parseCharsetParamFromContentType(String contentType) {
-        if (!contentType) {
-            return null
-        }
-        int start = contentType.toLowerCase().indexOf("charset=")
-        if (start == -1) return null
-        String charset = contentType.substring(start)
-        int end = charset.indexOf(' ')
-        if (end != -1) charset = charset.substring(0, end)
-        charset = charset.split("=")[1]
-        return charset?.replaceAll(/[^A-Za-z0-9-.:_]/, "")
+        return new ContentTypeHeader(contentType).charset
     }
 
     static Map urlEncodedStringToMap(String urlencoded) {
