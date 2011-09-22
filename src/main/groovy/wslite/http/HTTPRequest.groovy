@@ -29,6 +29,8 @@ class HTTPRequest {
     String sslTrustStoreFile
     String sslTrustStorePassword
 
+    Proxy proxy
+
     HTTPHeaderMap headers = [:] as HTTPHeaderMap
 
     byte[] data = null

@@ -32,7 +32,7 @@ class HTTPConnectionFactory {
         ] as X509TrustManager
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, [trustingTrustManager] as TrustManager[], null)
-        def conn = getConnection(url)
+        def conn = getConnection(url, proxy)
         conn.setSSLSocketFactory(sc.getSocketFactory())
         conn.setHostnameVerifier({arg0, arg1 -> return true} as HostnameVerifier)
         return conn
@@ -54,7 +54,7 @@ class HTTPConnectionFactory {
         def sc = SSLContext.getInstance("SSL")
         sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom())
 
-        def conn = getConnection(url)
+        def conn = getConnection(url, proxy)
         conn.setSSLSocketFactory(sc.getSocketFactory())
 
         return conn

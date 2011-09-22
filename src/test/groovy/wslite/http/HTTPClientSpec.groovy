@@ -149,6 +149,72 @@ class HTTPClientSpec extends Specification {
         null == conn.requestProperties["javax.net.ssl.trustStorePassword"]
     }
 
+    def "proxy setting in client"() {
+        given:
+        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080)) 
+
+        def testurl = "https://foo.org".toURL()
+
+        when:
+        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        httpc.execute(request)
+
+        then:
+        1 * httpc.httpConnectionFactory.getConnection(testurl, httpc.proxy) >> {url, proxy -> conn.URL = url; conn}
+    }
+
+    def "proxy with TrustAllSSLCerts"() {
+        given:
+        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+        httpc.sslTrustAllCerts = true
+        def testurl = "https://foo.org".toURL()
+
+        when:
+        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        httpc.execute(request)
+
+        then:
+        1 * httpc.httpConnectionFactory.getConnectionTrustAllSSLCerts(testurl, httpc.proxy) >> {url, proxy -> conn.URL = url; conn}
+    }
+
+    def "proxy with TrustStore"() {
+        given:
+        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+        httpc.sslTrustStoreFile = "~/test.jks"
+        httpc.sslTrustStorePassword = "test"
+        def testurl = "https://foo.org".toURL()
+
+        when:
+        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        httpc.execute(request)
+
+        then:
+        1 * httpc.httpConnectionFactory.getConnectionUsingTrustStore(
+                testurl,
+                httpc.sslTrustStoreFile,
+                httpc.sslTrustStorePassword,
+                httpc.proxy) >> {url, truststore, password, proxy -> conn.URL = url; conn}
+    }
+
+    def "proxy setting in request will override client"() {
+        given:
+        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+        def testurl = "https://foo.org".toURL()
+        def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy2.example.com', 80))
+
+        when:
+        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        request.proxy = testproxy
+        httpc.execute(request)
+
+        then:
+        1 * httpc.httpConnectionFactory.getConnection(testurl, testproxy) >> {url, proxy -> conn.URL = url; conn}
+    }
 }
 
 class MockHTTPClientConnection {
