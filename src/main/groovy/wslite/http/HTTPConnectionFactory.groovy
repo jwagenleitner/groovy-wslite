@@ -30,7 +30,7 @@ class HTTPConnectionFactory {
                 checkClientTrusted: { arg0, arg1 -> },
                 checkServerTrusted: {arg0, arg1 -> }
         ] as X509TrustManager
-        SSLContext sc = SSLContext.getInstance("SSL");
+        SSLContext sc = SSLContext.getInstance('SSL')
         sc.init(null, [trustingTrustManager] as TrustManager[], null)
         def conn = getConnection(url, proxy)
         conn.setSSLSocketFactory(sc.getSocketFactory())
@@ -38,7 +38,8 @@ class HTTPConnectionFactory {
         return conn
     }
 
-    def getConnectionUsingTrustStore(URL url, String trustStoreFile, String trustStorePassword, Proxy proxy=Proxy.NO_PROXY) {
+    def getConnectionUsingTrustStore(URL url, String trustStoreFile, String trustStorePassword,
+                                     Proxy proxy=Proxy.NO_PROXY) {
         InputStream tsFile = new FileInputStream(new File(trustStoreFile))
         char[] tsPassword = trustStorePassword?.getChars()
 
@@ -51,7 +52,7 @@ class HTTPConnectionFactory {
         def tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
         tmf.init(keyStore)
 
-        def sc = SSLContext.getInstance("SSL")
+        def sc = SSLContext.getInstance('SSL')
         sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom())
 
         def conn = getConnection(url, proxy)

@@ -16,13 +16,11 @@ package wslite.http
 
 class HTTP {
 
-    static final String DEFAULT_CHARSET = "ISO-8859-1" // http://tools.ietf.org/html/rfc2616#section-3.7.1
+    static final String DEFAULT_CHARSET = 'ISO-8859-1' // http://tools.ietf.org/html/rfc2616#section-3.7.1
 
-    static final String CONTENT_TYPE_HEADER = "Content-Type"
-
-    static String parseMimeTypeFromContentType(String contentType) {
-        return new ContentTypeHeader(contentType).mediaType
-    }
+    static final String CONTENT_TYPE_HEADER = 'Content-Type'
+    static final String CONTENT_LENGTH_HEADER = 'Content-Length'
+    static final String AUTHORIZATION_HEADER = 'Authorization'
 
     static String parseCharsetParamFromContentType(String contentType) {
         return new ContentTypeHeader(contentType).charset
@@ -30,10 +28,10 @@ class HTTP {
 
     static Map urlEncodedStringToMap(String urlencoded) {
         Map params = [:]
-        def pairs = urlencoded.split("&")
+        def pairs = urlencoded.split('&')
         String key, value
         for (pair in pairs) {
-            (key, value) = pair.split("=")
+            (key, value) = pair.split('=')
             key = URLDecoder.decode(key)
             value = URLDecoder.decode(value)
             if (!params.containsKey(key)) {
@@ -41,7 +39,7 @@ class HTTP {
                 continue
             }
             def existingValue = params[key]
-            if (existingValue && existingValue instanceof List) {
+            if (existingValue instanceof List) {
                 params[key] << value
             } else {
                 params[key] = [existingValue, value]
@@ -56,7 +54,7 @@ class HTTP {
         }
         def encodedList = []
         for (entry in params) {
-            if (entry.value != null && entry.value instanceof List) {
+            if (entry.value instanceof List) {
                 for (item in entry.value) {
                     encodedList << urlEncodePair(entry.key, item)
                 }
@@ -68,8 +66,10 @@ class HTTP {
     }
 
     private static String urlEncodePair(key, value) {
-        if (!key) return ""
-        value = value ?: ""
+        if (!key) {
+            return ''
+        }
+        value = value ?: ''
         return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
     }
 

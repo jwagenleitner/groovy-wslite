@@ -41,12 +41,12 @@ class HTTPResponseSpec extends Specification {
 
     def "content-type and charset"() {
         expect:
-        def response = new HTTPResponse(contentType: contentType)
-        response.contentType == type
+        def response = new HTTPResponse(contentTypeHeader: new ContentTypeHeader(contentType))
+        response.mediaType == mediaType
         response.charset == charset
 
         where:
-        contentType                                  | type                       | charset
+        contentType                                  | mediaType                  | charset
         "text/xml; charset=UTF-8"                    | "text/xml"                 | "UTF-8"
         "application/json;charset=US-ASCII"          | "application/json"         | "US-ASCII"
         "application/octet-stream"                   | "application/octet-stream" | null

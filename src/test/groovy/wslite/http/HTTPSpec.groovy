@@ -18,19 +18,6 @@ import spock.lang.*
 
 class HTTPSpec extends Specification {
 
-    def "parses mime type from content-type header"() {
-        expect:
-        mimeType == HTTP.parseMimeTypeFromContentType(contentType)
-
-        where:
-        contentType                             | mimeType
-        "application/xml"                       | "application/xml"
-        "application/xml;charset=UTF-8"         | "application/xml"
-        "application/soap+xml; charset=UTF-8"   | "application/soap+xml"
-        "application/vnd.json+xml"              | "application/vnd.json+xml"
-        'application/soap+xml; action="urn:echoResponse";charset=UTF-16' | "application/soap+xml"
-    }
-
     def "parses charset from content-type header"() {
         expect:
         charset == HTTP.parseCharsetParamFromContentType(contentType)

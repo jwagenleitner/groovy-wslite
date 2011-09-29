@@ -22,7 +22,6 @@ class HTTPResponse {
     int statusCode
     String statusMessage
     String contentType
-    String charset
     String contentEncoding
     int contentLength
     Date date
@@ -32,22 +31,29 @@ class HTTPResponse {
     HTTPHeaderMap headers
     byte[] data
 
+    private ContentTypeHeader contentTypeHeader
+
+    void setContentType(String contentType) {
+        contentTypeHeader = new ContentTypeHeader(contentType)
+        this.contentType = contentTypeHeader.mediaType
+    }
+
     Map getHeaders() {
         return Collections.unmodifiableMap(headers)
     }
 
-    void setContentType(String contentType) {
-        if (!contentType) {
-            this.contentType = null
-            this.charset = null
-            return
-        }
-        this.contentType = HTTP.parseMimeTypeFromContentType(contentType)
-        this.charset = HTTP.parseCharsetParamFromContentType(contentType)
+    String getMediaType() {
+        return contentTypeHeader?.mediaType
+    }
+
+    String getCharset() {
+        return contentTypeHeader?.charset
     }
 
     String getContentAsString() {
-        if (!data) return ""
+        if (!data) {
+            return ''
+        }
         return new String(data, charset ?: HTTP.DEFAULT_CHARSET)
     }
 

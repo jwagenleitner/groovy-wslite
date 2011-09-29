@@ -20,16 +20,15 @@ class HTTPClient {
 
     int connectTimeout = 0
     int readTimeout = 0
-
-    boolean useCaches = false
     boolean followRedirects = true
+    boolean useCaches
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
 
     Proxy proxy = Proxy.NO_PROXY
 
-    def defaultHeaders = [Connection:"Close"]
+    def defaultHeaders = [Connection:'Close']
 
     HTTPConnectionFactory httpConnectionFactory
     HTTPAuthorization authorization
@@ -43,22 +42,26 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
-        def conn = createConnection(request)
-        setupConnection(conn, request)
+        if (!(request?.url && request?.method)) {
+            throw new IllegalArgumentException('HTTP Request must contain a url and method')
+        }
         HTTPResponse response
+        def conn
         try {
-            doOutput(conn, request.data)
-            response = buildResponse(conn, doInput(conn))
+            conn = createConnection(request)
+            setupConnection(conn, request)
+            response = buildResponse(conn, conn.inputStream?.bytes)
         } catch(Exception ex) {
-            response = buildResponse(conn, conn.getErrorStream()?.bytes)
-            throw new HTTPClientException(response.statusCode + " " + response.statusMessage, ex, request, response)
+            response = buildResponse(conn, conn.errorStream?.bytes)
+            throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
+                    ex, request, response)
         } finally {
             conn.disconnect()
         }
         return response
     }
 
-    private def createConnection(HTTPRequest request) {
+    private createConnection(HTTPRequest request) {
         def usedProxy = request.proxy ?: proxy
         if (isSecureConnectionRequest(request)) {
             if (shouldTrustAllSSLCerts(request)) {
@@ -74,14 +77,15 @@ class HTTPClient {
                     trustStoreFile = sslTrustStoreFile
                     trustStorePassword = sslTrustStorePassword
                 }
-                return httpConnectionFactory.getConnectionUsingTrustStore(request.url, trustStoreFile, trustStorePassword, usedProxy)
+                return httpConnectionFactory.getConnectionUsingTrustStore(request.url,
+                        trustStoreFile, trustStorePassword, usedProxy)
             }
         }
         return httpConnectionFactory.getConnection(request.url, usedProxy)
     }
 
     private boolean isSecureConnectionRequest(HTTPRequest request) {
-        return request.url.getProtocol().toLowerCase() == "https"
+        return request.url.protocol.toLowerCase() == 'https'
     }
 
     private boolean shouldTrustAllSSLCerts(HTTPRequest request) {
@@ -100,6 +104,11 @@ class HTTPClient {
         conn.setInstanceFollowRedirects(request.isFollowRedirectsSet ? request.followRedirects : followRedirects)
         setRequestHeaders(conn, request)
         setAuthorizationHeader(conn)
+        if (request.data) {
+            conn.setDoOutput(true)
+            conn.addRequestProperty(HTTP.CONTENT_LENGTH_HEADER, "${request.data.size()}")
+            conn.outputStream.bytes = request.data
+        }
     }
 
     private void setRequestHeaders(conn, request) {
@@ -112,41 +121,30 @@ class HTTPClient {
     }
 
     private void setAuthorizationHeader(conn) {
-        if (!authorization) return
-        authorization.authorize(conn)
-    }
-
-    private void doOutput(conn, content) {
-        if (content) {
-            conn.setDoOutput(true)
-            conn.addRequestProperty("Content-Length", "${content.size()}")
-            conn.getOutputStream().bytes = content
+        if (authorization) {
+            authorization.authorize(conn)
         }
     }
 
-    private byte[] doInput(conn) {
-        return conn.getInputStream().bytes
-    }
-
-    private HTTPResponse buildResponse(conn, data) {
+    private HTTPResponse buildResponse(conn, responseData) {
         def response = new HTTPResponse()
-        response.data = data
-        response.statusCode = conn.getResponseCode()
-        response.statusMessage = conn.getResponseMessage()
-        response.url = conn.getURL()
-        response.contentEncoding = conn.getContentEncoding()
-        response.contentLength = conn.getContentLength()
-        response.contentType = conn.getContentType()
-        response.date = new Date(conn.getDate())
-        response.expiration = new Date(conn.getExpiration())
-        response.lastModified = new Date(conn.getLastModified())
+        response.data = responseData
+        response.statusCode = conn.responseCode
+        response.statusMessage = conn.responseMessage
+        response.url = conn.URL
+        response.contentEncoding = conn.contentEncoding
+        response.contentLength = conn.contentLength
+        response.contentType = conn.contentType
+        response.date = new Date(conn.date)
+        response.expiration = new Date(conn.expiration)
+        response.lastModified = new Date(conn.lastModified)
         response.headers = headersToMap(conn)
         return response
     }
 
-    private def headersToMap(conn) {
+    private HTTPHeaderMap headersToMap(conn) {
         def headers = new HTTPHeaderMap()
-        for (entry in conn.getHeaderFields()) {
+        for (entry in conn.headerFields) {
             headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
         return headers

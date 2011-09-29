@@ -15,12 +15,13 @@
 package wslite.http
 
 enum HTTPMethod {
-    GET("GET"),
-    POST("POST"),
-    PUT("PUT"),
-    DELETE("DELETE")
 
-    String method
+    GET('GET'),
+    POST('POST'),
+    PUT('PUT'),
+    DELETE('DELETE')
+
+    private String method
 
     HTTPMethod(String method) {
         this.method = method
@@ -30,4 +31,5 @@ enum HTTPMethod {
     String toString() {
         return method
     }
+
 }

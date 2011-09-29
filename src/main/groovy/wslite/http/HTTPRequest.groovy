@@ -17,14 +17,14 @@ package wslite.http
 import wslite.util.ObjectHelper
 
 class HTTPRequest {
+
     URL url
     HTTPMethod method
 
     int connectTimeout = 0
     int readTimeout = 0
-
-    boolean useCaches = false
     boolean followRedirects = true
+    boolean useCaches
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
@@ -35,7 +35,11 @@ class HTTPRequest {
 
     byte[] data = null
 
-    boolean isConnectTimeoutSet, isReadTimeoutSet, isUseCachesSet, isFollowRedirectsSet, isSSLTrustAllCertsSet
+    boolean isConnectTimeoutSet
+    boolean isReadTimeoutSet
+    boolean isUseCachesSet
+    boolean isFollowRedirectsSet
+    boolean isSSLTrustAllCertsSet
 
     void setConnectTimeout(int timeout) {
         this.connectTimeout = timeout
@@ -63,18 +67,27 @@ class HTTPRequest {
     }
 
     String getContentAsString() {
-        if (!data) return ""
-        String charset = HTTP.DEFAULT_CHARSET
-        if (headers['Content-Type']) {
-            charset = HTTP.parseCharsetParamFromContentType(headers['Content-Type']) ?: charset
+        if (!data) {
+            return ''
         }
         return new String(data, charset)
     }
 
+    private String getCharset() {
+        return contentTypeHeader.charset ?: HTTP.DEFAULT_CHARSET
+    }
+
+    private ContentTypeHeader getContentTypeHeader() {
+        return new ContentTypeHeader(headers[HTTP.CONTENT_TYPE_HEADER])
+    }
+
     @Override
     String toString() {
-        def excludes = ['isConnectTimeoutSet', 'isReadTimeoutSet', 'isUseCachesSet', 'isFollowRedirectsSet',
-                        'isSSLTrustAllCertsSet', 'sslTrustStorePassword', 'data', 'contentAsString']
+        def excludes = ['isConnectTimeoutSet', 'isReadTimeoutSet',
+                        'isUseCachesSet', 'isFollowRedirectsSet',
+                        'isSSLTrustAllCertsSet', 'sslTrustStorePassword',
+                        'data', 'contentAsString', 'charset', 'contentTypeHeader']
         ObjectHelper.dump(this, exclude:excludes)
     }
+
 }

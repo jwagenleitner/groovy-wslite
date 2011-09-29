@@ -14,6 +14,7 @@
  */
 package wslite.http.auth
 
+import wslite.http.HTTP
 import wslite.util.ObjectHelper
 
 class HTTPBasicAuthorization implements HTTPAuthorization {
@@ -23,9 +24,7 @@ class HTTPBasicAuthorization implements HTTPAuthorization {
 
     private String authorization
 
-    HTTPBasicAuthorization() {
-
-    }
+    HTTPBasicAuthorization() { }
 
     HTTPBasicAuthorization(String username, String password) {
         this.username = username
@@ -34,35 +33,36 @@ class HTTPBasicAuthorization implements HTTPAuthorization {
 
     void setUsername(String username) {
         this.username = username
-        this.authorization = null
+        authorization = null
     }
 
     void setPassword(String password) {
         this.password = password
-        this.authorization = null
+        authorization = null
     }
 
     String getUsername() {
-        return this.username
+        return username
     }
 
     String getPassword() {
-        return this.password
+        return password
     }
 
     void authorize(conn) {
-        conn.addRequestProperty("Authorization", getAuthorization())
+        conn.addRequestProperty(HTTP.AUTHORIZATION_HEADER, getAuthorization())
     }
 
     private String getAuthorization() {
-        if (!this.authorization) {
-            this.authorization = "Basic " + "${username}:${password}".toString().bytes.encodeBase64()
+        if (!authorization) {
+            authorization = 'Basic ' + "${username}:${password}".toString().bytes.encodeBase64()
         }
-        return this.authorization
+        return authorization
     }
 
     @Override
     String toString() {
         ObjectHelper.dump(this, include:['username'])
     }
+
 }

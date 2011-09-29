@@ -41,7 +41,9 @@ class HTTPHeaderMap<String,String> extends LinkedHashMap<String, String> {
     }
 
     private String getKeyIgnoreCase(String key) {
-        if (!key) return key
+        if (!key) {
+            return key
+        }
         for (k in this.keySet()) {
             if (k && k.toLowerCase() == key.toLowerCase()) {
                 return k
@@ -49,4 +51,5 @@ class HTTPHeaderMap<String,String> extends LinkedHashMap<String, String> {
         }
         return null
     }
+
 }
