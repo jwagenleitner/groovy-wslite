@@ -39,19 +39,4 @@ class HTTPResponseSpec extends Specification {
         null == resp.headers.newKey
     }
 
-    def "content-type and charset"() {
-        expect:
-        def response = new HTTPResponse(contentTypeHeader: new ContentTypeHeader(contentType))
-        response.mediaType == mediaType
-        response.charset == charset
-
-        where:
-        contentType                                  | mediaType                  | charset
-        "text/xml; charset=UTF-8"                    | "text/xml"                 | "UTF-8"
-        "application/json;charset=US-ASCII"          | "application/json"         | "US-ASCII"
-        "application/octet-stream"                   | "application/octet-stream" | null
-        "application/xml; charset=ISO-8859-1 mode=r" | "application/xml"          | "ISO-8859-1"
-        "text/csv;   CHARSET=utf-8"                  | "text/csv"                 | "utf-8"
-    }
-
 }

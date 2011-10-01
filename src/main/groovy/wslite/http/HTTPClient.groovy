@@ -134,7 +134,9 @@ class HTTPClient {
         response.url = conn.URL
         response.contentEncoding = conn.contentEncoding
         response.contentLength = conn.contentLength
-        response.contentType = conn.contentType
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(conn.contentType)
+        response.contentType = contentTypeHeader.mediaType
+        response.charset = contentTypeHeader.charset
         response.date = new Date(conn.date)
         response.expiration = new Date(conn.expiration)
         response.lastModified = new Date(conn.lastModified)

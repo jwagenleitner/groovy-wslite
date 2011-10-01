@@ -41,29 +41,29 @@ class HTTPRequest {
     boolean isFollowRedirectsSet
     boolean isSSLTrustAllCertsSet
 
-    void setConnectTimeout(int timeout) {
-        this.connectTimeout = timeout
-        this.isConnectTimeoutSet = true
+    void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout
+        isConnectTimeoutSet = true
     }
 
-    void setReadTimeout(int timeout) {
-        this.readTimeout = timeout
-        this.isReadTimeoutSet = true
+    void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout
+        isReadTimeoutSet = true
     }
 
     void setUseCaches(boolean useCaches) {
         this.useCaches = useCaches
-        this.isUseCachesSet = true
+        isUseCachesSet = true
     }
 
     void setFollowRedirects(boolean followRedirects) {
         this.followRedirects = followRedirects
-        this.isFollowRedirectsSet = true
+        isFollowRedirectsSet = true
     }
 
     void setSslTrustAllCerts(boolean sslTrustAllCerts) {
         this.sslTrustAllCerts = sslTrustAllCerts
-        this.isSSLTrustAllCertsSet = true
+        isSSLTrustAllCertsSet = true
     }
 
     String getContentAsString() {
