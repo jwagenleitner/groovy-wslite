@@ -215,6 +215,32 @@ class HTTPClientSpec extends Specification {
         then:
         1 * httpc.httpConnectionFactory.getConnection(testurl, testproxy) >> {url, proxy -> conn.URL = url; conn}
     }
+
+    def 'will use default headers if not already set'() {
+        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
+        httpc.defaultHeaders['x-foo'] = 'bar'
+        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+
+        when:
+        httpc.execute(request)
+
+        then:
+        conn.requestProperties['x-foo'] == 'bar'
+    }
+
+    def 'request headers will override default headers'() {
+        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
+        httpc.defaultHeaders['x-foo'] = 'bar'
+        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+        request.headers['x-foo'] = 'baz'
+
+        when:
+        httpc.execute(request)
+
+        then:
+        conn.requestProperties['x-foo'] == 'baz'
+    }
+
 }
 
 class MockHTTPClientConnection {
@@ -234,7 +260,10 @@ class MockHTTPClientConnection {
         requestProperties[k] = v
     }
     def addRequestProperty(k, v) {
-        if (!requestProperties[k]) requestProperties[k] = v
+        requestProperties[k] << v
+    }
+    def getRequestProperty(k) {
+        return requestProperties[k]
     }
     boolean doOutput
     boolean doInput

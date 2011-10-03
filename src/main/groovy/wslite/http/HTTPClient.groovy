@@ -106,7 +106,9 @@ class HTTPClient {
         setAuthorizationHeader(conn)
         if (request.data) {
             conn.setDoOutput(true)
-            conn.addRequestProperty(HTTP.CONTENT_LENGTH_HEADER, "${request.data.size()}")
+            if (conn.getRequestProperty(HTTP.CONTENT_LENGTH_HEADER) == null) {
+                conn.setRequestProperty(HTTP.CONTENT_LENGTH_HEADER, "${request.data.size()}")
+            }
             conn.outputStream.bytes = request.data
         }
     }
@@ -116,7 +118,9 @@ class HTTPClient {
             conn.setRequestProperty(entry.key, entry.value)
         }
         for (entry in defaultHeaders) {
-            conn.addRequestProperty(entry.key, entry.value)
+            if (conn.getRequestProperty(entry.key) == null) {
+                conn.setRequestProperty(entry.key, entry.value)
+            }
         }
     }
 
