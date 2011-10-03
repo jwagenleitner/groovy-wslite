@@ -27,50 +27,11 @@ class HTTP {
     }
 
     static Map urlEncodedStringToMap(String urlencoded) {
-        Map params = [:]
-        def pairs = urlencoded.split('&')
-        String key, value
-        for (pair in pairs) {
-            (key, value) = pair.split('=')
-            key = URLDecoder.decode(key)
-            value = URLDecoder.decode(value)
-            if (!params.containsKey(key)) {
-                params[key] = value
-                continue
-            }
-            def existingValue = params[key]
-            if (existingValue instanceof List) {
-                params[key] << value
-            } else {
-                params[key] = [existingValue, value]
-            }
-        }
-        return params
+        return new wslite.rest.URLParametersCodec().decode(urlencoded)
     }
 
     static String mapToURLEncodedString(params) {
-        if (!params || !(params instanceof Map)) {
-            return null
-        }
-        def encodedList = []
-        for (entry in params) {
-            if (entry.value instanceof List) {
-                for (item in entry.value) {
-                    encodedList << urlEncodePair(entry.key, item)
-                }
-                continue
-            }
-            encodedList << urlEncodePair(entry.key, entry.value)
-        }
-        return encodedList.join('&')
-    }
-
-    private static String urlEncodePair(key, value) {
-        if (!key) {
-            return ''
-        }
-        value = value ?: ''
-        return "${URLEncoder.encode(key.toString())}=${URLEncoder.encode(value.toString())}"
+        return new wslite.rest.URLParametersCodec().encode(params)
     }
 
 }
