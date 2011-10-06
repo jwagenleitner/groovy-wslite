@@ -31,7 +31,7 @@ class HTTPRequest {
 
     Proxy proxy
 
-    HTTPHeaderMap headers = [:] as HTTPHeaderMap
+    Map<String, String> headers = new HTTPHeaderMap<String, String>()
 
     byte[] data = null
 
@@ -40,6 +40,10 @@ class HTTPRequest {
     boolean isUseCachesSet
     boolean isFollowRedirectsSet
     boolean isSSLTrustAllCertsSet
+
+    void setHeaders(Map<String, String> map) {
+        headers = new HTTPHeaderMap(map)
+    }
 
     void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout

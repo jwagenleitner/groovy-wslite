@@ -29,11 +29,15 @@ class HTTPResponse {
     Date expiration
     Date lastModified
 
-    HTTPHeaderMap headers
+    Map<String, String> headers = new HTTPHeaderMap<String, String>()
     byte[] data
 
-    Map getHeaders() {
-        return Collections.unmodifiableMap(headers)
+    Map<String, String> getHeaders() {
+        return headers.asImmutable()
+    }
+
+    void setHeaders(Map<String, String> map) {
+        headers = new HTTPHeaderMap(map)
     }
 
     String getContentAsString() {

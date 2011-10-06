@@ -148,8 +148,8 @@ class HTTPClient {
         return response
     }
 
-    private HTTPHeaderMap headersToMap(conn) {
-        def headers = new HTTPHeaderMap()
+    private Map headersToMap(conn) {
+        def headers = [:]
         for (entry in conn.headerFields) {
             headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
