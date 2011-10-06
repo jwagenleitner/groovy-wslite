@@ -16,6 +16,9 @@ apply plugin: 'idea'
 version = '0.4-SNAPSHOT'
 group = 'com.github.groovy-wslite'
 
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
+
 codeNarcConfigFileName = "./config/codenarc/codenarc.groovy"
 
 repositories {
