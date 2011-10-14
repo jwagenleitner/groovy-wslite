@@ -1,5 +1,7 @@
 ## 0.4 (2011-10-14)
 
+* Added per client/request Proxy support
+
 [List of issues resolved] (/jwagenleitner/groovy-wslite/issues?milestone=4&state=closed)
 
 ## 0.3 (2011-09-21)
