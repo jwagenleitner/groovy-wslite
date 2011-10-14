@@ -231,7 +231,7 @@ def response = soapClient.send(proxy:proxy) {
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.3')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
 import wslite.rest.*
 
 def client = new RESTClient("http://www.fresnostatenews.com/feed/")
@@ -419,7 +419,7 @@ __groovy-wslite__ is available in Maven Central.
     <dependency>
         <groupId>com.github.groovy-wslite</groupId>
         <artifactId>groovy-wslite</artifactId>
-        <version>0.3</version>
+        <version>0.4</version>
     </dependency>
 
 #### Snapshots
@@ -435,7 +435,7 @@ __groovy-wslite__ is available in Maven Central.
         <dependency>
             <groupId>com.github.groovy-wslite</groupId>
             <artifactId>groovy-wslite</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -443,12 +443,12 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.3')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
 
 #### Snapshots
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4-SNAPSHOT', changing=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.5-SNAPSHOT', changing=true)
 
 ## Using with Grails
 
@@ -469,7 +469,7 @@ The SOAP/RESTClients can easily be configured and used in your Grails applicatio
             //mavenRepo "https://oss.sonatype.org/content/groups/public"
         }
         dependencies {
-            runtime 'com.github.groovy-wslite:groovy-wslite:0.3'
+            runtime 'com.github.groovy-wslite:groovy-wslite:0.4'
         }
     }
 

@@ -1,3 +1,7 @@
+## 0.4 (2011-10-14)
+
+[List of issues resolved] (/jwagenleitner/groovy-wslite/issues?milestone=4&state=closed)
+
 ## 0.3 (2011-09-21)
 
 [List of issues resolved] (/jwagenleitner/groovy-wslite/issues?sort=created&direction=desc&state=closed&page=1&milestone=2)
