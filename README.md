@@ -15,7 +15,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.3')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
 import wslite.soap.*
 
 def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
