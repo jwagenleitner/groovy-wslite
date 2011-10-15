@@ -12,13 +12,13 @@ ruleset {
     }
     ruleset('rulesets/exceptions.xml') {
         'CatchException' {
-            doNotApplyToClassNames = 'HTTPClient'
+            doNotApplyToClassNames = 'HTTPClient,RESTClient'
         }
     }
     ruleset('rulesets/generic.xml') {
         'StatelessClass' {
             doNotApplyToClassNames = 'HTTPClient,HTTPClientException,HTTPMethod,HTTPRequest,HTTPResponse, ' +
-                    'HTTPBasicAuthorization'
+                    'HTTPBasicAuthorization,RESTClient,ContentBuilder'
         }
     }
     ruleset('rulesets/grails.xml')

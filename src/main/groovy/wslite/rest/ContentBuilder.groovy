@@ -14,6 +14,7 @@
  */
 package wslite.rest
 
+import groovy.xml.*
 import wslite.http.*
 import wslite.json.*
 
@@ -29,6 +30,13 @@ class ContentBuilder {
         this.charset = defaultCharset
     }
 
+    ContentBuilder build(Closure content) {
+        content.resolveStrategy = Closure.DELEGATE_FIRST
+        content.delegate = this
+        content.call()
+        return this
+    }
+
     void type(contentType) {
         this.contentType = contentType?.toString()
     }
@@ -38,31 +46,31 @@ class ContentBuilder {
     }
 
     void bytes(data) {
-        contents["bytes"] = data
+        contents['bytes'] = data
     }
 
     void text(data) {
-        contents["text"] = data?.toString()
+        contents['text'] = data?.toString()
     }
 
     void urlenc(data) {
-        contents["urlenc"] = data
+        contents['urlenc'] = data
     }
 
     void xml(data) {
-        contents["xml"] = data
+        contents['xml'] = data
     }
 
     void json(data) {
-        contents["json"] = data
+        contents['json'] = data
     }
 
     byte[] getData() {
-        if (contents["bytes"]) return contents["bytes"]
-        if (contents["text"]) return contents["text"].getBytes(charset)
-        if (contents["urlenc"]) return HTTP.mapToURLEncodedString(contents["urlenc"]).getBytes(charset)
-        if (contents["xml"]) return closureToXmlString(contents["xml"]).getBytes(charset)
-        if (contents["json"]) return objectToJson(contents["json"]).getBytes(charset)
+        if (contents['bytes']) return contents['bytes']
+        if (contents['text']) return contents['text'].getBytes(charset)
+        if (contents['urlenc']) return HTTP.mapToURLEncodedString(contents['urlenc']).getBytes(charset)
+        if (contents['xml']) return closureToXmlString(contents['xml']).getBytes(charset)
+        if (contents['json']) return objectToJson(contents['json']).getBytes(charset)
         return null
     }
 
@@ -75,23 +83,19 @@ class ContentBuilder {
     }
 
     private String getContentType() {
-        if (contentType) {
-            return contentType
-        }
-        return guessContentType()
+        return contentType ?: guessContentType()
     }
 
     private String guessContentType() {
-        if (contents["bytes"]) return ContentType.BINARY.toString()
-        if (contents["urlenc"]) return ContentType.URLENC.toString()
-        if (contents["xml"]) return ContentType.XML.toString()
-        if (contents["json"]) return ContentType.JSON.toString()
+        if (contents['bytes']) return ContentType.BINARY.toString()
+        if (contents['urlenc']) return ContentType.URLENC.toString()
+        if (contents['xml']) return ContentType.XML.toString()
+        if (contents['json']) return ContentType.JSON.toString()
         return ContentType.TEXT.toString()
     }
 
     private String closureToXmlString(content) {
-        def xml = new groovy.xml.StreamingMarkupBuilder().bind(content)
-        return xml.toString()
+        return new StreamingMarkupBuilder().bind(content).toString()
     }
 
     private String objectToJson(content) {

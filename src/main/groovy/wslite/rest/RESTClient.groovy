@@ -26,7 +26,7 @@ class RESTClient {
 
     def defaultAcceptHeader
     def defaultContentTypeHeader
-    String defaultCharset = "UTF-8"
+    String defaultCharset = 'UTF-8'
 
     RESTClient(HTTPClient client=new HTTPClient()) {
         this.httpClient = client
@@ -41,38 +41,34 @@ class RESTClient {
         this.httpClient.authorization = authorization
     }
 
-    def get(Map params=[:]) {
+    Response get(Map params=[:]) {
         return executeMethod(HTTPMethod.GET, params)
     }
 
-    def delete(Map params=[:]) {
+    Response delete(Map params=[:]) {
         return executeMethod(HTTPMethod.DELETE, params)
     }
 
-    def post(Map params=[:], Closure content) {
+    Response post(Map params=[:], Closure content) {
         return executeMethod(HTTPMethod.POST, params, content)
     }
 
-    def put(Map params=[:], Closure content) {
+    Response put(Map params=[:], Closure content) {
         return executeMethod(HTTPMethod.PUT, params, content)
     }
 
-    def executeMethod(HTTPMethod method, Map params) {
+    private Response executeMethod(HTTPMethod method, Map params) {
         executeMethod(method, params, null)
     }
 
-    def executeMethod(HTTPMethod method, Map params, Closure content) {
-        // make a defensive copy of the params since setDefault* methods are destructive
-        def requestParams = new LinkedHashMap(params ?: [:])
+    private Response executeMethod(HTTPMethod method, Map params, Closure content) {
+        Map requestParams = createRequestParams(params)
         setDefaultAcceptParam(requestParams)
         byte[] data = null
         if (content) {
-            def contentBuilder = new ContentBuilder(defaultContentTypeHeader, defaultCharset)
-            content.resolveStrategy = Closure.DELEGATE_FIRST
-            content.delegate = contentBuilder
-            content.call()
-            setDefaultContentHeader(contentBuilder, requestParams)
-            data = contentBuilder.getData()
+            def contentBuilder = new ContentBuilder(defaultContentTypeHeader, defaultCharset).build(content)
+            setDefaultContentHeader(requestParams, contentBuilder.contentTypeHeader)
+            data = contentBuilder.data
         }
         HTTPRequest httpRequest
         HTTPResponse httpResponse
@@ -87,6 +83,16 @@ class RESTClient {
         return buildResponse(httpRequest, httpResponse)
     }
 
+    private createRequestParams(Map params) {
+        Map requestParams = new LinkedHashMap(params ?: [:])
+        Map headerMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
+        if (params.headers) {
+            headerMap.putAll(params.headers)
+        }
+        requestParams.headers = headerMap
+        return requestParams
+    }
+
     private Response buildResponse(httpRequest, httpResponse) {
         Response response
         try {
@@ -98,16 +104,15 @@ class RESTClient {
     }
 
     private void setDefaultAcceptParam(params) {
-        if (!params.containsKey("accept") && defaultAcceptHeader) {
-            params.accept = (defaultAcceptHeader instanceof ContentType) ?
-                             defaultAcceptHeader.getAcceptHeader() : defaultAcceptHeader.toString()
+        if (!params.containsKey('accept') && defaultAcceptHeader) {
+            params.headers[HTTP.ACCEPT_HEADER] = (defaultAcceptHeader instanceof ContentType) ?
+                             defaultAcceptHeader.acceptHeader : defaultAcceptHeader.toString()
         }
     }
 
-    private void setDefaultContentHeader(contentBuilder, params) {
-        if (!params.headers) params.headers = [:]
-        if (!params.headers.containsKey("Content-Type")) {
-            params.headers."Content-Type" = contentBuilder.getContentTypeHeader()
+    private void setDefaultContentHeader(params, contentType) {
+        if (!params.headers.containsKey(HTTP.CONTENT_TYPE_HEADER)) {
+            params.headers[HTTP.CONTENT_TYPE_HEADER] = contentType
         }
     }
 

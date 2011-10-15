@@ -21,6 +21,7 @@ class HTTP {
     static final String CONTENT_TYPE_HEADER = 'Content-Type'
     static final String CONTENT_LENGTH_HEADER = 'Content-Length'
     static final String AUTHORIZATION_HEADER = 'Authorization'
+    static final String ACCEPT_HEADER = 'Accept'
 
     static String parseCharsetParamFromContentType(String contentType) {
         return new ContentTypeHeader(contentType).charset
