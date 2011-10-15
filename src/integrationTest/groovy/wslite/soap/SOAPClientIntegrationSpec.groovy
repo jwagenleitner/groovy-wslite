@@ -55,24 +55,6 @@ class SOAPClientIntegrationSpec extends Specification {
         thrown(SOAPFaultException)
     }
 
-    def "accessing a public SOAP 1.2 service"() {
-        given:
-        def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
-
-        when:
-        def response = soapClient.send {
-            version SOAPVersion.V1_2
-            body {
-                GetWeatherByZipCode(xmlns:"http://www.webservicex.net") {
-                    ZipCode("93657")
-                }
-            }
-        }
-
-        then:
-        "SANGER" == response.GetWeatherByZipCodeResponse.GetWeatherByZipCodeResult.PlaceName.text()
-    }
-
     def "accessing a public SOAP 1.2 service that throws a fault"() {
         given:
         def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
