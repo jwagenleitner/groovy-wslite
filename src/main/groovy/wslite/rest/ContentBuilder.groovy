@@ -20,14 +20,16 @@ import wslite.json.*
 
 class ContentBuilder {
 
-    String contentType
-    String charset
+    byte[] data
 
-    def contents = [:]
+    private String contentType
+    private String charset
+
+    private ContentType dataContentType
 
     ContentBuilder(String defaultContentType, String defaultCharset) {
-        this.contentType = defaultContentType
-        this.charset = defaultCharset
+        contentType = defaultContentType
+        charset = defaultCharset
     }
 
     ContentBuilder build(Closure content) {
@@ -45,53 +47,45 @@ class ContentBuilder {
         this.charset = charset?.toString()
     }
 
-    void bytes(data) {
-        contents['bytes'] = data
+    void bytes(content) {
+        dataContentType = ContentType.BINARY
+        data = content
     }
 
-    void text(data) {
-        contents['text'] = data?.toString()
+    void text(content) {
+        dataContentType = ContentType.TEXT
+        data = content?.toString().getBytes(getCharset())
     }
 
-    void urlenc(data) {
-        contents['urlenc'] = data
+    void urlenc(content) {
+        dataContentType = ContentType.URLENC
+        data = new URLParametersCodec().encode(content).getBytes(getCharset())
     }
 
-    void xml(data) {
-        contents['xml'] = data
+    void xml(content) {
+        dataContentType = ContentType.XML
+        data = closureToXmlString(content).getBytes(getCharset())
     }
 
-    void json(data) {
-        contents['json'] = data
+    void json(content) {
+        dataContentType = ContentType.JSON
+        data = objectToJson(content).getBytes(getCharset())
     }
 
-    byte[] getData() {
-        if (contents['bytes']) return contents['bytes']
-        if (contents['text']) return contents['text'].getBytes(charset)
-        if (contents['urlenc']) return HTTP.mapToURLEncodedString(contents['urlenc']).getBytes(charset)
-        if (contents['xml']) return closureToXmlString(contents['xml']).getBytes(charset)
-        if (contents['json']) return objectToJson(contents['json']).getBytes(charset)
-        return null
+    String getCharset() {
+        return charset ?: HTTP.DEFAULT_CHARSET
     }
 
     String getContentTypeHeader() {
-        String contentTypeHeader = getContentType()
-        if (charset) {
-            contentTypeHeader += "; charset=${charset}"
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(getContentType())
+        if (!contentTypeHeader.charset) {
+            return contentTypeHeader.mediaType + '; charset=' + getCharset()
         }
-        return contentTypeHeader
+        return contentTypeHeader.contentType
     }
 
     private String getContentType() {
-        return contentType ?: guessContentType()
-    }
-
-    private String guessContentType() {
-        if (contents['bytes']) return ContentType.BINARY.toString()
-        if (contents['urlenc']) return ContentType.URLENC.toString()
-        if (contents['xml']) return ContentType.XML.toString()
-        if (contents['json']) return ContentType.JSON.toString()
-        return ContentType.TEXT.toString()
+        return contentType ?: dataContentType.toString()
     }
 
     private String closureToXmlString(content) {

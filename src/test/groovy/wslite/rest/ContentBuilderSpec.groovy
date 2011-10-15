@@ -15,166 +15,161 @@
 package wslite.rest
 
 import spock.lang.*
+import wslite.http.*
 
 class ContentBuilderSpec extends Specification {
 
-    def getBuilder(String contentType, String charset, Closure content) {
-        def contentBuilder = new ContentBuilder(contentType, charset)
-        content.resolveStrategy = Closure.DELEGATE_FIRST
-        content.delegate = contentBuilder
-        content.call()
-        return contentBuilder
-    }
-
-    def getBuilder(Closure content) {
-        return getBuilder(null, null, content)
-    }
-
-    def "default content type and charset"() {
+    def 'default content type and charset'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {}
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {}
 
         then:
-        "text/plain" == builder.contentType
-        "UTF-8" == builder.charset
-        "text/plain; charset=UTF-8" == builder.getContentTypeHeader()
+        'text/plain' == builder.contentType
+        'UTF-8' == builder.charset
+        'text/plain; charset=UTF-8' == builder.getContentTypeHeader()
     }
 
-    def "type overrides content type default"() {
+    def 'type overrides content type default'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            type "application/xml"
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            type 'application/xml'
         }
 
         then:
-        "application/xml" == builder.contentType
+        'application/xml' == builder.contentType
     }
 
-    def "charset overrides charset default"() {
+    def 'charset overrides charset default'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            charset "ISO-8859-1"
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            charset 'ISO-8859-1'
         }
 
         then:
-        "text/plain" == builder.contentType
-        "ISO-8859-1" == builder.charset
-        "text/plain; charset=ISO-8859-1" == builder.getContentTypeHeader()
+        'text/plain' == builder.contentType
+        'ISO-8859-1' == builder.charset
+        'text/plain; charset=ISO-8859-1' == builder.getContentTypeHeader()
     }
 
-    def "bytes"() {
+    def 'bytes'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            bytes "foo".getBytes("UTF-8")
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            bytes 'foo'.getBytes('UTF-8')
         }
 
         then:
-        "foo".getBytes("UTF-8") == builder.getData()
+        'foo'.getBytes('UTF-8') == builder.getData()
     }
 
-    def "text"() {
+    def 'text'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            text "foo"
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            text 'foo'
         }
 
         then:
-        "foo" == new String(builder.getData(), builder.charset)
+        'foo' == new String(builder.getData(), builder.charset)
     }
 
-    def "urlenc"() {
+    def 'urlenc'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            urlenc foo:"bar", q:["one", "two"]
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            urlenc foo:'bar', q:['one', 'two']
         }
 
         then:
-        "foo=bar&q=one&q=two" == new String(builder.getData(), builder.charset)
+        'foo=bar&q=one&q=two' == new String(builder.getData(), builder.charset)
     }
 
-    def "xml"() {
+    def 'xml'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             xml {
                 root()
             }
         }
 
         then:
-        "<root/>" == new String(builder.getData(), builder.charset)
+        '<root/>' == new String(builder.getData(), builder.charset)
     }
 
-    def "json"() {
+    def 'json'() {
         when:
-        def builder = getBuilder("text/plain", "UTF-8") {
-            json employee: [job:[title:"Nuclear Technician", department:"Sector 7g"]]
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            json employee: [job:[title:'Nuclear Technician', department:'Sector 7g']]
         }
 
         then:
-        """{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}""" == new String(builder.getData(), builder.charset)
+        '''{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}''' == new String(builder.getData(), builder.charset)
     }
 
-    def "no default charset"() {
+    def 'no default charset'() {
         when:
-        def builder = getBuilder("text/plain", null) {
+        def builder = new ContentBuilder('text/plain', null).build {
             xml {
                 root()
             }
         }
 
         then:
-        "text/plain" == builder.getContentTypeHeader()
+        "text/plain; charset=${HTTP.DEFAULT_CHARSET}" == builder.getContentTypeHeader()
     }
 
-    def "guesses content type for bytes"() {
+    def 'guesses content type for bytes'() {
         when:
-        def builder = getBuilder(null, null) {
-            bytes "foo".bytes
+        def builder = new ContentBuilder(null, null).build {
+            bytes 'foo'.bytes
         }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
         then:
-        ContentType.BINARY.toString() == builder.getContentTypeHeader()
+        ContentType.BINARY.toString() == contentTypeHeader.mediaType
     }
 
-    def "guesses content type for text"() {
+    def 'guesses content type for text'() {
         when:
-        def builder = getBuilder(null, null) {
-            text "foo"
+        def builder = new ContentBuilder(null, null).build {
+            text 'foo'
         }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
         then:
-        ContentType.TEXT.toString() == builder.getContentTypeHeader()
+        ContentType.TEXT.toString() == contentTypeHeader.mediaType
     }
 
-    def "guesses content type for urlenc"() {
+    def 'guesses content type for urlenc'() {
         when:
-        def builder = getBuilder(null, null) {
-            urlenc "foo":"bar"
+        def builder = new ContentBuilder(null, null).build {
+            urlenc 'foo':'bar'
         }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
         then:
-        ContentType.URLENC.toString() == builder.getContentTypeHeader()
+        ContentType.URLENC.toString() == contentTypeHeader.mediaType
     }
 
-    def "guesses content type for xml"() {
+    def 'guesses content type for xml'() {
         when:
-        def builder = getBuilder(null, null) {
+        def builder = new ContentBuilder(null, null).build {
             xml {
                 foo()
             }
         }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
         then:
-        ContentType.XML.toString() == builder.getContentTypeHeader()
+        ContentType.XML.toString() == contentTypeHeader.mediaType
     }
 
-    def "guesses content type for json"() {
+    def 'guesses content type for json'() {
         when:
-        def builder = getBuilder(null, null) {
-            json id: "12345", department: "Finance"
+        def builder = new ContentBuilder(null, null).build {
+            json id: '12345', department: 'Finance'
         }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
         then:
-        ContentType.JSON.toString() == builder.getContentTypeHeader()
+        ContentType.JSON.toString() == contentTypeHeader.mediaType
     }
+
 }
