@@ -18,20 +18,16 @@ import wslite.http.*
 
 class RequestBuilder {
 
-    RequestBuilder() {
-
-    }
-
     HTTPRequest build(HTTPMethod method, String url, Map params, byte[] data) {
         if (!method || !url) {
-            throw new IllegalArgumentException("URL and Method are required")
+            throw new IllegalArgumentException('URL and Method are required')
         }
         params = new LinkedHashMap(params ?: [:])
-        def path = params?.remove("path")
-        def query = params?.remove("query")
-        def accept = params?.remove("accept")
-        def headers = new HTTPHeaderMap(params?.remove("headers") ?: [:])
-        if (accept && !headers.containsKey("Accept")) {
+        def path = params?.remove('path')
+        def query = params?.remove('query')
+        def accept = params?.remove('accept')
+        def headers = new HTTPHeaderMap(params?.remove('headers') ?: [:])
+        if (accept && !headers.containsKey('Accept')) {
             headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
         }
         HTTPRequest request = new HTTPRequest(params ?: [:])
@@ -44,12 +40,12 @@ class RequestBuilder {
 
     private URL buildURL(url, path, query) {
         def target = new StringBuilder(url)
-        if (path && path != "/") {
-            url.endsWith("/") ?: target.append('/')
-            path.startsWith("/") ? target.append(path[1..-1]) : target.append(path)
+        if (path && path != '/') {
+            url.endsWith('/') ?: target.append('/')
+            path.startsWith('/') ? target.append(path[1..-1]) : target.append(path)
         }
         if (query) {
-            target.indexOf("?") == -1 ? target.append("?") : target.append("&")
+            target.indexOf('?') == -1 ? target.append('?') : target.append('&')
             target.append(HTTP.mapToURLEncodedString(query))
         }
         return new URL(target.toString())

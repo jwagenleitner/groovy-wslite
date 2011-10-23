@@ -82,7 +82,7 @@ class SOAPClient {
     private SOAPResponse buildSOAPResponse(httpRequest, httpResponse) {
         SOAPResponse response
         try {
-            String soapMessageText = httpResponse.getContentAsString()
+            String soapMessageText = httpResponse.contentAsString
             def soapEnvelope = parseEnvelope(soapMessageText)
             response = new SOAPResponse(httpRequest:httpRequest,
                                         httpResponse:httpResponse,
@@ -94,14 +94,14 @@ class SOAPClient {
         return response
     }
 
-    private def parseEnvelope(String soapMessageText) {
+    private parseEnvelope(String soapMessageText) {
         def envelopeNode = new XmlSlurper().parseText(soapMessageText)
         if (envelopeNode.name() != SOAP.ENVELOPE_ELEMENT_NAME) {
-            throw new IllegalStateException("Root element is " + envelopeNode.name() +
-                    ", expected " + SOAP.ENVELOPE_ELEMENT_NAME)
+            throw new IllegalStateException('Root element is ' + envelopeNode.name() +
+                    ', expected ' + SOAP.ENVELOPE_ELEMENT_NAME)
         }
         if (envelopeNode."${SOAP.BODY_ELEMENT_NAME}".isEmpty()) {
-            throw new IllegalStateException(SOAP.BODY_ELEMENT_NAME + " element is missing")
+            throw new IllegalStateException(SOAP.BODY_ELEMENT_NAME + ' element is missing')
         }
         return envelopeNode
     }

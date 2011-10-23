@@ -20,7 +20,7 @@ class SOAPFaultException extends Exception {
     SOAPResponse response
 
     SOAPFaultException(SOAPResponse response) {
-        super(parseFaultCode(response) + " - " + parseFaultReason(response))
+        super(parseFaultCode(response) + ' - ' + parseFaultReason(response))
         this.response = response
     }
 
@@ -28,7 +28,7 @@ class SOAPFaultException extends Exception {
         String faultCode
         switch (faultResponse.soapVersion) {
             case SOAPVersion.V1_1:
-                faultCode = faultResponse.fault.":faultcode".text()
+                faultCode = faultResponse.fault.':faultcode'.text()
                 break
             case SOAPVersion.V1_2:
                 faultCode = faultResponse.fault."${SOAP.SOAP_NS_PREFIX}:Code"."${SOAP.SOAP_NS_PREFIX}:Value".text()
@@ -41,7 +41,7 @@ class SOAPFaultException extends Exception {
         String faultReason
         switch (faultResponse.soapVersion) {
             case SOAPVersion.V1_1:
-                faultReason = faultResponse.fault.":faultstring".text()
+                faultReason = faultResponse.fault.':faultstring'.text()
                 break
             case SOAPVersion.V1_2:
                 faultReason = faultResponse.fault."${SOAP.SOAP_NS_PREFIX}:Reason"."${SOAP.SOAP_NS_PREFIX}:Text".text()

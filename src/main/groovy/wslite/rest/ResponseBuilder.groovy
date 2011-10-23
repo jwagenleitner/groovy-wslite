@@ -21,10 +21,6 @@ import wslite.json.JSONObject
 
 class ResponseBuilder {
 
-    ResponseBuilder() {
-
-    }
-
     Response build(HTTPRequest httpRequest, HTTPResponse httpResponse) {
         Response response = new Response(httpRequest, httpResponse)
         if (isTextResponse(httpResponse)) {
@@ -41,7 +37,7 @@ class ResponseBuilder {
     }
 
     private boolean isTextResponse(HTTPResponse httpResponse) {
-        return httpResponse.contentType?.startsWith("text/") ||
+        return httpResponse.contentType?.startsWith('text/') ||
                httpResponse.contentType in ( ContentType.TEXT.getContentTypeList() +
                                              ContentType.HTML.getContentTypeList() +
                                              ContentType.XML.getContentTypeList()  +
@@ -56,12 +52,12 @@ class ResponseBuilder {
         return httpResponse.contentType in ContentType.JSON.getContentTypeList()
     }
 
-    private def parseXmlContent(String content) {
+    private parseXmlContent(String content) {
         return new XmlSlurper().parseText(content)
     }
 
-    private def parseJsonContent(String content) {
-        return content.trim().startsWith("[") ? new JSONArray(content) : new JSONObject(content)
+    private parseJsonContent(String content) {
+        return content.trim().startsWith('[') ? new JSONArray(content) : new JSONObject(content)
     }
 
 }

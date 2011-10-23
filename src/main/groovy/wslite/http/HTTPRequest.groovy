@@ -74,11 +74,11 @@ class HTTPRequest {
         if (!data) {
             return ''
         }
-        return new String(data, charset)
+        return new String(data, getCharset())
     }
 
     private String getCharset() {
-        return contentTypeHeader.charset ?: HTTP.DEFAULT_CHARSET
+        return getContentTypeHeader().charset ?: HTTP.DEFAULT_CHARSET
     }
 
     private ContentTypeHeader getContentTypeHeader() {

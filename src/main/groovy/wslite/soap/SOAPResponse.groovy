@@ -41,7 +41,7 @@ class SOAPResponse {
                 break
         }
         if (!namespace) {
-            throw new IllegalStateException("No SOAP 1.1 or 1.2 Envelope found")
+            throw new IllegalStateException('No SOAP 1.1 or 1.2 Envelope found')
         }
         envelope.declareNamespace(namespace)
     }

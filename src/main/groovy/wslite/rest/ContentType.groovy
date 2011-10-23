@@ -15,13 +15,13 @@
 package wslite.rest
 
 enum ContentType {
-    JSON(["application/json","application/javascript","text/javascript","text/json"]),
-    XML(["application/xml","text/xml","application/xhtml+xml","application/atom+xml"]),
-    HTML(["text/html"]),
-    URLENC(["application/x-www-form-urlencoded"]),
-    BINARY(["application/octet-stream"]),
-    TEXT(["text/plain"]),
-    ANY(["*/*"])
+    JSON(['application/json', 'application/javascript', 'text/javascript', 'text/json']),
+    XML(['application/xml', 'text/xml', 'application/xhtml+xml', 'application/atom+xml']),
+    HTML(['text/html']),
+    URLENC(['application/x-www-form-urlencoded']),
+    BINARY(['application/octet-stream']),
+    TEXT(['text/plain']),
+    ANY(['*/*'])
 
     private final List contentTypes
 
@@ -35,10 +35,11 @@ enum ContentType {
     }
 
     String getAcceptHeader() {
-        return contentTypes.join(", ")
+        return contentTypes.join(', ')
     }
 
     private ContentType(contentTypes) {
-        this.contentTypes = contentTypes;
+        this.contentTypes = contentTypes
     }
+
 }
