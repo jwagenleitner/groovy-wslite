@@ -59,6 +59,16 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+// Disable Checkstyle tasks
+task checkstyleMain(overwrite: true) << {};
+task checkstyleTest(overwrite: true) << {};
+task checkstyleIntegrationTest(overwrite: true) << {};
+
+// Do not fail the build for CodeNarc tasks
+tasks.withType(CodeNarc).all { codeNarcTask ->
+    codeNarcTask.ignoreFailures = true
+}
+
 build.dependsOn integrationTest
 
 artifacts {
