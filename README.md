@@ -216,12 +216,22 @@ try {
 If behind proxy, you can set it in the request.
 
 ``` groovy
-def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080)
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
 
 def client = new SOAPClient("https://www.example.com/ExampleService")
 def response = client.send(proxy:proxy) {
     ....
 }
+```
+
+If the proxy requires authentication...
+
+``` groovy
+Authenticator.setDefault(new Authenticator() {
+    protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication("username","password".toCharArray())
+    }
+})
 ```
 
 ## REST
