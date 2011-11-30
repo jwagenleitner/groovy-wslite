@@ -23,17 +23,17 @@ class RequestBuilder {
             throw new IllegalArgumentException('URL and Method are required')
         }
         params = new LinkedHashMap(params ?: [:])
-        def path = params?.remove('path')
-        def query = params?.remove('query')
-        def accept = params?.remove('accept')
-        def headers = new HTTPHeaderMap(params?.remove('headers') ?: [:])
-        if (accept && !headers.containsKey('Accept')) {
-            headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
-        }
-        HTTPRequest request = new HTTPRequest(params ?: [:])
+        def path = params.remove('path')
+        def query = params.remove('query')
+        def accept = params.remove('accept')
+        def headers = params.remove('headers') ?: [:]
+        HTTPRequest request = new HTTPRequest(params)
         request.method = method
         request.url = buildURL(url, path, query)
         request.headers = headers
+        if (accept && !request.headers.containsKey('Accept')) {
+            request.headers.Accept = (accept instanceof ContentType) ? accept.getAcceptHeader() : accept.toString()
+        }
         request.data = data
         return request
     }

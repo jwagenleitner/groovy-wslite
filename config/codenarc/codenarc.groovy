@@ -1,8 +1,5 @@
 ruleset {
     ruleset('rulesets/basic.xml') {
-        'ExplicitCallToEqualsMethod' {
-            doNotApplyToClassNames = 'HTTPHeaderMap'
-        }
         'GStringAsMapKey' {
             doNotApplyToClassNames = 'SOAPMessageBuilder'
         }
@@ -31,7 +28,7 @@ ruleset {
     ruleset('rulesets/logging.xml')
     ruleset('rulesets/naming.xml') {
         'FieldName' {
-            doNotApplyToClassNames = 'ContentType,HTTPHeaderMap'
+            doNotApplyToClassNames = 'ContentType'
         }
         'ConfusingMethodName'  {
             doNotApplyToClassNames='SOAPMessageBuilder'
@@ -44,9 +41,6 @@ ruleset {
                     'ContentBuilder,RequestBuilder,ResponseBuilder,' +
                     'SOAPResponse,' +
                     'ObjectHelper'
-        }
-        'UnnecessaryPublicModifier' {
-            doNotApplyToClassNames = 'HTTPHeaderMap'
         }
         exclude 'UnnecessarySemicolon'
         exclude 'UnnecessaryReturnKeywordRule'

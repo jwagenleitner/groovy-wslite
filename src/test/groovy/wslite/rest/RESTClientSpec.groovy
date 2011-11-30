@@ -330,7 +330,7 @@ class RESTClientSpec extends Specification {
         client.httpClient = httpClient
     }
 
-    HTTPResponse getMockResponse(HTTPHeaderMap headers=[:], data=null) {
+    HTTPResponse getMockResponse(headers=[:], data=null) {
         def response = new HTTPResponse()
         response.statusCode = 200
         response.statusMessage = "OK"

@@ -85,7 +85,7 @@ class RESTClient {
 
     private createRequestParams(Map params) {
         Map requestParams = new LinkedHashMap(params ?: [:])
-        Map headerMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
+        Map headerMap = new TreeMap(String.CASE_INSENSITIVE_ORDER)
         if (params.headers) {
             headerMap.putAll(params.headers)
         }

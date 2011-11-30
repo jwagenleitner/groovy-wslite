@@ -31,7 +31,7 @@ class HTTPRequest {
 
     Proxy proxy
 
-    Map<String, String> headers = new HTTPHeaderMap<String, String>()
+    Map headers = new TreeMap(String.CASE_INSENSITIVE_ORDER)
 
     byte[] data = null
 
@@ -41,8 +41,8 @@ class HTTPRequest {
     boolean isFollowRedirectsSet
     boolean isSSLTrustAllCertsSet
 
-    void setHeaders(Map<String, String> map) {
-        headers = new HTTPHeaderMap(map)
+    void setHeaders(Map map) {
+        headers.putAll(map)
     }
 
     void setConnectTimeout(int connectTimeout) {

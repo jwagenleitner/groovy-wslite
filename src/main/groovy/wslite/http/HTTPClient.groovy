@@ -115,13 +115,23 @@ class HTTPClient {
 
     private void setRequestHeaders(conn, request) {
         for (entry in request.headers) {
-            conn.setRequestProperty(entry.key, entry.value)
+            setConnectionRequestProperty(conn, entry.key, entry.value)
         }
         for (entry in defaultHeaders) {
             if (conn.getRequestProperty(entry.key) == null) {
-                conn.setRequestProperty(entry.key, entry.value)
+                setConnectionRequestProperty(conn, entry.key, entry.value)
             }
         }
+    }
+
+    private void setConnectionRequestProperty(conn, String key, List values) {
+        for (val in values) {
+            setConnectionRequestProperty(conn, key, val.toString())
+        }
+    }
+
+    private void setConnectionRequestProperty(conn, String key, String value) {
+        conn.setRequestProperty(key, value)
     }
 
     private void setAuthorizationHeader(conn) {
@@ -151,7 +161,7 @@ class HTTPClient {
     private Map headersToMap(conn) {
         def headers = [:]
         for (entry in conn.headerFields) {
-            headers[entry.key] = entry.value.size() > 1 ? entry.value : entry.value[0]
+            headers[entry.key ?: ''] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
         return headers
     }
