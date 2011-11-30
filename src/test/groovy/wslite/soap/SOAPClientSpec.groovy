@@ -268,6 +268,25 @@ class SOAPClientSpec extends Specification {
         "bar" == response.envelope.Body.GetFoo.text()
     }
 
+    def "send raw string with soap 1.2 message and soap version will be detected"() {
+        given: "an http client that expects a SOAP 1.2 Content-Type header"
+        def httpc = [execute:{req ->
+                                assert req.headers."content-type".startsWith(SOAP.SOAP_V12_MEDIA_TYPE)
+                                [data:req.data]}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a raw text string is sent using v1.2"
+        def response = soapClient.send("""<?xml version='1.0' encoding='UTF-8'?>
+                                <SOAP:Envelope xmlns:SOAP='http://www.w3.org/2003/05/soap-envelope'>
+                                  <SOAP:Body>
+                                    <GetFoo>bar</GetFoo>
+                                  </SOAP:Body>
+                                </SOAP:Envelope>""")
+
+        then:
+        "bar" == response.envelope.Body.GetFoo.text()
+    }
+
     def "send raw string with soap message and override the soap version used"() {
         given: "a soap client configured to echo the soap request to soap response"
         def httpc = [execute:{req ->

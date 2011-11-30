@@ -45,7 +45,7 @@ class SOAPClient {
     }
 
     SOAPResponse send(Map requestParams=[:], String content) {
-        return send(requestParams, SOAPVersion.V1_1, content)
+        return send(requestParams, detectSOAPVersion(content), content)
     }
 
     SOAPResponse send(Map requestParams=[:], SOAPVersion soapVersion, String content) {
@@ -151,4 +151,15 @@ class SOAPClient {
             httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction
         }
     }
+
+    private SOAPVersion detectSOAPVersion(String content) {
+        SOAPVersion sv = SOAPVersion.V1_1
+        try {
+            if (SOAP.SOAP12_NS == new XmlSlurper().parseText(content).namespaceURI()) {
+                sv = SOAPVersion.V1_2
+            }
+        } catch (Exception ex) { }
+        return sv
+    }
+
 }
