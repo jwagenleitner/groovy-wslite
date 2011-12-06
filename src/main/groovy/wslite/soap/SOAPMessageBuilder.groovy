@@ -29,9 +29,11 @@ class SOAPMessageBuilder {
     Map bodyAttributes = [:]
 
     SOAPMessageBuilder build(Closure content) {
-        content.resolveStrategy = Closure.DELEGATE_FIRST
-        content.delegate = this
-        content.call()
+        Closure c = content.clone()
+        c.resolveStrategy = Closure.DELEGATE_FIRST
+        c.delegate = this
+        c.call()
+        c.delegate = content.delegate
         return this
     }
 

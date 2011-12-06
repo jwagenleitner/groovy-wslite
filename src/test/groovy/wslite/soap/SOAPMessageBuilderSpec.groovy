@@ -75,4 +75,59 @@ class SOAPMessageBuilderSpec extends Specification {
         assert env.@foo.text() == "bar"
     }
 
+    @Issue("https://github.com/jwagenleitner/groovy-wslite/issues/30")
+    def "can handle nested header and body tags"() {
+        when:"message body has nested header or body elements"
+        def message = new SOAPMessageBuilder().build {
+            body {
+                ejecutar( 'xmlns:mns':'urn:servicioFrontera') {
+                    xmlOrder() {
+                        order {
+                            header { }
+                            body { }
+                            foo {
+                              orderName('bar')
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        and:"message body with nested header or body tags"
+        def messageBody = new SOAPMessageBuilder().build {
+            body {
+                body {
+                    header { }
+                }
+
+            }
+        }
+
+        and:"mesage header with nested header or body tags"
+        def messageHeader = new SOAPMessageBuilder().build {
+            header {
+                header {
+                    body { }
+                }
+            }
+        }
+
+        then:
+        def env = slurp(message.toString())
+        assert !env.Body.ejecutar.xmlOrder.order.header.isEmpty()
+        assert !env.Body.ejecutar.xmlOrder.order.body.isEmpty()
+        assert !env.Body.ejecutar.xmlOrder.order.foo.isEmpty()
+
+        and:
+        def envBody = slurp(messageBody.toString())
+        assert !envBody.Body.body.isEmpty()
+        assert !envBody.Body.body.header.isEmpty()
+
+        and:
+        def envHeader = slurp(messageHeader.toString())
+        assert !envHeader.Header.header.isEmpty()
+        assert !envHeader.Header.header.body.isEmpty()
+    }
+
 }
