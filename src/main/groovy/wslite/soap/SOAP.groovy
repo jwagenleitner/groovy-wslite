@@ -26,6 +26,8 @@ class SOAP {
     static final String DEFAULT_CHAR_ENCODING = 'UTF-8'
 
     static final String SOAP_ACTION_HEADER = 'SOAPAction'
+    static final String SOAP_ACTION_V12_HEADER = 'action'
+    
 
     static final String ENVELOPE_ELEMENT_NAME = 'Envelope'
     static final String HEADER_ELEMENT_NAME = 'Header'
