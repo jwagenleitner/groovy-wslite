@@ -15,7 +15,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.5.0')
 import wslite.soap.*
 
 def client = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
@@ -86,7 +86,8 @@ client.send(
 )
 ```
 
-The default when sending a raw string is SOAP v1.1, you can override this by specifying a SOAPVersion.
+The SOAP version will be auto-detected based on the namespace URI used for the Envelope, you can
+override this by specifying a SOAPVersion.
 
 ``` groovy
 client.send(SOAPVersion.V1_2,
@@ -239,7 +240,7 @@ Authenticator.setDefault(new Authenticator() {
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.5.0')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
@@ -309,7 +310,9 @@ def response = client.post() {
 
 ### Client Defaults
 
-When interacting with a service that requires a particular Accept header or when sending content of the same type/charset, you can set those as defaults so they will be sent for every request (if they are not already specified in the request):
+When interacting with a service that requires a particular Accept header or when sending content of
+the same type/charset, you can set those as defaults so they will be sent for every request
+(if they are not already specified in the request):
 
 ``` groovy
 client.defaultAcceptHeader = "text/xml"
@@ -348,8 +351,8 @@ client.httpClient.sslTrustStorePassword = "myKeystorePassword"
 def response = client.get()
 ```
 
-You can also specify a custom trust store on a per request basis, this will override any custom trust store that may be
-set on the client.
+You can also specify a custom trust store on a per request basis, this will override any custom
+trust store that may be set on the client.
 
 ``` groovy
 def client = new RESTClient("http://some.service.net")
@@ -360,8 +363,8 @@ Note: sslTrustStorePassword is optional.
 
 #### Trusting all SSL certs
 
-When in development mode and dealing with lots of servers with self-signed certs it can be helpful to bypass a custom
-trust store and trust all certs automatically.
+When in development mode and dealing with lots of servers with self-signed certs it can be helpful
+to bypass a custom trust store and trust all certs automatically.
 
 ``` groovy
 import wslite.rest.*
@@ -379,8 +382,8 @@ def client = new RESTClient("http://some.service.net")
 def response = client.get(sslTrustAllCerts:true)
 ```
 
-Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set on the client or
-the request.
+Note: sslTrustAllCerts overrides any custom trust store settings that may have already be set
+on the client or the request.
 
 ### Response
 
@@ -424,7 +427,7 @@ __groovy-wslite__ is available in Maven Central.
     <dependency>
         <groupId>com.github.groovy-wslite</groupId>
         <artifactId>groovy-wslite</artifactId>
-        <version>0.4</version>
+        <version>0.5.0</version>
     </dependency>
 
 #### Snapshots
@@ -440,7 +443,7 @@ __groovy-wslite__ is available in Maven Central.
         <dependency>
             <groupId>com.github.groovy-wslite</groupId>
             <artifactId>groovy-wslite</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.9.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -448,12 +451,12 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.4')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.5.0')
 
 #### Snapshots
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.5-SNAPSHOT', changing=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.9.0-SNAPSHOT', changing=true)
 
 ## Using with Grails
 
@@ -474,7 +477,7 @@ The SOAP/RESTClients can easily be configured and used in your Grails applicatio
             //mavenRepo "https://oss.sonatype.org/content/groups/public"
         }
         dependencies {
-            runtime 'com.github.groovy-wslite:groovy-wslite:0.4'
+            runtime 'com.github.groovy-wslite:groovy-wslite:0.5.0'
         }
     }
 
@@ -531,6 +534,10 @@ class MyService {
     }
 }
 ```
+
+## Versioning
+
+This project uses [Semantic Versioning][http://semver.org/].
 
 ## Dependencies
 

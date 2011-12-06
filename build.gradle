@@ -13,7 +13,7 @@ apply plugin: 'code-quality'
 apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 apply plugin: 'idea'
 
-version = '0.5-SNAPSHOT'
+version = '0.5.0'
 group = 'com.github.groovy-wslite'
 
 sourceCompatibility = 1.5

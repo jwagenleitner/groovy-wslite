@@ -1,3 +1,9 @@
+## 0.5.0 (2011-12-05)
+
+* Auto detect soap version for SOAPClient.send(String)
+* Replaced custom HTTPHeaderMap with a case-insensitive key comparator TreeMap
+* Adopted Semantic Versioning
+
 ## 0.4 (2011-10-14)
 
 * Added per client/request Proxy support
