@@ -86,7 +86,7 @@ client.send(
 )
 ```
 
-The SOAP version will be auto-detected based on the namespace URI used for the Envelope, you can
+The SOAP version will be auto-detected using the namespace URI of the Envelope element, you can
 override this by specifying a SOAPVersion.
 
 ``` groovy
@@ -537,7 +537,7 @@ class MyService {
 
 ## Versioning
 
-This project uses [Semantic Versioning][http://semver.org/].
+This project uses [Semantic Versioning] (http://semver.org/).
 
 ## Dependencies
 
