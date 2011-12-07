@@ -150,7 +150,7 @@ class SOAPClient {
         if (!httpRequest.headers[SOAP.SOAP_ACTION_HEADER] && soapAction )                             
         if (soapVersion == SOAPVersion.V1_1)
             httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction                     
-        else 
+        else if (soapVersion == SOAPVersion.V1_2)
                 httpRequest.headers[HTTP.CONTENT_TYPE_HEADER] += ";" + SOAP.SOAP_ACTION_V12_HEADER + "=\"" + soapAction +"\""            
     }
 
