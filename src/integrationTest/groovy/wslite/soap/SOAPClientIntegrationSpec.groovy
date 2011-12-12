@@ -52,7 +52,9 @@ class SOAPClientIntegrationSpec extends Specification {
         }
 
         then:
-        thrown(SOAPFaultException)
+        def sfe = thrown(SOAPFaultException)
+        sfe.hasFault()
+        sfe.soapVersion == SOAPVersion.V1_1
     }
 
     def "accessing a public SOAP 1.2 service that throws a fault"() {
@@ -70,7 +72,9 @@ class SOAPClientIntegrationSpec extends Specification {
         }
 
         then:
-        thrown(SOAPFaultException)
+        def sfe = thrown(SOAPFaultException)
+        sfe.hasFault()
+        sfe.soapVersion == SOAPVersion.V1_2
     }
 
 }

@@ -14,13 +14,13 @@
  */
 package wslite.soap
 
-class SOAPFaultException extends Exception {
+class SOAPFaultException extends SOAPClientException {
 
     @Delegate
     SOAPResponse response
 
     SOAPFaultException(SOAPResponse response) {
-        super(parseFaultCode(response) + ' - ' + parseFaultReason(response))
+        super(parseFaultCode(response) + ' - ' + parseFaultReason(response), response.httpRequest, response.httpResponse)
         this.response = response
     }
 

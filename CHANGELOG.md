@@ -1,3 +1,7 @@
+## 0.5.1 (2011-12-11)
+
+* Fixed [IncompatibleClassChangeError when exceptions are thrown and using JDK 7] (/jwagenleitner/groovy-wslite/issues/31)
+
 ## 0.5.0 (2011-12-05)
 
 * Auto detect soap version for SOAPClient.send(String)
