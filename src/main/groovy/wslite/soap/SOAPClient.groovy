@@ -146,10 +146,12 @@ class SOAPClient {
                                                "${SOAP.SOAP_V12_MEDIA_TYPE}; charset=${charset}"
     }
 
-    private void setSoapActionHeaderIfNotPresent(HTTPRequest httpRequest, SOAPVersion soapVersion, String soapAction) {
-        if (!httpRequest.headers[SOAP.SOAP_ACTION_HEADER] && soapAction && soapVersion == SOAPVersion.V1_1) {
-            httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction
-        }
+    private void setSoapActionHeaderIfNotPresent(HTTPRequest httpRequest, SOAPVersion soapVersion, String soapAction) {       
+        if (!httpRequest.headers[SOAP.SOAP_ACTION_HEADER] && soapAction )                             
+        if (soapVersion == SOAPVersion.V1_1)
+            httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction                     
+        else if (soapVersion == SOAPVersion.V1_2)
+                httpRequest.headers[HTTP.CONTENT_TYPE_HEADER] += ";" + SOAP.SOAP_ACTION_V12_HEADER + "=\"" + soapAction +"\""            
     }
 
     private SOAPVersion detectSOAPVersion(String content) {
