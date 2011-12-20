@@ -177,6 +177,21 @@ class SOAPClientSpec extends Specification {
         "http://foo/bar" == response.httpResponse.headers.SOAPAction
     }
 
+    def "should add action parameter to Content-Type header for SOAP 1.2 messages"() {
+        setup:
+        def httpc = [execute:{req -> return new HTTPResponse(headers:req.headers, data:simpleSoap12Response.bytes)}] as HTTPClient
+        soapClient.httpClient = httpc
+
+        when: "a SOAP 1.2 message is sent that includes a SOAPAction"
+        def response = soapClient.send(SOAPAction:"http://foo/bar") {
+            version SOAPVersion.V1_2
+            body { test(true) }
+        }
+
+        then:
+        response.httpResponse.headers.'Content-Type'.endsWith(';action="http://foo/bar"')
+    }
+
     def "send should pass arguments in the http request"() {
         setup:
         def httpc = [
