@@ -18,7 +18,7 @@ import spock.lang.*
 
 class ContentTypeHeaderSpec extends Specification {
 
-    def 'can get media type from Content-Type header'() {
+    void 'can get media type from Content-Type header'() {
         expect:
         mediaType == new ContentTypeHeader(contentType).mediaType
 
@@ -32,7 +32,7 @@ class ContentTypeHeaderSpec extends Specification {
         null                            | null
     }
 
-    def 'can get charset from Content-Type header string'() {
+    void 'can get charset from Content-Type header string'() {
         expect:
         charset == new ContentTypeHeader(contentType).charset
 

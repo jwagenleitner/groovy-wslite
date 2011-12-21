@@ -22,65 +22,65 @@ class SOAPMessageBuilderSpec extends Specification {
         return new XmlSlurper().parseText(message)
     }
 
-    def "default SOAP version is 1.1"() {
-        when:"a message with no version is built"
+    void 'default SOAP version is 1.1'() {
+        when: 'a message with no version is built'
         def message = new SOAPMessageBuilder().build {
             body {}
         }
 
-        then:"version should default to 1.1"
+        then: 'version should default to 1.1'
         assert SOAPVersion.V1_1 == message.version
     }
 
-    def "overriding SOAP version"() {
-        when:"a message specifies v1.2 is built"
+    void 'overriding SOAP version'() {
+        when: 'a message specifies v1.2 is built'
         def message = new SOAPMessageBuilder().build {
             version SOAPVersion.V1_2
         }
 
-        then:"version should be set to 1.2"
+        then: 'version should be set to 1.2'
         assert SOAPVersion.V1_2 == message.version
     }
 
-    def "default SOAP namespace prefix"() {
-        when:"a message doesn't specify a SOAP namespace prefix"
+    void 'default SOAP namespace prefix'() {
+        when: 'a message does not specify a SOAP namespace prefix'
         def message = new SOAPMessageBuilder().build {
             body {}
         }
 
-        then:"SOAP namespace prefix should default to SOAP"
+        then: 'SOAP namespace prefix should default to SOAP'
         assert message.toString().contains("<${SOAP.SOAP_NS_PREFIX}:Envelope")
     }
 
-    def "overriding SOAP namespace prefix"() {
-        when:"a message specifies an alternative SOAP namespace prefix"
+    void 'overriding SOAP namespace prefix'() {
+        when: 'a message specifies an alternative SOAP namespace prefix'
         def message = new SOAPMessageBuilder().build {
-            soapNamespacePrefix "FOOBAR"
+            soapNamespacePrefix 'FOOBAR'
             body {}
         }
 
         then:
-        assert message.toString().contains("<FOOBAR:Envelope")
+        assert message.toString().contains('<FOOBAR:Envelope')
     }
 
-    def "custom envelope attributes"() {
-        when:"custom envelope attributes are speicified"
+    void 'custom envelope attributes'() {
+        when: 'custom envelope attributes are speicified'
         def message = new SOAPMessageBuilder().build {
-            envelopeAttributes foo:'bar'
+            envelopeAttributes foo: 'bar'
             body {}
         }
 
         then:
         def env = slurp(message.toString())
-        assert env.@foo.text() == "bar"
+        assert env.@foo.text() == 'bar'
     }
 
-    @Issue("https://github.com/jwagenleitner/groovy-wslite/issues/30")
-    def "can handle nested header and body tags"() {
-        when:"message body has nested header or body elements"
+    @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/30')
+    void 'can handle nested header and body tags'() {
+        when: 'message body has nested header or body elements'
         def message = new SOAPMessageBuilder().build {
             body {
-                ejecutar( 'xmlns:mns':'urn:servicioFrontera') {
+                ejecutar( 'xmlns:mns': 'urn:servicioFrontera') {
                     xmlOrder() {
                         order {
                             header { }
@@ -94,7 +94,7 @@ class SOAPMessageBuilderSpec extends Specification {
             }
         }
 
-        and:"message body with nested header or body tags"
+        and: 'message body with nested header or body tags'
         def messageBody = new SOAPMessageBuilder().build {
             body {
                 body {
@@ -104,7 +104,7 @@ class SOAPMessageBuilderSpec extends Specification {
             }
         }
 
-        and:"mesage header with nested header or body tags"
+        and: 'mesage header with nested header or body tags'
         def messageHeader = new SOAPMessageBuilder().build {
             header {
                 header {

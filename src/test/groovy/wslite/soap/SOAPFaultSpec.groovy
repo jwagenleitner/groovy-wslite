@@ -21,10 +21,10 @@ import wslite.http.HTTPResponse
 
 class SOAPFaultSpec extends Specification {
 
-    def soapClient = new SOAPClient(serviceURL: "http://test.com")
+    def soapClient = new SOAPClient(serviceURL: 'http://test.com')
     def testSoapMessage = { body { test(true) } }
 
-    def sampleSOAP11Fault = """
+    def sampleSOAP11Fault = '''
 <?xml version='1.0' encoding='UTF-8'?>
 <soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
     <soap:Body>
@@ -40,9 +40,9 @@ class SOAPFaultSpec extends Specification {
         </soap:Fault>
     </soap:Body>
 </soap:Envelope>
-""".trim()
+'''.trim()
 
-    def sampleSOAP12Fault = """
+    def sampleSOAP12Fault = '''
 <?xml version='1.0' encoding='UTF-8'?>
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
     xmlns:m="http://www.example.org/timeouts"
@@ -64,12 +64,12 @@ class SOAPFaultSpec extends Specification {
         </env:Fault>
     </env:Body>
 </env:Envelope>
-""".trim()
+'''.trim()
 
-    def "throws exception if SOAP 1.1 Fault response is returned from server"() {
+    void 'throws exception if SOAP 1.1 Fault response is returned from server'() {
         given:
-        def httpc = [execute:{req ->
-            throw new HTTPClientException("fault", null, null, new HTTPResponse(data:sampleSOAP11Fault.bytes))
+        def httpc = [execute: { req ->
+            throw new HTTPClientException('fault', null, null, new HTTPResponse(data: sampleSOAP11Fault.bytes))
         }] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -78,15 +78,15 @@ class SOAPFaultSpec extends Specification {
 
         then:
         def sfe = thrown(SOAPFaultException)
-        sfe.message.contains("soap:Client")
-        sfe.message.contains("Invalid message format")
-        "soap:Client" == sfe.fault.faultcode.text()
+        sfe.message.contains('soap:Client')
+        sfe.message.contains('Invalid message format')
+        'soap:Client' == sfe.fault.faultcode.text()
     }
 
-    def "throws exception if SOAP 1.2 Fault response is returned from server"() {
+    void 'throws exception if SOAP 1.2 Fault response is returned from server'() {
         given:
-        def httpc = [execute:{req ->
-            throw new HTTPClientException("fault", null, null, new HTTPResponse(data:sampleSOAP12Fault.bytes))
+        def httpc = [execute: { req ->
+            throw new HTTPClientException('fault', null, null, new HTTPResponse(data: sampleSOAP12Fault.bytes))
         }] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -95,15 +95,15 @@ class SOAPFaultSpec extends Specification {
 
         then:
         def sfe = thrown(SOAPFaultException)
-        sfe.message.contains("env:Sender*")
-        sfe.message.contains("Sender Timeout")
-        "env:Sender* " == sfe.fault.Code.Value.text()
+        sfe.message.contains('env:Sender*')
+        sfe.message.contains('Sender Timeout')
+        'env:Sender* ' == sfe.fault.Code.Value.text()
     }
 
-    def "throws exception if SOAP 1.1 Fault response is returned from server with http status code success"() {
+    void 'throws exception if SOAP 1.1 Fault response is returned from server with http status code success'() {
         given:
-        def httpc = [execute:{req ->
-            return new HTTPResponse(statusCode:200, data:sampleSOAP11Fault.bytes)
+        def httpc = [execute: { req ->
+            return new HTTPResponse(statusCode: 200, data: sampleSOAP11Fault.bytes)
         }] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -112,15 +112,15 @@ class SOAPFaultSpec extends Specification {
 
         then:
         def sfe = thrown(SOAPFaultException)
-        sfe.message.contains("soap:Client")
-        sfe.message.contains("Invalid message format")
-        "soap:Client" == sfe.fault.faultcode.text()
+        sfe.message.contains('soap:Client')
+        sfe.message.contains('Invalid message format')
+        'soap:Client' == sfe.fault.faultcode.text()
     }
 
-    def "throws exception if SOAP 1.2 Fault response is returned from server with http status code success"() {
+    void 'throws exception if SOAP 1.2 Fault response is returned from server with http status code success'() {
         given:
-        def httpc = [execute:{req ->
-            return new HTTPResponse(statusCode:200, data:sampleSOAP12Fault.bytes)
+        def httpc = [execute: { req ->
+            return new HTTPResponse(statusCode: 200, data: sampleSOAP12Fault.bytes)
         }] as HTTPClient
         soapClient.httpClient = httpc
 
@@ -129,9 +129,9 @@ class SOAPFaultSpec extends Specification {
 
         then:
         def sfe = thrown(SOAPFaultException)
-        sfe.message.contains("env:Sender*")
-        sfe.message.contains("Sender Timeout")
-        "env:Sender* " == sfe.fault.Code.Value.text()
+        sfe.message.contains('env:Sender*')
+        sfe.message.contains('Sender Timeout')
+        'env:Sender* ' == sfe.fault.Code.Value.text()
     }
 
 }

@@ -18,7 +18,7 @@ import spock.lang.*
 
 class HTTPRequestSpec extends Specification {
 
-    def "track when connect timeout is set"() {
+    void 'track when connect timeout is set'() {
         when:
         def req = new HTTPRequest(connectTimeout:5000)
 
@@ -26,7 +26,7 @@ class HTTPRequestSpec extends Specification {
         req.isConnectTimeoutSet
     }
 
-    def "track when read timeout is set"() {
+    void 'track when read timeout is set'() {
         when:
         def req = new HTTPRequest(readTimeout:5000)
 
@@ -34,7 +34,7 @@ class HTTPRequestSpec extends Specification {
         req.isReadTimeoutSet
     }
 
-    def "track when use caches is set"() {
+    void 'track when use caches is set'() {
         when:
         def req = new HTTPRequest(useCaches:false)
 
@@ -42,7 +42,7 @@ class HTTPRequestSpec extends Specification {
         req.isUseCachesSet
     }
 
-    def "track when follow redirects is set"() {
+    void 'track when follow redirects is set'() {
         when:
         def req = new HTTPRequest(followRedirects:false)
 
@@ -50,7 +50,7 @@ class HTTPRequestSpec extends Specification {
         req.isFollowRedirectsSet
     }
 
-    def "track when trust all SSL certs is set"() {
+    void 'track when trust all SSL certs is set'() {
         when:
         def req = new HTTPRequest(sslTrustAllCerts:false)
 
@@ -58,7 +58,7 @@ class HTTPRequestSpec extends Specification {
         req.isSSLTrustAllCertsSet
     }
 
-    def "is set flags should all be false for a new request"() {
+    void 'is set flags should all be false for a new request'() {
         when:
         def req = new HTTPRequest()
 
@@ -70,34 +70,34 @@ class HTTPRequestSpec extends Specification {
         !req.isSSLTrustAllCertsSet
     }
 
-    def "headers retrieved case insensitively"() {
+    void 'headers retrieved case insensitively'() {
         when:
         def req = new HTTPRequest()
-        req.headers = ["Content-Type":"text/xml", Accept:"text/json"]
+        req.headers = ['Content-Type': 'text/xml', Accept: 'text/json']
 
         then:
-        "text/xml" == req.headers."content-type"
-        "text/json" == req.headers["ACCEPT"]
+        'text/xml' == req.headers.'content-type'
+        'text/json' == req.headers['ACCEPT']
     }
 
-    def "headers overwritten case insensitively"() {
+    void 'headers overwritten case insensitively'() {
         when:
         def req = new HTTPRequest()
-        req.headers = ["Content-Type":"text/xml", Accept:"text/json"]
-        req.headers.accept = "text/csv"
+        req.headers = ['Content-Type': 'text/xml', Accept: 'text/json']
+        req.headers.accept = 'text/csv'
 
         then:
         2 == req.headers.size()
-        "text/xml" == req.headers."Content-Type"
-        "text/csv" == req.headers.ACCEPT
+        'text/xml' == req.headers.'Content-Type'
+        'text/csv' == req.headers.ACCEPT
     }
 
-    def "headers makes a copy if passed a Map"() {
+    void 'headers makes a copy if passed a Map'() {
         when:
         def req = new HTTPRequest()
-        def myMapOfHeaders = ["Content-Type":"text/xml", Accept:"text/json"]
+        def myMapOfHeaders = ['Content-Type': 'text/xml', Accept: 'text/json']
         req.headers = myMapOfHeaders
-        myMapOfHeaders.foo = "bar"
+        myMapOfHeaders.foo = 'bar'
 
         then:
         3 == myMapOfHeaders.size()
@@ -105,12 +105,12 @@ class HTTPRequestSpec extends Specification {
         null == req.headers.foo
     }
 
-    def "headers do not change original Map"() {
+    void 'headers do not change original Map'() {
         when:
         def req = new HTTPRequest()
-        def myMapOfHeaders = ["Content-Type":"text/xml", Accept:"text/json"]
+        def myMapOfHeaders = ['Content-Type': 'text/xml', Accept: 'text/json']
         req.headers = myMapOfHeaders
-        req.headers.foo = "bar"
+        req.headers.foo = 'bar'
 
         then:
         2 == myMapOfHeaders.size()
@@ -118,58 +118,60 @@ class HTTPRequestSpec extends Specification {
         null == myMapOfHeaders.foo
     }
 
-    def "headers set individually"() {
+    void 'headers set individually'() {
         when:
         def req = new HTTPRequest()
-        req.headers."Content-Type" = "text/plain"
+        req.headers.'Content-Type' = 'text/plain'
 
         then:
-        "text/plain" == req.headers."CONTENT-TYPE"
+        'text/plain' == req.headers.'CONTENT-TYPE'
     }
 
-    def "headers removed case insensitively"() {
+    void 'headers removed case insensitively'() {
         when:
         def req = new HTTPRequest()
-        req.headers."Content-Type" = "text/plain"
-        req.headers.remove("content-TYPE")
+        req.headers.'Content-Type' = 'text/plain'
+        req.headers.remove('content-TYPE')
 
         then:
         req.headers.isEmpty()
         0 == req.headers.size()
-        null == req.headers."Content-Type"
+        null == req.headers.'Content-Type'
     }
 
-    def "can get content as string if not content type set"() {
+    void 'can get content as string if not content type set'() {
         given:
-        def request = new HTTPRequest(data:"foo".bytes)
+        def request = new HTTPRequest(data: 'foo'.bytes)
 
         when:
         String content = request.getContentAsString()
 
         then:
-        "foo" == content
+        'foo' == content
    }
 
-   def "can get content as string if headers has content type with charset"() {
+   void 'can get content as string if headers has content type with charset'() {
        given:
-       def request = new HTTPRequest(data:"foo".bytes, headers:['Content-Type':'text/xml; charset=UTF-8'])
+       def request = new HTTPRequest(data: 'foo'.bytes,
+                                    headers:['Content-Type': 'text/xml; charset=UTF-8'])
 
        when:
        String content = request.getContentAsString()
 
        then:
-       "foo" == content
+       'foo' == content
     }
 
-   def "can get content as string if headers has content type with no charset"() {
+   void 'can get content as string if headers has content type with no charset'() {
        given:
-       def request = new HTTPRequest(data:"foo".bytes, headers:['Content-Type':'text/xml'])
+       def request = new HTTPRequest(data: 'foo'.bytes,
+                                     headers:['Content-Type': 'text/xml'])
 
        when:
        String content = request.getContentAsString()
 
        then:
-       "foo" == content
+       'foo' == content
     }
 
 }

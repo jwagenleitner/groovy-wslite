@@ -18,16 +18,16 @@ import spock.lang.*
 
 class RESTClientIntegrationSpec extends Specification {
 
-    def "FresnoStateNews.com"() {
+    void 'FresnoStateNews.com'() {
         when:
-        def client = new RESTClient("http://www.fresnostatenews.com/feed/")
+        def client = new RESTClient('http://www.fresnostatenews.com/feed/')
         def response = client.get()
 
         then:
         200 == response.statusCode
-        "text/xml" == response.contentType
-        "UTF-8" == response.charset
-        "text/xml; charset=UTF-8" == response.headers."Content-Type"
-        "FresnoStateNews.com" == response.xml.channel.title.text()
+        'text/xml' == response.contentType
+        'UTF-8' == response.charset
+        'text/xml; charset=UTF-8' == response.headers."Content-Type"
+        'FresnoStateNews.com' == response.xml.channel.title.text()
     }
 }

@@ -18,12 +18,12 @@ import spock.lang.*
 
 class TwitterApiSpec extends Specification {
 
-    RESTClient twitterV1 = new RESTClient("http://api.twitter.com/1/")
+    RESTClient twitterV1 = new RESTClient('http://api.twitter.com/1/')
 
-    @See("https://dev.twitter.com/docs/api/1/get/trends/daily")
-    def "daily trends"() {
+    @See('https://dev.twitter.com/docs/api/1/get/trends/daily')
+    void 'daily trends'() {
         when:
-        def response = twitterV1.get(path:'/trends/daily.json')
+        def response = twitterV1.get(path: '/trends/daily.json')
 
         then:
         200 == response.statusCode
@@ -31,30 +31,31 @@ class TwitterApiSpec extends Specification {
         1 < response.json.trends.find({true}).value.size()
     }
 
-    @See("https://dev.twitter.com/docs/api/1/get/users/show")
-    def "get user"() {
+    @See('https://dev.twitter.com/docs/api/1/get/users/show')
+    void 'get user'() {
         when:
-        def response = twitterV1.get(path:'/users/show.json', query:[screen_name:'jwagenleitner', include_entities:true])
+        def response = twitterV1.get(path: '/users/show.json',
+                query: [screen_name: 'jwagenleitner', include_entities: true])
 
         then:
         200 == response.statusCode
-        "John Wagenleitner" == response.json.name
+        'John Wagenleitner' == response.json.name
     }
 
-    @See("https://dev.twitter.com/docs/api/1/get/statuses/public_timeline")
-    def "get public timeline"() {
+    @See('https://dev.twitter.com/docs/api/1/get/statuses/public_timeline')
+    void 'get public timeline'() {
         when:
-        def response = twitterV1.get(path:'/statuses/public_timeline.json')
+        def response = twitterV1.get(path: '/statuses/public_timeline.json')
 
         then:
         200 == response.statusCode
         1 < response.json.size()
     }
 
-    @See("https://dev.twitter.com/docs/api/1/get/statuses/mentions")
-    def "get mentions fails without auth"() {
+    @See('https://dev.twitter.com/docs/api/1/get/statuses/mentions')
+    void 'get mentions fails without auth'() {
         when:
-        def response = twitterV1.get(path:'/statuses/mentions.json')
+        def response = twitterV1.get(path: '/statuses/mentions.json')
 
         then:
         def ex = thrown(RESTClientException)

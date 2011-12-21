@@ -19,7 +19,7 @@ import wslite.http.*
 
 class ContentBuilderSpec extends Specification {
 
-    def 'default content type and charset'() {
+    void 'default content type and charset'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {}
 
@@ -29,7 +29,7 @@ class ContentBuilderSpec extends Specification {
         'text/plain; charset=UTF-8' == builder.getContentTypeHeader()
     }
 
-    def 'type overrides content type default'() {
+    void 'type overrides content type default'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             type 'application/xml'
@@ -39,7 +39,7 @@ class ContentBuilderSpec extends Specification {
         'application/xml' == builder.contentType
     }
 
-    def 'charset overrides charset default'() {
+    void 'charset overrides charset default'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             charset 'ISO-8859-1'
@@ -51,7 +51,7 @@ class ContentBuilderSpec extends Specification {
         'text/plain; charset=ISO-8859-1' == builder.getContentTypeHeader()
     }
 
-    def 'bytes'() {
+    void 'bytes'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             bytes 'foo'.getBytes('UTF-8')
@@ -61,7 +61,7 @@ class ContentBuilderSpec extends Specification {
         'foo'.getBytes('UTF-8') == builder.getData()
     }
 
-    def 'text'() {
+    void 'text'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             text 'foo'
@@ -71,17 +71,17 @@ class ContentBuilderSpec extends Specification {
         'foo' == new String(builder.getData(), builder.charset)
     }
 
-    def 'urlenc'() {
+    void 'urlenc'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
-            urlenc foo:'bar', q:['one', 'two']
+            urlenc foo: 'bar', q: ['one', 'two']
         }
 
         then:
         'foo=bar&q=one&q=two' == new String(builder.getData(), builder.charset)
     }
 
-    def 'xml'() {
+    void 'xml'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             xml {
@@ -93,17 +93,17 @@ class ContentBuilderSpec extends Specification {
         '<root/>' == new String(builder.getData(), builder.charset)
     }
 
-    def 'json'() {
+    void 'json'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
-            json employee: [job:[title:'Nuclear Technician', department:'Sector 7g']]
+            json employee: [job: [title: 'Nuclear Technician', department: 'Sector 7g']]
         }
 
         then:
         '''{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}''' == new String(builder.getData(), builder.charset)
     }
 
-    def 'no default charset'() {
+    void 'no default charset'() {
         when:
         def builder = new ContentBuilder('text/plain', null).build {
             xml {
@@ -115,7 +115,7 @@ class ContentBuilderSpec extends Specification {
         "text/plain; charset=${HTTP.DEFAULT_CHARSET}" == builder.getContentTypeHeader()
     }
 
-    def 'guesses content type for bytes'() {
+    void 'guesses content type for bytes'() {
         when:
         def builder = new ContentBuilder(null, null).build {
             bytes 'foo'.bytes
@@ -126,7 +126,7 @@ class ContentBuilderSpec extends Specification {
         ContentType.BINARY.toString() == contentTypeHeader.mediaType
     }
 
-    def 'guesses content type for text'() {
+    void 'guesses content type for text'() {
         when:
         def builder = new ContentBuilder(null, null).build {
             text 'foo'
@@ -137,10 +137,10 @@ class ContentBuilderSpec extends Specification {
         ContentType.TEXT.toString() == contentTypeHeader.mediaType
     }
 
-    def 'guesses content type for urlenc'() {
+    void 'guesses content type for urlenc'() {
         when:
         def builder = new ContentBuilder(null, null).build {
-            urlenc 'foo':'bar'
+            urlenc 'foo': 'bar'
         }
         ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
 
@@ -148,7 +148,7 @@ class ContentBuilderSpec extends Specification {
         ContentType.URLENC.toString() == contentTypeHeader.mediaType
     }
 
-    def 'guesses content type for xml'() {
+    void 'guesses content type for xml'() {
         when:
         def builder = new ContentBuilder(null, null).build {
             xml {
@@ -161,7 +161,7 @@ class ContentBuilderSpec extends Specification {
         ContentType.XML.toString() == contentTypeHeader.mediaType
     }
 
-    def 'guesses content type for json'() {
+    void 'guesses content type for json'() {
         when:
         def builder = new ContentBuilder(null, null).build {
             json id: '12345', department: 'Finance'

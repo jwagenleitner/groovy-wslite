@@ -23,11 +23,11 @@ class URLParametersCodecSpec extends Specification {
         urlencoded == new URLParametersCodec().encode(map)
 
         where:
-        map                                 | urlencoded
-        [q:"test"]                          | "q=test"
-        [q:["test1", "test2"], foo:"bar"]   | "q=test1&q=test2&foo=bar"
-        [path:"/hr/departments"]            | "path=%2Fhr%2Fdepartments"
-        [title:"Homer & Sally"]             | "title=Homer+%26+Sally"
+        map                                   | urlencoded
+        [q: 'test']                           | 'q=test'
+        [q: ['test1', 'test2'], foo: 'bar']   | 'q=test1&q=test2&foo=bar'
+        [path: '/hr/departments']             | 'path=%2Fhr%2Fdepartments'
+        [title: 'Homer & Sally']              | 'title=Homer+%26+Sally'
     }
 
     void 'decodes a url encoded string to a map'() {
@@ -35,11 +35,11 @@ class URLParametersCodecSpec extends Specification {
         map == new URLParametersCodec().decode(urlencoded)
 
         where:
-        map                                 | urlencoded
-        [q:"test"]                          | "q=test"
-        [q:["test1", "test2"], foo:"bar"]   | "q=test1&q=test2&foo=bar"
-        [path:"/hr/departments"]            | "path=%2Fhr%2Fdepartments"
-        [title:"Homer & Sally"]             | "title=Homer+%26+Sally"
+        map                                   | urlencoded
+        [q: 'test']                           | 'q=test'
+        [q: ['test1', 'test2'], foo: 'bar']   | 'q=test1&q=test2&foo=bar'
+        [path: '/hr/departments']             | 'path=%2Fhr%2Fdepartments'
+        [title: 'Homer & Sally']              | 'title=Homer+%26+Sally'
     }
 
 }

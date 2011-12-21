@@ -18,20 +18,22 @@ import spock.lang.*
 
 class HTTPResponseSpec extends Specification {
 
-    def "header keys are case insensitive"() {
+    void 'header keys are case insensitive'() {
         when:
-        def resp = new HTTPResponse(headers:["Content-Type":"text/xml", "Accept":"text/javascript"])
+        def resp = new HTTPResponse(headers:['Content-Type': 'text/xml',
+                                             Accept: 'text/javascript'])
 
         then:
-        "text/xml" == resp.headers."content-type"
-        "text/javascript" == resp.headers["accEPT"]
+        'text/xml' == resp.headers.'content-type'
+        'text/javascript' == resp.headers['accEPT']
     }
 
-    def "headers are not modifiable once assigned"() {
+    void 'headers are not modifiable once assigned'() {
         when:
-        def resp = new HTTPResponse(headers:["Content-Type":"text/xml", "Accept":"text/javascript"])
+        def resp = new HTTPResponse(headers:['Content-Type': 'text/xml',
+                                             Accept: 'text/javascript'])
         def h = resp.headers
-        h.newKey = "newVal"
+        h.newKey = 'newVal'
 
         then:
         thrown(UnsupportedOperationException)

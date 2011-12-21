@@ -20,13 +20,13 @@ class HTTPClientSpec extends Specification {
 
     def httpc = new HTTPClient()
     def conn = new MockHTTPClientConnection()
-    def testURL = "http://test.com".toURL()
+    def testURL = 'http://test.com'.toURL()
 
     private def getHTTPConnectionFactory(conn) {
         [getConnection:{url, proxy=null -> conn.URL = url; conn}] as HTTPConnectionFactory
     }
 
-    def "will use its settings if not specified in request"() {
+    void 'will use its settings if not specified in request'() {
         given:
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.connectTimeout = 20000
@@ -35,7 +35,7 @@ class HTTPClientSpec extends Specification {
         httpc.useCaches = false
 
         when:
-        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
@@ -45,7 +45,7 @@ class HTTPClientSpec extends Specification {
         !conn.useCaches
     }
 
-    def "request settings will override settings"() {
+    void 'request settings will override settings'() {
         given:
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.connectTimeout = 20000
@@ -54,7 +54,7 @@ class HTTPClientSpec extends Specification {
         httpc.useCaches = true
 
         when:
-        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
         request.connectTimeout = 7000
         request.readTimeout = 9000
         request.followRedirects = true
@@ -68,40 +68,40 @@ class HTTPClientSpec extends Specification {
         !conn.useCaches
     }
 
-    def "client will trust all ssl certs if not overridden on request"() {
+    void 'client will trust all ssl certs if not overridden on request'() {
         given:
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.sslTrustAllCerts = true
 
         when:
-        def request = new HTTPRequest(url:"https://foo.org".toURL(), method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
-        conn.hostnameVerifier.verify("foo", null)
+        conn.hostnameVerifier.verify('foo', null)
     }
 
-    def "request set to trust all ssl certs will override client"() {
+    void 'request set to trust all ssl certs will override client'() {
         given:
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.sslTrustAllCerts = false
 
         when:
-        def request = new HTTPRequest(url:"https://foo.org".toURL(), method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
         request.sslTrustAllCerts = true
         httpc.execute(request)
 
         then:
-        conn.hostnameVerifier.verify("foo", null)
+        conn.hostnameVerifier.verify('foo', null)
     }
 
-    def "request set to not trust all ssl will override client"() {
+    void 'request set to not trust all ssl will override client'() {
         given:
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.sslTrustAllCerts = true
 
         when:
-        def request = new HTTPRequest(url:"https://foo.org".toURL(), method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
         request.sslTrustAllCerts = false
         httpc.execute(request)
 
@@ -109,86 +109,96 @@ class HTTPClientSpec extends Specification {
         null == conn.hostnameVerifier
     }
 
-    def "client will use trust store if not overridden on request"() {
+    void 'client will use trust store if not overridden on request'() {
         given:
-        httpc.httpConnectionFactory = [getConnectionUsingTrustStore:{url, tsfile, tspassword, proxy=null ->
-            conn.URL = url
-            conn.setRequestProperty("javax.net.ssl.trustStore", tsfile)
-            conn.setRequestProperty("javax.net.ssl.trustStorePassword", tspassword)
-            return conn
+        httpc.httpConnectionFactory = [getConnectionUsingTrustStore: {
+            url, tsfile, tspassword, proxy=null ->
+                conn.URL = url
+                conn.setRequestProperty('javax.net.ssl.trustStore', tsfile)
+                conn.setRequestProperty('javax.net.ssl.trustStorePassword', tspassword)
+                return conn
         }] as HTTPConnectionFactory
-        httpc.sslTrustStoreFile = "~/test.jks"
+        httpc.sslTrustStoreFile = '~/test.jks'
 
         when:
-        def request = new HTTPRequest(url:"https://foo.org".toURL(), method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
-        "~/test.jks" == conn.requestProperties["javax.net.ssl.trustStore"]
-        null == conn.requestProperties["javax.net.ssl.trustStorePassword"]
+        '~/test.jks' == conn.requestProperties['javax.net.ssl.trustStore']
+        null == conn.requestProperties['javax.net.ssl.trustStorePassword']
     }
 
-    def "request trust store settings will override client"() {
+    void 'request trust store settings will override client'() {
         given:
-        httpc.httpConnectionFactory = [getConnectionUsingTrustStore:{url, tsfile, tspassword, proxy=null ->
-            conn.URL = url
-            conn.setRequestProperty("javax.net.ssl.trustStore", tsfile)
-            conn.setRequestProperty("javax.net.ssl.trustStorePassword", tspassword)
-            return conn
+        httpc.httpConnectionFactory = [getConnectionUsingTrustStore: {
+            url, tsfile, tspassword, proxy=null ->
+                conn.URL = url
+                conn.setRequestProperty('javax.net.ssl.trustStore', tsfile)
+                conn.setRequestProperty('javax.net.ssl.trustStorePassword', tspassword)
+                return conn
         }] as HTTPConnectionFactory
-        httpc.sslTrustStoreFile = "~/test.jks"
+        httpc.sslTrustStoreFile = '~/test.jks'
         httpc.sslTrustStorePassword = "foo"
 
         when:
-        def request = new HTTPRequest(url:"https://foo.org".toURL(), method:HTTPMethod.GET)
-        request.sslTrustStoreFile = "~/usethis.jks"
+        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
+        request.sslTrustStoreFile = '~/usethis.jks'
         httpc.execute(request)
 
         then:
-        "~/usethis.jks" == conn.requestProperties["javax.net.ssl.trustStore"]
-        null == conn.requestProperties["javax.net.ssl.trustStorePassword"]
+        '~/usethis.jks' == conn.requestProperties['javax.net.ssl.trustStore']
+        null == conn.requestProperties['javax.net.ssl.trustStorePassword']
     }
 
-    def "proxy setting in client"() {
+    void 'proxy setting in client'() {
         given:
         httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080)) 
 
-        def testurl = "https://foo.org".toURL()
+        def testurl = 'https://foo.org'.toURL()
 
         when:
-        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnection(testurl, httpc.proxy) >> {url, proxy -> conn.URL = url; conn}
+        1 * httpc.httpConnectionFactory.getConnection(testurl, httpc.proxy) >> { url, proxy ->
+            conn.URL = url
+            conn
+        }
     }
 
-    def "proxy with TrustAllSSLCerts"() {
+    void 'proxy with TrustAllSSLCerts'() {
         given:
         httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
         httpc.sslTrustAllCerts = true
-        def testurl = "https://foo.org".toURL()
+
+        def testurl = 'https://foo.org'.toURL()
 
         when:
-        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnectionTrustAllSSLCerts(testurl, httpc.proxy) >> {url, proxy -> conn.URL = url; conn}
+        1 * httpc.httpConnectionFactory.getConnectionTrustAllSSLCerts(testurl, httpc.proxy) >> {
+            url, proxy ->
+                conn.URL = url
+                conn
+        }
     }
 
-    def "proxy with TrustStore"() {
+    void 'proxy with TrustStore'() {
         given:
         httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
-        httpc.sslTrustStoreFile = "~/test.jks"
-        httpc.sslTrustStorePassword = "test"
-        def testurl = "https://foo.org".toURL()
+        httpc.sslTrustStoreFile = '~/test.jks'
+        httpc.sslTrustStorePassword = 'test'
+        def testurl = 'https://foo.org'.toURL()
 
         when:
-        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
         httpc.execute(request)
 
         then:
@@ -196,30 +206,36 @@ class HTTPClientSpec extends Specification {
                 testurl,
                 httpc.sslTrustStoreFile,
                 httpc.sslTrustStorePassword,
-                httpc.proxy) >> {url, truststore, password, proxy -> conn.URL = url; conn}
+                httpc.proxy) >> { url, truststore, password, proxy ->
+                    conn.URL = url
+                    conn
+                }
     }
 
-    def "proxy setting in request will override client"() {
+    void 'proxy setting in request will override client'() {
         given:
         httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
 
-        def testurl = "https://foo.org".toURL()
+        def testurl = 'https://foo.org'.toURL()
         def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy2.example.com', 80))
 
         when:
-        def request = new HTTPRequest(url: testurl, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
         request.proxy = testproxy
         httpc.execute(request)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnection(testurl, testproxy) >> {url, proxy -> conn.URL = url; conn}
+        1 * httpc.httpConnectionFactory.getConnection(testurl, testproxy) >> { url, proxy ->
+            conn.URL = url
+            conn
+        }
     }
 
-    def 'will use default headers if not already set'() {
+    void 'will use default headers if not already set'() {
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.defaultHeaders['x-foo'] = 'bar'
-        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
 
         when:
         httpc.execute(request)
@@ -228,10 +244,10 @@ class HTTPClientSpec extends Specification {
         conn.requestProperties['x-foo'] == 'bar'
     }
 
-    def 'request headers will override default headers'() {
+    void 'request headers will override default headers'() {
         httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
         httpc.defaultHeaders['x-foo'] = 'bar'
-        def request = new HTTPRequest(url:testURL, method:HTTPMethod.GET)
+        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
         request.headers['x-foo'] = 'baz'
 
         when:
@@ -271,10 +287,10 @@ class MockHTTPClientConnection {
     def outputStream = [:]
     def errorStream = [bytes:null]
     int responseCode = 200
-    String responseMessage = "OK"
-    String contentEncoding = ""
+    String responseMessage = 'OK'
+    String contentEncoding = ''
     int contentLength
-    String contentType = "text/xml"
+    String contentType = 'text/xml'
     long date = new Date().time
     long expiration = new Date().time
     long lastModified = new Date().time

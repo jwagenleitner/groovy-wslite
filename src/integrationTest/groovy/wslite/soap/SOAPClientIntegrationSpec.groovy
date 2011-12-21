@@ -18,34 +18,34 @@ import spock.lang.*
 
 class SOAPClientIntegrationSpec extends Specification {
 
-    def "accessing a public SOAP 1.1 service"() {
+    void 'accessing a public SOAP 1.1 service'() {
         given:
         def soapClient = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
 
         when:
-        def resp = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
+        def resp = soapClient.send(SOAPAction: 'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
             body {
-                GetMartinLutherKingDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
+                GetMartinLutherKingDay('xmlns': 'http://www.27seconds.com/Holidays/US/Dates/') {
                     year(2011)
                 }
             }
         }
 
         then:
-        "2011-01-15T00:00:00" == resp.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
+        '2011-01-15T00:00:00' == resp.GetMartinLutherKingDayResponse.GetMartinLutherKingDayResult.text()
         200 == resp.httpResponse.statusCode
-        "OK" == resp.httpResponse.statusMessage
-        "ASP.NET" == resp.httpResponse.headers['X-Powered-By']
+        'OK' == resp.httpResponse.statusMessage
+        'ASP.NET' == resp.httpResponse.headers['X-Powered-By']
     }
 
-    def "accessing a public SOAP 1.1 service that throws a fault"() {
+    void 'accessing a public SOAP 1.1 service that throws a fault'() {
         given:
         def soapClient = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
 
         when:
-        def resp = soapClient.send(SOAPAction:'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
+        def resp = soapClient.send(SOAPAction: 'http://www.27seconds.com/Holidays/US/Dates/GetMartinLutherKingDay') {
             body {
-                GetHomerSimposonDay('xmlns':'http://www.27seconds.com/Holidays/US/Dates/') {
+                GetHomerSimposonDay('xmlns': 'http://www.27seconds.com/Holidays/US/Dates/') {
                     year(2011)
                 }
             }
@@ -57,16 +57,16 @@ class SOAPClientIntegrationSpec extends Specification {
         sfe.soapVersion == SOAPVersion.V1_1
     }
 
-    def "accessing a public SOAP 1.2 service that throws a fault"() {
+    def 'accessing a public SOAP 1.2 service that throws a fault'() {
         given:
-        def soapClient = new SOAPClient("http://www.webservicex.net/WeatherForecast.asmx")
+        def soapClient = new SOAPClient('http://www.webservicex.net/WeatherForecast.asmx')
 
         when:
         def response = soapClient.send {
             version SOAPVersion.V1_2
             body {
-                GetWeatherByReadingMyMind(xmlns:"http://www.webservicex.net") {
-                    ZipCode("93657")
+                GetWeatherByReadingMyMind(xmlns: 'http://www.webservicex.net') {
+                    ZipCode('93657')
                 }
             }
         }

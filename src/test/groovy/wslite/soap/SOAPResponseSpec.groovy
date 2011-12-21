@@ -18,7 +18,7 @@ import spock.lang.*
 
 class SOAPResponseSpec extends Specification {
 
-    def soap11Response = """
+    def soap11Response = '''
         <?xml version='1.0' encoding='UTF-8'?>
         <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
           <SOAP:Header>
@@ -31,9 +31,9 @@ class SOAPResponseSpec extends Specification {
                 <City>Springfield</City>
             </GetAddressResponse>
           </SOAP:Body>
-        </SOAP:Envelope>""".trim()
+        </SOAP:Envelope>'''.trim()
 
-    def soapFaultResponse = """
+    def soapFaultResponse = '''
          <?xml version='1.0' encoding='UTF-8'?>
          <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
            <SOAP:Header />
@@ -47,30 +47,30 @@ class SOAPResponseSpec extends Specification {
                </details>
              </SOAP:Fault>
            </SOAP:Body>
-         </SOAP:Envelope>""".trim()
+         </SOAP:Envelope>'''.trim()
 
     def parseText(text) {
         return new XmlSlurper().parseText(text)
     }
 
-    def "access first Body element if it exists"() {
+    void 'access first Body element if it exists'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
-        "Springfield" == response.GetAddressResponse.City.text()
-        "Springfield" == response.envelope.Body.GetAddressResponse.City.text()
+        'Springfield' == response.GetAddressResponse.City.text()
+        'Springfield' == response.envelope.Body.GetAddressResponse.City.text()
     }
 
-    def "access first Body element that does not exist returns empty string"() {
+    void 'access first Body element that does not exist returns empty string'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
-        "" == response.GetAddressResponse2.City.text()
+        '' == response.GetAddressResponse2.City.text()
     }
 
-    def "should report soap fault is present"() {
+    void 'should report soap fault is present'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soapFaultResponse))
 
@@ -78,16 +78,16 @@ class SOAPResponseSpec extends Specification {
         response.hasFault()
     }
 
-    def "should return soap fault if present"() {
+    void 'should return soap fault if present'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soapFaultResponse))
 
         then:
         response.hasFault()
-        "742" == response.fault.faultcode.text()
+        '742' == response.fault.faultcode.text()
     }
 
-    def "should not report soap fault is present for a valid response"() {
+    void 'should not report soap fault is present for a valid response'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soap11Response))
 
@@ -95,20 +95,20 @@ class SOAPResponseSpec extends Specification {
         !response.hasFault()
     }
 
-    def "should access the soap body directly"() {
+    void 'should access the soap body directly'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
-        "742 Evergreen Terrace" == response.body.GetAddressResponse.Address1.text()
+        '742 Evergreen Terrace' == response.body.GetAddressResponse.Address1.text()
     }
 
-    def "should access the soap header directly"() {
+    void 'should access the soap header directly'() {
         when:
         def response = new SOAPResponse(envelope: parseText(soap11Response))
 
         then:
-        "742ABC" == response.header.apiToken.text()
+        '742ABC' == response.header.apiToken.text()
     }
 
 }
