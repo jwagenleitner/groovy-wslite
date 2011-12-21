@@ -421,7 +421,7 @@ class SOAPClientSpec extends Specification {
         }
 
         then:
-        SOAP.DEFAULT_CHAR_ENCODING == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+        SOAP.DEFAULT_CHAR_ENCODING == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
     }
 
     void 'uses character encoding specified in the message builder'() {
@@ -439,7 +439,7 @@ class SOAPClientSpec extends Specification {
         }
 
         then:
-        'ISO-8859-1' == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+        'ISO-8859-1' == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
     }
 
     void 'uses character encoding specified in the Content-Type header'() {
@@ -457,7 +457,7 @@ class SOAPClientSpec extends Specification {
         }
 
         then:
-        'UTF-16' == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+        'UTF-16' == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
     }
 
     void 'uses character encoding specified in the xml declaration'() {
@@ -475,7 +475,7 @@ class SOAPClientSpec extends Specification {
                                 </SOAP:Envelope>'''.trim())
 
         then:
-        'ISO-8859-2' == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+        'ISO-8859-2' == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
     }
 
     void 'uses default character encoding if no Content-Type charset or xml declaration encoding'() {
@@ -493,7 +493,7 @@ class SOAPClientSpec extends Specification {
                                 </SOAP:Envelope>'''.trim())
 
         then:
-        SOAP.DEFAULT_CHAR_ENCODING == HTTP.parseCharsetParamFromContentType(response.httpRequest.headers['Content-Type'])
+        SOAP.DEFAULT_CHAR_ENCODING == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
     }
 
     void 'Content-Type header specified in the request be used as-is and not modified'() {

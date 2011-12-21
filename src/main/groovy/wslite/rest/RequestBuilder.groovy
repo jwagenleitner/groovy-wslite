@@ -18,6 +18,8 @@ import wslite.http.*
 
 class RequestBuilder {
 
+    URLParametersCodec urlParametersCodec = new URLParametersCodec()
+
     HTTPRequest build(HTTPMethod method, String url, Map params, byte[] data) {
         if (!method || !url) {
             throw new IllegalArgumentException('URL and Method are required')
@@ -46,7 +48,7 @@ class RequestBuilder {
         }
         if (query) {
             target.indexOf('?') == -1 ? target.append('?') : target.append('&')
-            target.append(HTTP.mapToURLEncodedString(query))
+            target.append(urlParametersCodec.encode(query))
         }
         return new URL(target.toString())
     }

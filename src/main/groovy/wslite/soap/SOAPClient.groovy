@@ -129,7 +129,7 @@ class SOAPClient {
     }
 
     private String getCharacterEncodingFromContentTypeHeader(String contentType) {
-        return HTTP.parseCharsetParamFromContentType(contentType)
+        return new ContentTypeHeader(contentType).charset
     }
 
     private String getCharacterEncodingFromXmlDeclaration(String xml) {

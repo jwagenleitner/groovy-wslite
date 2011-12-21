@@ -23,16 +23,4 @@ class HTTP {
     static final String AUTHORIZATION_HEADER = 'Authorization'
     static final String ACCEPT_HEADER = 'Accept'
 
-    static String parseCharsetParamFromContentType(String contentType) {
-        return new ContentTypeHeader(contentType).charset
-    }
-
-    static Map urlEncodedStringToMap(String urlencoded) {
-        return new wslite.rest.URLParametersCodec().decode(urlencoded)
-    }
-
-    static String mapToURLEncodedString(params) {
-        return new wslite.rest.URLParametersCodec().encode(params)
-    }
-
 }
