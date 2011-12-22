@@ -34,65 +34,46 @@ class RequestBuilderSpec extends Specification {
     }
 
     void 'adding path to url'() {
-        given:
-        def params = [path: '/users/123']
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET,
-                'http://ws.org/services', params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [path: '/users/123'], null)
 
         then:
         'http://ws.org/services/users/123' ==  request.url.toString()
     }
 
     void 'path with slash and url with trailing slash'() {
-        given:
-        def url = 'http://ws.org/services/'
-        def params = [path: '/users/123']
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services/',
+                [path: '/users/123'], null)
 
         then:
         'http://ws.org/services/users/123' ==  request.url.toString()
     }
 
     void 'path with no beginning slash and url with no trailing slash'() {
-        given:
-        def url = 'http://ws.org/services'
-        def params = [path: 'users/123']
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [path: 'users/123'], null)
 
         then:
         'http://ws.org/services/users/123' ==  request.url.toString()
     }
 
     void 'map to querystring'() {
-        given:
-        def url = 'http://ws.org/services'
-        def params = [path: '/users', query: [deptid: '6900', managerid: '123']]
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [path: '/users', query: [deptid: '6900', managerid: '123']], null)
 
         then:
         'http://ws.org/services/users?deptid=6900&managerid=123' == request.url.toString()
     }
 
     void 'map to querystring with encoded strings'() {
-        given:
-        def url = 'http://ws.org/services'
-        def params = [path: '/users', query: ['hire_date': '06/19/2009',
-                      homepage: 'http://geocities.com/users/jansmith']]
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [path: '/users', query: ['hire_date': '06/19/2009', homepage: 'http://geocities.com/users/jansmith']],
+                null)
 
         then:
         'http://ws.org/services/users?' +
@@ -101,13 +82,9 @@ class RequestBuilderSpec extends Specification {
     }
 
     void 'headers added to request'() {
-        given:
-        def url = 'http://ws.org/services'
-        def params = [headers: [Accept: 'text/plain', 'X-Foo': '123']]
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [headers: [Accept: 'text/plain', 'X-Foo': '123']], null)
 
         then:
         'text/plain' == request.headers.Accept
@@ -115,13 +92,9 @@ class RequestBuilderSpec extends Specification {
     }
 
     void 'sets http connection parameters'() {
-        given:
-        def url = 'http://ws.org/services'
-        def params = [path: '/foo', readTimeout: 9876, sslTrustAllCerts: false]
-
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
+                [path: '/foo', readTimeout: 9876, sslTrustAllCerts: false], null)
 
         then:
         9876 == request.readTimeout
@@ -130,12 +103,10 @@ class RequestBuilderSpec extends Specification {
 
     void 'original params not modified'() {
         given:
-        def url = 'http://ws.org/services'
         def params = [path: '/users/123', readTimeout: 9876, sslTrustAllCerts: false]
 
         when:
-        HTTPRequest request = new RequestBuilder().build(HTTPMethod.GET, url,
-                                                            params, null)
+        def request = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services', params, null)
         params.remove('path')
 
         then:
@@ -145,8 +116,7 @@ class RequestBuilderSpec extends Specification {
 
     void 'accept parameter can be set using enum or string'() {
         expect:
-        def response = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services',
-                                                    [accept: accept], null)
+        def response = new RequestBuilder().build(HTTPMethod.GET, 'http://ws.org/services', [accept: accept], null)
         response.headers.Accept == contentType
 
         where:
@@ -155,4 +125,5 @@ class RequestBuilderSpec extends Specification {
         'text/plain'                | 'text/plain'
         "${ContentType.JSON}"      | ContentType.JSON.toString()
     }
+
 }

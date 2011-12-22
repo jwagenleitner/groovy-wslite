@@ -20,8 +20,14 @@ import wslite.json.*
 
 class RESTClientSpec extends Specification {
 
-    String testURL = 'http://ws.org'
-    RESTClient client = new RESTClient(testURL)
+    RESTClient client
+
+    def setup() {
+        client = new RESTClient('http://ws.org')
+        def httpClient = new MockHTTPClient()
+        httpClient.response = getMockResponse()
+        client.httpClient = httpClient
+    }
 
     void 'minimal get'() {
         when:
@@ -53,7 +59,6 @@ class RESTClientSpec extends Specification {
 
         expect:
         response.xml.foo.text() == foo
-        assert 0 < response.text.size()
 
         where:
         contentType                 | foo
@@ -324,13 +329,7 @@ class RESTClientSpec extends Specification {
         ex.response.contentAsString == '<foo><name></foo>'
     }
 
-    def setup() {
-        def httpClient = new MockHTTPClient()
-        httpClient.response = getMockResponse()
-        client.httpClient = httpClient
-    }
-
-    HTTPResponse getMockResponse(headers=[:], data=null) {
+    private getMockResponse(headers=[:], data=null) {
         def response = new HTTPResponse()
         response.statusCode = 200
         response.statusMessage = 'OK'

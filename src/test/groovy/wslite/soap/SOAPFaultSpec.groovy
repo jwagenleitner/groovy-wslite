@@ -21,10 +21,71 @@ import wslite.http.HTTPResponse
 
 class SOAPFaultSpec extends Specification {
 
-    def soapClient = new SOAPClient(serviceURL: 'http://test.com')
-    def testSoapMessage = { body { test(true) } }
+    SOAPClient soapClient = new SOAPClient(serviceURL: 'http://test.com')
 
-    def sampleSOAP11Fault = '''
+    void 'throws exception if SOAP 1.1 Fault response is returned from server'() {
+        given:
+        soapClient.httpClient = getExceptionThrowingMockHTTPClient(statusCode: 500, data: sampleSOAP11Fault.bytes)
+
+        when:
+        def response = soapClient.send(testSoapMessage)
+
+        then:                                                                  
+        def sfe = thrown(SOAPFaultException)
+        sfe.message.contains('soap:Client')
+        sfe.message.contains('Invalid message format')
+        'soap:Client' == sfe.fault.faultcode.text()
+        500 == sfe.response.httpResponse.statusCode
+    }
+
+    void 'throws exception if SOAP 1.2 Fault response is returned from server'() {
+        given:
+        soapClient.httpClient = getExceptionThrowingMockHTTPClient(statusCode: 500, data: sampleSOAP12Fault.bytes)
+
+        when:
+        def response = soapClient.send(testSoapMessage)
+
+        then:
+        def sfe = thrown(SOAPFaultException)
+        sfe.message.contains('env:Sender*')
+        sfe.message.contains('Sender Timeout')
+        'env:Sender* ' == sfe.fault.Code.Value.text()
+        500 == sfe.response.httpResponse.statusCode
+    }
+
+    void 'throws exception if SOAP 1.1 Fault response is returned from server with http status code success'() {
+        given:
+        soapClient.httpClient = getMockHttpClient(statusCode: 200, data: sampleSOAP11Fault.bytes)
+
+        when:
+        def response = soapClient.send(testSoapMessage)
+
+        then:
+        def sfe = thrown(SOAPFaultException)
+        sfe.message.contains('soap:Client')
+        sfe.message.contains('Invalid message format')
+        'soap:Client' == sfe.fault.faultcode.text()
+        200 == sfe.response.httpResponse.statusCode
+    }
+
+    void 'throws exception if SOAP 1.2 Fault response is returned from server with http status code success'() {
+        given:
+        soapClient.httpClient = getMockHttpClient(statusCode: 200, data: sampleSOAP12Fault.bytes)
+
+        when:
+        def response = soapClient.send(testSoapMessage)
+
+        then:
+        def sfe = thrown(SOAPFaultException)
+        sfe.message.contains('env:Sender*')
+        sfe.message.contains('Sender Timeout')
+        'env:Sender* ' == sfe.fault.Code.Value.text()
+        200 == sfe.response.httpResponse.statusCode
+    }
+
+    private static final Closure testSoapMessage = { body { test(true) } }
+
+    private static final String sampleSOAP11Fault = '''
 <?xml version='1.0' encoding='UTF-8'?>
 <soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
     <soap:Body>
@@ -42,7 +103,7 @@ class SOAPFaultSpec extends Specification {
 </soap:Envelope>
 '''.trim()
 
-    def sampleSOAP12Fault = '''
+    private static final String sampleSOAP12Fault = '''
 <?xml version='1.0' encoding='UTF-8'?>
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
     xmlns:m="http://www.example.org/timeouts"
@@ -66,72 +127,16 @@ class SOAPFaultSpec extends Specification {
 </env:Envelope>
 '''.trim()
 
-    void 'throws exception if SOAP 1.1 Fault response is returned from server'() {
-        given:
-        def httpc = [execute: { req ->
-            throw new HTTPClientException('fault', null, null, new HTTPResponse(data: sampleSOAP11Fault.bytes))
+    private getMockHttpClient(Map responseParams) {
+        [execute: { httpRequest ->
+            return new HTTPResponse(responseParams)
         }] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when:
-        def response = soapClient.send(testSoapMessage)
-
-        then:
-        def sfe = thrown(SOAPFaultException)
-        sfe.message.contains('soap:Client')
-        sfe.message.contains('Invalid message format')
-        'soap:Client' == sfe.fault.faultcode.text()
     }
 
-    void 'throws exception if SOAP 1.2 Fault response is returned from server'() {
-        given:
-        def httpc = [execute: { req ->
-            throw new HTTPClientException('fault', null, null, new HTTPResponse(data: sampleSOAP12Fault.bytes))
+    private getExceptionThrowingMockHTTPClient(Map responseParams) {
+        return [execute: { httpRequest ->
+            throw new HTTPClientException('fault', null, null, new HTTPResponse(responseParams))
         }] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when:
-        def response = soapClient.send(testSoapMessage)
-
-        then:
-        def sfe = thrown(SOAPFaultException)
-        sfe.message.contains('env:Sender*')
-        sfe.message.contains('Sender Timeout')
-        'env:Sender* ' == sfe.fault.Code.Value.text()
-    }
-
-    void 'throws exception if SOAP 1.1 Fault response is returned from server with http status code success'() {
-        given:
-        def httpc = [execute: { req ->
-            return new HTTPResponse(statusCode: 200, data: sampleSOAP11Fault.bytes)
-        }] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when:
-        def response = soapClient.send(testSoapMessage)
-
-        then:
-        def sfe = thrown(SOAPFaultException)
-        sfe.message.contains('soap:Client')
-        sfe.message.contains('Invalid message format')
-        'soap:Client' == sfe.fault.faultcode.text()
-    }
-
-    void 'throws exception if SOAP 1.2 Fault response is returned from server with http status code success'() {
-        given:
-        def httpc = [execute: { req ->
-            return new HTTPResponse(statusCode: 200, data: sampleSOAP12Fault.bytes)
-        }] as HTTPClient
-        soapClient.httpClient = httpc
-
-        when:
-        def response = soapClient.send(testSoapMessage)
-
-        then:
-        def sfe = thrown(SOAPFaultException)
-        sfe.message.contains('env:Sender*')
-        sfe.message.contains('Sender Timeout')
-        'env:Sender* ' == sfe.fault.Code.Value.text()
     }
 
 }

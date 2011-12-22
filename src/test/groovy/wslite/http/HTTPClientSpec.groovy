@@ -18,25 +18,35 @@ import spock.lang.*
 
 class HTTPClientSpec extends Specification {
 
-    def httpc = new HTTPClient()
-    def conn = new MockHTTPClientConnection()
-    def testURL = 'http://test.com'.toURL()
+    def httpClient
+    def conn
+    def mockHttpGetRequest = new HTTPRequest(url: 'http://test.com'.toURL(), method: HTTPMethod.GET)
+    def mockHttpsGetRequest = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
 
-    private def getHTTPConnectionFactory(conn) {
-        [getConnection:{url, proxy=null -> conn.URL = url; conn}] as HTTPConnectionFactory
+    void setup() {
+        conn = new MockHTTPClientConnection()
+        httpClient = new HTTPClient()
+        httpClient.httpConnectionFactory = [getConnection: { url, proxy=null ->
+            conn.URL = url
+            return conn
+        }, getConnectionUsingTrustStore: {
+            url, tsfile, tspassword, proxy=null ->
+            conn.URL = url
+            conn.setRequestProperty('javax.net.ssl.trustStore', tsfile)
+            conn.setRequestProperty('javax.net.ssl.trustStorePassword', tspassword)
+            return conn
+        }] as HTTPConnectionFactory
     }
 
     void 'will use its settings if not specified in request'() {
         given:
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.connectTimeout = 20000
-        httpc.readTimeout = 15000
-        httpc.followRedirects = false
-        httpc.useCaches = false
+        httpClient.connectTimeout = 20000
+        httpClient.readTimeout = 15000
+        httpClient.followRedirects = false
+        httpClient.useCaches = false
 
         when:
-        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpGetRequest)
 
         then:
         conn.connectTimeout == 20000
@@ -47,19 +57,17 @@ class HTTPClientSpec extends Specification {
 
     void 'request settings will override settings'() {
         given:
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.connectTimeout = 20000
-        httpc.readTimeout = 15000
-        httpc.followRedirects = false
-        httpc.useCaches = true
+        httpClient.connectTimeout = 20000
+        httpClient.readTimeout = 15000
+        httpClient.followRedirects = false
+        httpClient.useCaches = true
 
         when:
-        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
-        request.connectTimeout = 7000
-        request.readTimeout = 9000
-        request.followRedirects = true
-        request.useCaches = false
-        httpc.execute(request)
+        mockHttpGetRequest.connectTimeout = 7000
+        mockHttpGetRequest.readTimeout = 9000
+        mockHttpGetRequest.followRedirects = true
+        mockHttpGetRequest.useCaches = false
+        httpClient.execute(mockHttpGetRequest)
 
         then:
         conn.connectTimeout == 7000
@@ -70,12 +78,10 @@ class HTTPClientSpec extends Specification {
 
     void 'client will trust all ssl certs if not overridden on request'() {
         given:
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.sslTrustAllCerts = true
+        httpClient.sslTrustAllCerts = true
 
         when:
-        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
         conn.hostnameVerifier.verify('foo', null)
@@ -83,13 +89,11 @@ class HTTPClientSpec extends Specification {
 
     void 'request set to trust all ssl certs will override client'() {
         given:
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.sslTrustAllCerts = false
+        httpClient.sslTrustAllCerts = false
 
         when:
-        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
-        request.sslTrustAllCerts = true
-        httpc.execute(request)
+        mockHttpsGetRequest.sslTrustAllCerts = true
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
         conn.hostnameVerifier.verify('foo', null)
@@ -97,13 +101,11 @@ class HTTPClientSpec extends Specification {
 
     void 'request set to not trust all ssl will override client'() {
         given:
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.sslTrustAllCerts = true
+        httpClient.sslTrustAllCerts = true
 
         when:
-        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
-        request.sslTrustAllCerts = false
-        httpc.execute(request)
+        mockHttpsGetRequest.sslTrustAllCerts = false
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
         null == conn.hostnameVerifier
@@ -111,18 +113,10 @@ class HTTPClientSpec extends Specification {
 
     void 'client will use trust store if not overridden on request'() {
         given:
-        httpc.httpConnectionFactory = [getConnectionUsingTrustStore: {
-            url, tsfile, tspassword, proxy=null ->
-                conn.URL = url
-                conn.setRequestProperty('javax.net.ssl.trustStore', tsfile)
-                conn.setRequestProperty('javax.net.ssl.trustStorePassword', tspassword)
-                return conn
-        }] as HTTPConnectionFactory
-        httpc.sslTrustStoreFile = '~/test.jks'
+        httpClient.sslTrustStoreFile = '~/test.jks'
 
         when:
-        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
         '~/test.jks' == conn.requestProperties['javax.net.ssl.trustStore']
@@ -131,20 +125,12 @@ class HTTPClientSpec extends Specification {
 
     void 'request trust store settings will override client'() {
         given:
-        httpc.httpConnectionFactory = [getConnectionUsingTrustStore: {
-            url, tsfile, tspassword, proxy=null ->
-                conn.URL = url
-                conn.setRequestProperty('javax.net.ssl.trustStore', tsfile)
-                conn.setRequestProperty('javax.net.ssl.trustStorePassword', tspassword)
-                return conn
-        }] as HTTPConnectionFactory
-        httpc.sslTrustStoreFile = '~/test.jks'
-        httpc.sslTrustStorePassword = "foo"
+        httpClient.sslTrustStoreFile = '~/test.jks'
+        httpClient.sslTrustStorePassword = "foo"
 
         when:
-        def request = new HTTPRequest(url: 'https://foo.org'.toURL(), method: HTTPMethod.GET)
-        request.sslTrustStoreFile = '~/usethis.jks'
-        httpc.execute(request)
+        mockHttpsGetRequest.sslTrustStoreFile = '~/usethis.jks'
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
         '~/usethis.jks' == conn.requestProperties['javax.net.ssl.trustStore']
@@ -153,17 +139,14 @@ class HTTPClientSpec extends Specification {
 
     void 'proxy setting in client'() {
         given:
-        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
-        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080)) 
-
-        def testurl = 'https://foo.org'.toURL()
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
 
         when:
-        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnection(testurl, httpc.proxy) >> { url, proxy ->
+        1 * httpClient.httpConnectionFactory.getConnection(mockHttpsGetRequest.url, httpClient.proxy) >> { url, proxy ->
             conn.URL = url
             conn
         }
@@ -171,18 +154,15 @@ class HTTPClientSpec extends Specification {
 
     void 'proxy with TrustAllSSLCerts'() {
         given:
-        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
-        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
-        httpc.sslTrustAllCerts = true
-
-        def testurl = 'https://foo.org'.toURL()
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+        httpClient.sslTrustAllCerts = true
 
         when:
-        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnectionTrustAllSSLCerts(testurl, httpc.proxy) >> {
+        1 * httpClient.httpConnectionFactory.getConnectionTrustAllSSLCerts(mockHttpsGetRequest.url, httpClient.proxy) >> {
             url, proxy ->
                 conn.URL = url
                 conn
@@ -191,22 +171,20 @@ class HTTPClientSpec extends Specification {
 
     void 'proxy with TrustStore'() {
         given:
-        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
-        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
-        httpc.sslTrustStoreFile = '~/test.jks'
-        httpc.sslTrustStorePassword = 'test'
-        def testurl = 'https://foo.org'.toURL()
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+        httpClient.sslTrustStoreFile = '~/test.jks'
+        httpClient.sslTrustStorePassword = 'test'
 
         when:
-        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
-        httpc.execute(request)
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnectionUsingTrustStore(
-                testurl,
-                httpc.sslTrustStoreFile,
-                httpc.sslTrustStorePassword,
-                httpc.proxy) >> { url, truststore, password, proxy ->
+        1 * httpClient.httpConnectionFactory.getConnectionUsingTrustStore(
+                mockHttpsGetRequest.url,
+                httpClient.sslTrustStoreFile,
+                httpClient.sslTrustStorePassword,
+                httpClient.proxy) >> { url, truststore, password, proxy ->
                     conn.URL = url
                     conn
                 }
@@ -214,44 +192,37 @@ class HTTPClientSpec extends Specification {
 
     void 'proxy setting in request will override client'() {
         given:
-        httpc.httpConnectionFactory = Mock(HTTPConnectionFactory)
-        httpc.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
-
-        def testurl = 'https://foo.org'.toURL()
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
         def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy2.example.com', 80))
 
         when:
-        def request = new HTTPRequest(url: testurl, method: HTTPMethod.GET)
-        request.proxy = testproxy
-        httpc.execute(request)
+        mockHttpsGetRequest.proxy = testproxy
+        httpClient.execute(mockHttpsGetRequest)
 
         then:
-        1 * httpc.httpConnectionFactory.getConnection(testurl, testproxy) >> { url, proxy ->
+        1 * httpClient.httpConnectionFactory.getConnection(mockHttpsGetRequest.url, testproxy) >> { url, proxy ->
             conn.URL = url
             conn
         }
     }
 
     void 'will use default headers if not already set'() {
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.defaultHeaders['x-foo'] = 'bar'
-        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
+        httpClient.defaultHeaders['x-foo'] = 'bar'
 
         when:
-        httpc.execute(request)
+        httpClient.execute(mockHttpGetRequest)
 
         then:
         conn.requestProperties['x-foo'] == 'bar'
     }
 
     void 'request headers will override default headers'() {
-        httpc.httpConnectionFactory = getHTTPConnectionFactory(conn)
-        httpc.defaultHeaders['x-foo'] = 'bar'
-        def request = new HTTPRequest(url: testURL, method: HTTPMethod.GET)
-        request.headers['x-foo'] = 'baz'
+        httpClient.defaultHeaders['x-foo'] = 'bar'
+        mockHttpGetRequest.headers['x-foo'] = 'baz'
 
         when:
-        httpc.execute(request)
+        httpClient.execute(mockHttpGetRequest)
 
         then:
         conn.requestProperties['x-foo'] == 'baz'

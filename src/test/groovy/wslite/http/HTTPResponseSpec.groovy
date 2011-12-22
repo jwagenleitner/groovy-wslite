@@ -17,28 +17,27 @@ package wslite.http
 import spock.lang.*
 
 class HTTPResponseSpec extends Specification {
+    
+    HTTPResponse response = new HTTPResponse()
 
     void 'header keys are case insensitive'() {
         when:
-        def resp = new HTTPResponse(headers:['Content-Type': 'text/xml',
-                                             Accept: 'text/javascript'])
+        response.headers = ['Content-Type': 'text/xml', Accept: 'text/javascript']
 
         then:
-        'text/xml' == resp.headers.'content-type'
-        'text/javascript' == resp.headers['accEPT']
+        'text/xml' == response.headers.'content-type'
+        'text/javascript' == response.headers['accEPT']
     }
 
     void 'headers are not modifiable once assigned'() {
         when:
-        def resp = new HTTPResponse(headers:['Content-Type': 'text/xml',
-                                             Accept: 'text/javascript'])
-        def h = resp.headers
-        h.newKey = 'newVal'
+        response.headers = ['Content-Type': 'text/xml',Accept: 'text/javascript']
+        response.headers.newKey = 'newVal'
 
         then:
         thrown(UnsupportedOperationException)
-        2 == resp.headers.size()
-        null == resp.headers.newKey
+        2 == response.headers.size()
+        null == response.headers.newKey
     }
 
 }

@@ -18,10 +18,6 @@ import spock.lang.*
 
 class SOAPMessageBuilderSpec extends Specification {
 
-    def slurp(message) {
-        return new XmlSlurper().parseText(message)
-    }
-
     void 'default SOAP version is 1.1'() {
         when: 'a message with no version is built'
         def message = new SOAPMessageBuilder().build {
@@ -128,6 +124,10 @@ class SOAPMessageBuilderSpec extends Specification {
         def envHeader = slurp(messageHeader.toString())
         assert !envHeader.Header.header.isEmpty()
         assert !envHeader.Header.header.body.isEmpty()
+    }
+
+    private slurp(message) {
+        return new XmlSlurper().parseText(message)
     }
 
 }

@@ -19,9 +19,12 @@ import wslite.http.*
 
 class ResponseBuilderSpec extends Specification {
 
+    HTTPResponse httpResponse = new HTTPResponse()
+    
     void 'text response sets text property'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'text/plain', data: 'foo'.bytes)
+        httpResponse.contentType = 'text/plain'
+        httpResponse.data = 'foo'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -34,7 +37,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'xml response sets text property and xml property'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'application/xml', data: '<foo><name>bar</name></foo>'.bytes)
+        httpResponse.contentType = 'application/xml'
+        httpResponse.data = '<foo><name>bar</name></foo>'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -47,7 +51,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'json response sets text property and json property'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'application/json', data: '{foo:{name: "bar"}}'.bytes)
+        httpResponse.contentType = 'application/json'
+        httpResponse.data = '{foo:{name: "bar"}}'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -60,7 +65,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'handles text responses with no content'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'text/plain', data: null)
+        httpResponse.contentType = 'text/plain'
+        httpResponse.data = null
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -71,7 +77,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'throws exception when content-type is xml and there is no content'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'text/xml', data: null)
+        httpResponse.contentType = 'text/xml'
+        httpResponse.data = null
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -82,7 +89,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'throws exception when content-type is json and there is no content'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'application/json', data: null)
+        httpResponse.contentType = 'application/json'
+        httpResponse.data = null
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -93,7 +101,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'throws exception when content-type is xml and content contains invalid markup'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'text/xml', data: '<html><body>Error<br></body></html>'.bytes)
+        httpResponse.contentType = 'text/xml'
+        httpResponse.data = '<html><body>Error<br></body></html>'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
@@ -104,7 +113,8 @@ class ResponseBuilderSpec extends Specification {
 
     void 'throws exception when content-type is json and content contains invalid json'() {
         given:
-        def httpResponse = new HTTPResponse(contentType: 'application/json', data: '<html><body>Error<br></body></html>'.bytes)
+        httpResponse.contentType = 'application/json'
+        httpResponse.data = '<html><body>Error<br></body></html>'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
