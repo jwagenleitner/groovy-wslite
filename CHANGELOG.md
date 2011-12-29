@@ -1,3 +1,9 @@
+## 0.5.2 (2011-12-29)
+
+* Fix for SOAP 1.2 action header (thanks @jladenfors)
+* RESTClient JSON fixes
+* Fix [JSON builder does not handle properly GStrings] (/jwagenleitner/groovy-wslite/issues/33)
+
 ## 0.5.1 (2011-12-11)
 
 * Fixed [IncompatibleClassChangeError when exceptions are thrown and using JDK 7] (/jwagenleitner/groovy-wslite/issues/31)
