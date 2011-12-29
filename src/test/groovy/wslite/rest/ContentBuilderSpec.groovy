@@ -103,7 +103,7 @@ class ContentBuilderSpec extends Specification {
         '''{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}''' == new String(builder.getData(), builder.charset)
     }
 
-    void 'no default charset'() {
+    void 'will use the http 1.1 default charset if none is specified'() {
         when:
         def builder = new ContentBuilder('text/plain', null).build {
             xml {
@@ -170,6 +170,35 @@ class ContentBuilderSpec extends Specification {
 
         then:
         ContentType.JSON.toString() == contentTypeHeader.mediaType
+    }
+
+    @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/33')
+    void 'json content using GStrings should work with JSON object'() {
+        given:
+        def value = "a"
+
+        when:
+        def builder = new ContentBuilder(ContentType.JSON.toString(), 'UTF-8').build {
+            json param: "${value}"
+        }
+
+        then:
+        '{"param":"a"}' == new String(builder.getData(), 'UTF-8')
+    }
+
+    @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/33')
+    void 'json content using GStrings should work with JSON array'() {
+        given:
+        def value1 = "a"
+        def value2 = "b"
+
+        when:
+        def builder = new ContentBuilder(ContentType.JSON.toString(), 'UTF-8').build {
+            json(["${value1}", "${value2}"])
+        }
+
+        then:
+        '["a","b"]' == new String(builder.getData(), 'UTF-8')
     }
 
 }
