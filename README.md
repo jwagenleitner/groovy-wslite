@@ -443,7 +443,7 @@ __groovy-wslite__ is available in Maven Central.
         <dependency>
             <groupId>com.github.groovy-wslite</groupId>
             <artifactId>groovy-wslite</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -456,7 +456,7 @@ __groovy-wslite__ is available in Maven Central.
 #### Snapshots
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.9.0-SNAPSHOT', changing=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0-SNAPSHOT', changing=true)
 
 ## Using with Grails
 
