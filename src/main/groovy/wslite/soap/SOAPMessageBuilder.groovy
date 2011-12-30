@@ -16,17 +16,17 @@ package wslite.soap
 
 class SOAPMessageBuilder {
 
-    Map xmlnsSoap = [(SOAPVersion.V1_1):SOAP.SOAP11_NS,
-                     (SOAPVersion.V1_2):SOAP.SOAP12_NS]
-
     String soapNamespacePrefix = SOAP.SOAP_NS_PREFIX
     SOAPVersion version = SOAPVersion.V1_1
     String encoding = SOAP.DEFAULT_CHAR_ENCODING
-    Map envelopeAttributes = [:]
-    Closure header = {}
-    Map headerAttributes = [:]
-    Closure body = {}
-    Map bodyAttributes = [:]
+
+    private Map envelopeAttributes = [:]
+    private Closure header = {}
+    private Map headerAttributes = [:]
+    private Closure body = {}
+    private Map bodyAttributes = [:]
+
+    private final Map xmlnsSoap = [(SOAPVersion.V1_1):SOAP.SOAP11_NS, (SOAPVersion.V1_2):SOAP.SOAP12_NS]
 
     SOAPMessageBuilder build(Closure content) {
         Closure c = content.clone()
