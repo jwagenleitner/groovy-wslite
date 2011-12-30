@@ -16,6 +16,7 @@ package wslite.rest
 
 import spock.lang.*
 import wslite.http.*
+import wslite.json.*
 
 class ContentBuilderSpec extends Specification {
 
@@ -85,12 +86,15 @@ class ContentBuilderSpec extends Specification {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             xml {
-                root()
+                root() {
+                    foo('bar')
+                }
             }
         }
 
         then:
-        '<root/>' == new String(builder.getData(), builder.charset)
+        def xml = new XmlSlurper().parseText(new String(builder.getData(), builder.charset))
+        'bar' == xml.foo.text()
     }
 
     void 'json'() {
@@ -100,7 +104,9 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        '''{"employee":{"job":{"title":"Nuclear Technician","department":"Sector 7g"}}}''' == new String(builder.getData(), builder.charset)
+        def json = new JSONObject(new String(builder.getData(), builder.charset))
+        'Nuclear Technician' == json.employee.job.title
+        'Sector 7g' == json.employee.job.department
     }
 
     void 'will use the http 1.1 default charset if none is specified'() {
@@ -183,7 +189,8 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        '{"param":"a"}' == new String(builder.getData(), 'UTF-8')
+        def json = new JSONObject(new String(builder.getData(), 'UTF-8'))
+        'a' == json.param
     }
 
     @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/33')
@@ -198,7 +205,108 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        '["a","b"]' == new String(builder.getData(), 'UTF-8')
+        def json = new JSONArray(new String(builder.getData(), 'UTF-8'))
+        'a' == json[0]
+        'b' == json[1]
+    }
+
+    void 'xml nodes with same name as builder methods should work'() {
+        given:
+        def xmlns = 'http://hr.org'
+        def data = 'b'
+
+        when:
+        def builder = new ContentBuilder(ContentType.XML.toString(), 'UTF-8').build {
+            xml {
+                PersonRequest(xmlns: xmlns, foo: 'bar') {
+                    text('foo')
+                    text2(data)
+                }
+            }
+        }
+
+        then:
+        def xml = new XmlSlurper().parseText(new String(builder.getData(), 'UTF-8'))
+        'foo' == xml.text.text()
+        'b' == xml.text2.text()
+        'PersonRequest' == xml.name()
+        'bar' == xml.@foo.text()
+    }
+
+    void 'xml can be created from a Closure'() {
+        given:
+        def someXml = {
+            HolidayRequest {
+                type('Vacation')
+            }
+        }
+
+        when:
+        def builder = new ContentBuilder(null, 'UTF-8').build {
+            xml someXml
+        }
+
+        then:
+        def xml = new XmlSlurper().parseText(new String(builder.getData(), 'UTF-8'))
+        'Vacation' == xml.type.text()
+    }
+
+    void 'json using property with same name as builder methods should work'() {
+        given:
+        def someVar = 'a'
+        def data = 'b'
+
+        when:
+        def builder = new ContentBuilder(ContentType.JSON.toString(), 'UTF-8').build {
+            json text: someVar, title: data
+        }
+
+        then:
+        def json = new JSONObject(new String(builder.getData(), 'UTF-8'))
+        'a' == json.text
+        'b' == json.title
+    }
+
+    void 'text using property with same name as builder methods should work'() {
+        given:
+        def data = 'a'
+
+        when:
+        def builder = new ContentBuilder(null, 'UTF-8').build {
+            text data
+        }
+
+        then:
+        '''a''' == new String(builder.getData(), 'UTF-8')
+    }
+
+    void 'urlenc using property with same name as builder methods should work'() {
+        given:
+        def data = 'a'
+
+        when:
+        def builder = new ContentBuilder(null, 'UTF-8').build {
+            urlenc data: data
+        }
+
+        then:
+        '''data=a''' == new String(builder.getData(), 'UTF-8')
+    }
+
+    void 'empty content'() {
+        when:
+        def builderBytes = new ContentBuilder(null, 'UTF-8').build { bytes() }
+        def builderText = new ContentBuilder(null, 'UTF-8').build { text() }
+        def builderUrlenc = new ContentBuilder(null, 'UTF-8').build { urlenc() }
+        def builderXml = new ContentBuilder(null, 'UTF-8').build { xml() }
+        def builderJson = new ContentBuilder(null, 'UTF-8').build { json() }
+
+        then:
+        null == builderBytes.getData()
+        null == builderText.getData()
+        null == builderUrlenc.getData()
+        null == builderXml.getData()
+        null == builderJson.getData()
     }
 
 }
