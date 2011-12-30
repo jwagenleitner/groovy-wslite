@@ -30,4 +30,23 @@ class RESTClientIntegrationSpec extends Specification {
         'text/xml; charset=UTF-8' == response.headers."Content-Type"
         'FresnoStateNews.com' == response.xml.channel.title.text()
     }
+
+    void 'Holiday Service get holidays by country, year and month'() {
+        given:
+        def client = new RESTClient('http://www.holidaywebservice.com/HolidayService_v2/HolidayService2.asmx')
+
+        when:
+        def response = client.post(path: '/GetHolidaysForMonth') {
+            urlenc countryCode: 'UnitedStates', year: '2011', month: '12'
+        }
+
+        then:
+        200 == response.statusCode
+        'text/xml' == response.contentType
+        'Christmas' == response.xml
+                .Holiday
+                .find { it.HolidayCode.text() == 'CHRISTMAS-ACTUAL'}
+                .Descriptor.text()
+    }
+
 }

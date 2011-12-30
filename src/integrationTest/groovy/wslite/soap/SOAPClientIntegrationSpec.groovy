@@ -77,4 +77,28 @@ class SOAPClientIntegrationSpec extends Specification {
         sfe.soapVersion == SOAPVersion.V1_2
     }
 
+    void 'Holiday Service get holidays by country, year and month'() {
+        given:
+        def client = new SOAPClient('http://www.holidaywebservice.com/HolidayService_v2/HolidayService2.asmx')
+
+        when:
+        def response = client.send(SOAPAction: 'http://www.holidaywebservice.com/HolidayService_v2/GetHolidaysForMonth') {
+            body {
+                GetHolidaysForMonth(xmlns: 'http://www.holidaywebservice.com/HolidayService_v2/') {
+                    countryCode('UnitedStates')
+                    year(2011)
+                    month(12)
+                }
+
+            }
+        }
+
+        then:
+        'Christmas' == response.GetHolidaysForMonthResponse
+                .GetHolidaysForMonthResult
+                .Holiday
+                .find { it.HolidayCode.text() == 'CHRISTMAS-ACTUAL' }
+                .Descriptor.text()
+    }
+
 }
