@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import groovy.lang.GString;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -39,6 +37,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+
+import groovy.lang.GString;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its
@@ -125,6 +125,24 @@ public class JSONObject implements Map {
         public String toString() {
             return "null";
         }
+
+        /**
+         * Used in Groovy truth
+         * @return false
+         */
+        public boolean asBoolean() {
+            return false;
+        }
+
+        /**
+         * References to any properties should return null.
+         * @param name The name of the property
+         * @return null
+         */
+        public Object propertyMissing(String name) {
+            return null;
+        }
+
     }
 
 
@@ -1632,15 +1650,16 @@ public class JSONObject implements Map {
      }
 
     public int size() {
-        return map.size();
+        return length();
     }
 
     public boolean isEmpty() {
-        return map.isEmpty();
+        return length() == 0;
     }
 
     public boolean containsKey(Object key) {
-        return map.containsKey(key);
+        String k = key == null ? null : key.toString();
+        return has(k);
     }
 
     public boolean containsValue(Object value) {
@@ -1648,15 +1667,22 @@ public class JSONObject implements Map {
     }
 
     public Object get(Object key) {
-        return map.get(key);
+        String k = key == null ? null : key.toString();
+        return opt(k);
     }
 
     public Object put(Object key, Object value) {
-        return map.put(key, value);
+        String k = key == null ? null : key.toString();
+        try {
+            return put(k, value);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object remove(Object key) {
-        return map.remove(key);
+        String k = key == null ? null : key.toString();
+        return remove(k);
     }
 
     public void putAll(Map m) {
@@ -1680,4 +1706,3 @@ public class JSONObject implements Map {
     }
 
 }
-

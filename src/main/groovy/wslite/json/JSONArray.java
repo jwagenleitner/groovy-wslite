@@ -921,11 +921,11 @@ public class JSONArray implements List {
     }
 
     public int size() {
-        return myArrayList.size();
+        return length();
     }
 
     public boolean isEmpty() {
-        return myArrayList.isEmpty();
+        return length() == 0;
     }
 
     public boolean contains(Object o) {
