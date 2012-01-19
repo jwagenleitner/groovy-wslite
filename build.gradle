@@ -38,6 +38,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     classifier = 'groovydoc'
     from groovydoc.destinationDir
@@ -63,7 +68,7 @@ tasks.withType(CodeNarc).all { codeNarcTask ->
 build.dependsOn integrationTest
 
 artifacts {
-    archives sourcesJar, groovydocJar
+    archives jar, sourcesJar, javadocJar, groovydocJar
 }
 
 signing {
