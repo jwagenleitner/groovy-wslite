@@ -1,9 +1,5 @@
 ruleset {
-    ruleset('rulesets/basic.xml') {
-        'GStringAsMapKey' {
-            doNotApplyToClassNames = 'SOAPMessageBuilder'
-        }
-    }
+    ruleset('rulesets/basic.xml')
     ruleset('rulesets/braces.xml')
     ruleset('rulesets/concurrency.xml')
     ruleset('rulesets/design.xml')
@@ -30,8 +26,11 @@ ruleset {
         'FieldName' {
             doNotApplyToClassNames = 'ContentType'
         }
-        'ConfusingMethodName'  {
-            doNotApplyToClassNames='SOAPMessageBuilder'
+        'ConfusingMethodName' {
+            doNotApplyToClassNames='SOAPMessageBuilder,ContentBuilder'
+        }
+        'FactoryMethodName' {
+            doNotApplyToClassNames='HTTPClient,RESTClient,SOAPClient'
         }
     }
     ruleset('rulesets/size.xml')

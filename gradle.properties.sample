@@ -1,6 +1,7 @@
 // This must be configured if you wanna deploy to the Nexus OSS Public Repo
 mavenUsername=usernameHere
 mavenPassword=passwordHere
-pgpSecretKeyRingFile=/path/to/secring.gpg
-pgpKeyId=A1A3E00E
-pgpPassword=passwordHere
+
+signing.secretKeyRingFile=/path/to/secring.gpg
+signing.keyId=A1A3E00E
+signing.password=passwordHere

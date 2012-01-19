@@ -1,16 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.3'
-    }
-}
-
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'code-quality'
-apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 apply plugin: 'idea'
 
 version = '1.0.0-SNAPSHOT'
@@ -19,45 +10,45 @@ group = 'com.github.groovy-wslite'
 sourceCompatibility = 1.5
 targetCompatibility = 1.5
 
-codeNarcConfigFileName = "./config/codenarc/codenarc.groovy"
-
 repositories {
     mavenCentral()
-    mavenRepo urls: "http://m2repo.spockframework.org/snapshots"
+    mavenRepo url: 'http://m2repo.spockframework.org/snapshots'
 }
 
 dependencies {
     groovy 'org.codehaus.groovy:groovy-all:1.7.6'
-    testCompile("org.spockframework:spock-core:0.6-groovy-1.7-SNAPSHOT") {
+    testCompile('org.spockframework:spock-core:0.6-groovy-1.7-SNAPSHOT') {
         exclude module: 'groovy-all'
     }
-    testCompile "cglib:cglib-nodep:2.2"
+    testCompile 'cglib:cglib-nodep:2.2'
 }
 
 sourceSets {
     integrationTest {
-        compileClasspath = sourceSets.main.classes + configurations.testRuntime
-        runtimeClasspath = classes + sourceSets.main.classes + configurations.testRuntime
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + sourceSets.main.output + configurations.testRuntime
         groovy {
             srcDir 'src/integrationTest/groovy'
         }
     }
 }
 
-task integrationTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.classesDir
-    classpath = sourceSets.integrationTest.runtimeClasspath
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+    classifier = 'groovydoc'
+    from groovydoc.destinationDir
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }
+
+codeNarcConfigFileName = './config/codenarc/codenarc.groovy'
 
 // Disable Checkstyle tasks
 task checkstyleMain(overwrite: true) << {};
@@ -72,56 +63,61 @@ tasks.withType(CodeNarc).all { codeNarcTask ->
 build.dependsOn integrationTest
 
 artifacts {
-    archives groovydocJar
-    archives sourcesJar
+    archives sourcesJar, groovydocJar
 }
 
-def deployer = null
-def installer = install.repositories.mavenInstaller
+signing {
+    sign configurations.archives
+}
 
 uploadArchives {
-    // Checks if login information for the logon repo is set correctly.
     // Should be set in gradle.properties (check gradle.properties.sample)
     if(project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
        repositories {
-            deployer = mavenDeployer {
-                configureAuth = {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
+
+                snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                     authentication(userName: mavenUsername, password: mavenPassword)
                 }
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/", configureAuth) 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/", configureAuth)
-            }
-        }
-    }
-}
 
-[installer, deployer]*.pom*.whenConfigured {pom ->
-    pom.project {
-        name "groovy-wslite"
-        description "Lightweight SOAP and REST webservice clients for Groovy"
-        url "https://github.com/jwagenleitner/groovy-wslite"
-        inceptionYear "2011"
-        licenses {
-            license {
-                name 'The Apache Software License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
-            }
-        }
-        scm {
-            url "scm:git:git@github.com:jwagenleitner/groovy-wslite.git"
-            connection "https://github.com/jwagenleitner/groovy-wslite"
-        }
-        developers {
-            developer {
-                id "jwagenleitner"
-                name "John Wagenleitner"
-                email "john.wagenleitner@gmail.com"
+                repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                    authentication(userName: mavenUsername, password: mavenPassword)
+                }
+
+                pom.project {
+                    name 'groovy-wslite'
+                    description 'Lightweight SOAP and REST webservice clients for Groovy'
+                    url 'https://github.com/jwagenleitner/groovy-wslite'
+                    inceptionYear '2011'
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                    scm {
+                        url 'scm:git:git@github.com:jwagenleitner/groovy-wslite.git'
+                        connection 'https://github.com/jwagenleitner/groovy-wslite'
+                    }
+                    developers {
+                        developer {
+                            id 'jwagenleitner'
+                            name 'John Wagenleitner'
+                            email 'john.wagenleitner@gmail.com'
+                            roles {
+                                role 'Lead'
+                                role 'Founder'
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0-milestone-3'
+    gradleVersion = '1.0-milestone-7'
 }
