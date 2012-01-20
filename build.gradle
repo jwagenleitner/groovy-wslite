@@ -72,12 +72,14 @@ artifacts {
 }
 
 signing {
-    sign configurations.archives
+    if (['secretKeyRingFile', 'keyId', 'password'].every { project.hasProperty("signing.${it}") }) {
+        sign configurations.archives
+    }
 }
 
 uploadArchives {
     // Should be set in gradle.properties (check gradle.properties.sample)
-    if(project.hasProperty('mavenUsername') && project.hasProperty('mavenPassword')) {
+    if (['mavenUsername', 'mavenPassword'].every { project.hasProperty(it) }) {
        repositories {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
