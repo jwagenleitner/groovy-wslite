@@ -228,6 +228,18 @@ class HTTPClientSpec extends Specification {
         conn.requestProperties['x-foo'] == 'baz'
     }
 
+    void 'handles exceptions thrown from connection factory'() {
+        given:
+        httpClient.httpConnectionFactory = [getConnection: { url, proxy -> throw new Exception('fail')}] as HTTPConnectionFactory
+
+        when:
+        httpClient.execute(mockHttpGetRequest)
+
+        then:
+        def ex = thrown(HTTPClientException)
+        assert 'fail' == ex.message
+    }
+
 }
 
 class MockHTTPClientConnection {

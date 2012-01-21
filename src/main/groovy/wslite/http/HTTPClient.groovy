@@ -52,11 +52,15 @@ class HTTPClient {
             setupConnection(conn, request)
             response = buildResponse(conn, conn.inputStream?.bytes)
         } catch(Exception ex) {
-            response = buildResponse(conn, conn.errorStream?.bytes)
-            throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
-                    ex, request, response)
+            if (!conn) {
+                throw new HTTPClientException(ex.message, ex, request, response)
+            } else {
+                response = buildResponse(conn, conn.errorStream?.bytes)
+                throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
+                        ex, request, response)
+            }
         } finally {
-            conn.disconnect()
+            conn?.disconnect()
         }
         return response
     }
