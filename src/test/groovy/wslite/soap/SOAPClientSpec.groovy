@@ -143,7 +143,7 @@ class SOAPClientSpec extends Specification {
         }
 
         then:
-        response.httpRequest.headers.'Content-Type'.endsWith(';action="http://foo/bar"')
+        response.httpRequest.headers.'Content-Type'.endsWith('; action="http://foo/bar"')
     }
 
     void 'send should pass arguments in the http request'() {

@@ -1,5 +1,9 @@
 ruleset {
-    ruleset('rulesets/basic.xml')
+    ruleset('rulesets/basic.xml') {
+        'EmptyCatchBlock' {
+            doNotApplyToClassNames = 'SOAPClient'
+        }
+    }
     ruleset('rulesets/braces.xml')
     ruleset('rulesets/concurrency.xml')
     ruleset('rulesets/design.xml')
