@@ -16,6 +16,8 @@ package wslite.http
 
 import wslite.http.auth.*
 
+import java.util.zip.GZIPInputStream
+
 class HTTPClient {
 
     int connectTimeout = 0
@@ -28,7 +30,7 @@ class HTTPClient {
 
     Proxy proxy = Proxy.NO_PROXY
 
-    def defaultHeaders = [Connection:'Close']
+    def defaultHeaders = [Connection:'Close', 'Accept-Encoding':'gzip']
 
     HTTPConnectionFactory httpConnectionFactory
     HTTPAuthorization authorization
@@ -50,7 +52,8 @@ class HTTPClient {
         try {
             conn = createConnection(request)
             setupConnection(conn, request)
-            response = buildResponse(conn, conn.inputStream?.bytes)
+            def connstream = (conn.inputStream && (conn.contentEncoding == 'gzip')) ? (new GZIPInputStream(conn.inputStream)) : conn.inputStream
+            response = buildResponse(conn, connstream?.bytes)
         } catch(Exception ex) {
             if (!conn) {
                 throw new HTTPClientException(ex.message, ex, request, response)
