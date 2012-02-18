@@ -1,3 +1,7 @@
+## 0.6.0 (2012-02-18)
+
+* gzip encoding now on by default for requests
+
 ## 0.5.2 (2011-12-29)
 
 * Fix for SOAP 1.2 action header (thanks @jladenfors)
