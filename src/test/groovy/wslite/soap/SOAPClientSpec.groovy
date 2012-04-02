@@ -132,6 +132,28 @@ class SOAPClientSpec extends Specification {
         'http://foo/bar' == response.httpRequest.headers.SOAPAction
     }
 
+    void 'should add empty string SOAPAction to request headers if set by client'() {
+        given:
+        soapClient.httpClient = mockHTTPClient(data: simpleSoap11Response.bytes)
+
+        when:
+        def response = soapClient.send(SOAPAction: '', testSoapMessage)
+
+        then:
+        '' == response.httpRequest.headers.SOAPAction
+    }
+
+    void 'should not add SOAPAction to request headers if SOAPAction header already present'() {
+        given:
+        soapClient.httpClient = mockHTTPClient(data: simpleSoap11Response.bytes)
+
+        when:
+        def response = soapClient.send(SOAPAction: 'http://foo/bar', headers: [soapaction: ''], testSoapMessage)
+
+        then:
+        '' == response.httpRequest.headers.SOAPAction
+    }
+
     void 'should add action parameter to Content-Type header for SOAP 1.2 messages'() {
         given:
         soapClient.httpClient = mockHTTPClient(data: simpleSoap12Response.bytes)

@@ -147,11 +147,11 @@ class SOAPClient {
     }
 
     private void setSoapActionHeaderIfNotPresent(HTTPRequest httpRequest, SOAPVersion soapVersion, String soapAction) {
-        if (!soapAction) {
+        if (soapAction == null) {
             return
         }
         if (soapVersion == SOAPVersion.V1_1) {
-            if (!httpRequest.headers[SOAP.SOAP_ACTION_HEADER]) {
+            if (!httpRequest.headers.containsKey(SOAP.SOAP_ACTION_HEADER)) {
                 httpRequest.headers[SOAP.SOAP_ACTION_HEADER] = soapAction
             }
         } else if (soapVersion == SOAPVersion.V1_2) {
