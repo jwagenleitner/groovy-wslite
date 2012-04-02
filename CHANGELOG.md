@@ -1,3 +1,7 @@
+## 0.7.0 (2012-04-02)
+
+* Fix [setSoapActionHeaderIfNotPresent treats the empty string same as null] (/jwagenleitner/groovy-wslite/issues/39)
+
 ## 0.6.0 (2012-02-18)
 
 * gzip encoding now on by default for requests
