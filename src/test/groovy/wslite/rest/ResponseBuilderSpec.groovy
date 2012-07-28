@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ class ResponseBuilderSpec extends Specification {
         '' == response.text
     }
 
-    void 'throws exception when content-type is xml and there is no content'() {
+    void 'xml response property is null when content-type is xml and there is no content'() {
         given:
         httpResponse.contentType = 'text/xml'
         httpResponse.data = null
@@ -84,10 +84,10 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        thrown(Exception)
+        null == response.xml
     }
 
-    void 'throws exception when content-type is json and there is no content'() {
+    void 'json response property is null when content-type is json and there is no content'() {
         given:
         httpResponse.contentType = 'application/json'
         httpResponse.data = null
@@ -96,7 +96,7 @@ class ResponseBuilderSpec extends Specification {
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        def ex = thrown(Exception)
+        null == response.json
     }
 
     void 'throws exception when content-type is xml and content contains invalid markup'() {
