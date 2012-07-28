@@ -1,3 +1,7 @@
+## 0.7.1 (2012-07-28)
+
+* Fix [When given a 204 (No Content) response, there's a fatal error] (/jwagenleitner/groovy-wslite/issues/43)
+
 ## 0.7.0 (2012-04-02)
 
 * Fix [setSoapActionHeaderIfNotPresent treats the empty string same as null] (/jwagenleitner/groovy-wslite/issues/39)
