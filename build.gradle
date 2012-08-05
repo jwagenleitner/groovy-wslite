@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
-apply plugin: 'code-quality'
+apply plugin: 'codenarc'
 apply plugin: 'idea'
 
 version = '1.0.0-SNAPSHOT'
@@ -53,16 +53,9 @@ task integrationTest(type: Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
-codeNarcConfigFileName = './config/codenarc/codenarc.groovy'
-
-// Disable Checkstyle tasks
-task checkstyleMain(overwrite: true) << {};
-task checkstyleTest(overwrite: true) << {};
-task checkstyleIntegrationTest(overwrite: true) << {};
-
-// Do not fail the build for CodeNarc tasks
-tasks.withType(CodeNarc).all { codeNarcTask ->
-    codeNarcTask.ignoreFailures = true
+tasks.withType(CodeNarc) {
+    ignoreFailures = true
+    configFile = file("$rootProject.projectDir/config/codenarc/codenarc.groovy")
 }
 
 build.dependsOn integrationTest
@@ -72,9 +65,10 @@ artifacts {
 }
 
 signing {
-    if (['secretKeyRingFile', 'keyId', 'password'].every { project.hasProperty("signing.${it}") }) {
-        sign configurations.archives
+    required {
+        gradle.taskGraph.hasTask("uploadArchives") 
     }
+    sign configurations.archives
 }
 
 uploadArchives {
@@ -126,5 +120,5 @@ uploadArchives {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0-milestone-7'
+    gradleVersion = '1.1'
 }
