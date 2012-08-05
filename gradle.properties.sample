@@ -1,4 +1,4 @@
-// This must be configured if you wanna deploy to the Nexus OSS Public Repo
+// This must be configured if you want to deploy to the Nexus OSS Public Repo
 mavenUsername=usernameHere
 mavenPassword=passwordHere
 

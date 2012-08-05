@@ -10,6 +10,8 @@ group = 'com.github.groovy-wslite'
 sourceCompatibility = 1.5
 targetCompatibility = 1.5
 
+//compileGroovy.options.compilerArgs = ['-Xlint:unchecked']
+
 repositories {
     mavenCentral()
     mavenRepo url: 'http://m2repo.spockframework.org/releases'
@@ -17,7 +19,7 @@ repositories {
 
 dependencies {
     groovy 'org.codehaus.groovy:groovy-all:1.7.6'
-    testCompile('org.spockframework:spock-core:0.5-groovy-1.7') {
+    testCompile('org.spockframework:spock-core:0.6-groovy-1.7') {
         exclude module: 'groovy-all'
     }
     testCompile 'cglib:cglib-nodep:2.2'
@@ -76,7 +78,7 @@ uploadArchives {
     if (['mavenUsername', 'mavenPassword'].every { project.hasProperty(it) }) {
        repositories {
             mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
                 snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                     authentication(userName: mavenUsername, password: mavenPassword)
