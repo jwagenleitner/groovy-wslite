@@ -59,7 +59,7 @@ class TwitterApiSpec extends Specification {
 
         then:
         def ex = thrown(RESTClientException)
-        401 == ex.response.statusCode
+        400 == ex.response.statusCode
     }
 
 }

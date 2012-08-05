@@ -35,7 +35,7 @@ class SOAPFaultSpec extends Specification {
         sfe.message.contains('soap:Client')
         sfe.message.contains('Invalid message format')
         'soap:Client' == sfe.fault.faultcode.text()
-        500 == sfe.response.httpResponse.statusCode
+        500 == sfe.httpResponse.statusCode
     }
 
     void 'throws exception if SOAP 1.2 Fault response is returned from server'() {
@@ -50,7 +50,7 @@ class SOAPFaultSpec extends Specification {
         sfe.message.contains('env:Sender*')
         sfe.message.contains('Sender Timeout')
         'env:Sender* ' == sfe.fault.Code.Value.text()
-        500 == sfe.response.httpResponse.statusCode
+        500 == sfe.httpResponse.statusCode
     }
 
     void 'throws exception if SOAP 1.1 Fault response is returned from server with http status code success'() {
@@ -65,7 +65,7 @@ class SOAPFaultSpec extends Specification {
         sfe.message.contains('soap:Client')
         sfe.message.contains('Invalid message format')
         'soap:Client' == sfe.fault.faultcode.text()
-        200 == sfe.response.httpResponse.statusCode
+        200 == sfe.httpResponse.statusCode
     }
 
     void 'throws exception if SOAP 1.2 Fault response is returned from server with http status code success'() {
@@ -80,7 +80,7 @@ class SOAPFaultSpec extends Specification {
         sfe.message.contains('env:Sender*')
         sfe.message.contains('Sender Timeout')
         'env:Sender* ' == sfe.fault.Code.Value.text()
-        200 == sfe.response.httpResponse.statusCode
+        200 == sfe.httpResponse.statusCode
     }
 
     private static final Closure testSoapMessage = { body { test(true) } }
