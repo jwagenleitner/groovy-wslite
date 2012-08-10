@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,20 @@ class SOAPClientSpec extends Specification {
         'bar' == response.envelope.Body.GetFoo.result.text()
     }
 
-    void 'throws parse exception if no response'() {
+    @Issue("#46")
+    void 'handles one way message exchanges'() {
         given:
         soapClient.httpClient = mockHTTPClient(data: null)
 
         when:
         def response = soapClient.send(testSoapMessage)
 
-        then: thrown(SOAPMessageParseException)
+        then:
+        null == response.body
+        null == response.envelope
+        !response.hasFault()
+        !response.hasHeader()
+        null == response.soapVersion
     }
 
     void 'throws parse exception if XML response is invalid'() {

@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ class SOAPResponse {
     String text
 
     void setEnvelope(GPathResult soapEnvelope) {
+        if (!soapEnvelope) {
+            return
+        }
         envelope = soapEnvelope
         def namespace = [:]
         switch (envelope.namespaceURI()) {
@@ -47,27 +50,27 @@ class SOAPResponse {
     }
 
     def getBody() {
-        return envelope."${SOAP.SOAP_NS_PREFIX}:${SOAP.BODY_ELEMENT_NAME}"
+        return envelope?."${SOAP.SOAP_NS_PREFIX}:${SOAP.BODY_ELEMENT_NAME}"
     }
 
     def getHeader() {
-        return envelope."${SOAP.SOAP_NS_PREFIX}:${SOAP.HEADER_ELEMENT_NAME}"
+        return envelope?."${SOAP.SOAP_NS_PREFIX}:${SOAP.HEADER_ELEMENT_NAME}"
     }
 
     boolean hasHeader() {
-        return !getHeader().isEmpty()
+        return envelope != null && !getHeader()?.isEmpty()
     }
 
     def getFault() {
-        return getBody()."${SOAP.SOAP_NS_PREFIX}:${SOAP.FAULT_ELEMENT_NAME}"
+        return getBody()?."${SOAP.SOAP_NS_PREFIX}:${SOAP.FAULT_ELEMENT_NAME}"
     }
 
     boolean hasFault() {
-        return !getFault().isEmpty()
+        return envelope != null && !getFault()?.isEmpty()
     }
 
     def propertyMissing(String name) {
-        return getBody()."${name}"
+        return getBody()?."${name}"
     }
 
     @Override
