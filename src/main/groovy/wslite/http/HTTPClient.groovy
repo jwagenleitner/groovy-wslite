@@ -52,13 +52,12 @@ class HTTPClient {
         try {
             conn = createConnection(request)
             setupConnection(conn, request)
-            def connstream = (conn.inputStream && (conn.contentEncoding == 'gzip')) ? (new GZIPInputStream(conn.inputStream)) : conn.inputStream
-            response = buildResponse(conn, connstream?.bytes)
+            response = buildResponse(conn, conn.inputStream)
         } catch(Exception ex) {
             if (!conn) {
                 throw new HTTPClientException(ex.message, ex, request, response)
             } else {
-                response = buildResponse(conn, conn.errorStream?.bytes)
+                response = buildResponse(conn, conn.errorStream)
                 throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
                         ex, request, response)
             }
@@ -147,9 +146,9 @@ class HTTPClient {
         }
     }
 
-    private HTTPResponse buildResponse(conn, responseData) {
+    private HTTPResponse buildResponse(conn, responseStream) {
         def response = new HTTPResponse()
-        response.data = responseData
+        response.data = getResponseContent(responseStream, conn.contentEncoding)
         response.statusCode = conn.responseCode
         response.statusMessage = conn.responseMessage
         response.url = conn.URL
@@ -163,6 +162,13 @@ class HTTPClient {
         response.lastModified = new Date(conn.lastModified)
         response.headers = headersToMap(conn)
         return response
+    }
+
+    private getResponseContent(inputStream, contentEncoding) {
+        if (!inputStream) {
+            return null
+        }
+        return (contentEncoding == 'gzip') ? new GZIPInputStream(inputStream)?.bytes : inputStream.bytes
     }
 
     private Map headersToMap(conn) {
