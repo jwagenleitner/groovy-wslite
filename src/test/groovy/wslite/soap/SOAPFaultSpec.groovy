@@ -83,6 +83,19 @@ class SOAPFaultSpec extends Specification {
         200 == sfe.httpResponse.statusCode
     }
 
+    void 'throws exception if incorrect content type is returned from server'() {
+        given:
+        soapClient.httpClient = getMockHttpClient(statusCode: 500, contentType: 'text/html', data: sampleIncorrectContentTypeFault.bytes)
+
+        when:
+        def response = soapClient.send(testSoapMessage)
+
+        then:
+        SOAPMessageParseException sfe = thrown(SOAPMessageParseException)
+        //sfe.message.contains('Invalid contentType')
+        500 == sfe.response.statusCode
+    }
+
     private static final Closure testSoapMessage = { body { test(true) } }
 
     private static final String sampleSOAP11Fault = '''
@@ -126,6 +139,23 @@ class SOAPFaultSpec extends Specification {
     </env:Body>
 </env:Envelope>
 '''.trim()
+
+    private static final String sampleIncorrectContentTypeFault = '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<title>500 - Internal server error.</title>
+</head>
+<body>
+<div id="header"><h1>Server Error</h1></div>
+<div id="content">
+ <div class="content-container"><fieldset>
+  <h2>500 - Internal server error.</h2>
+  <h3>There is a problem with the resource you are looking for, and it cannot be displayed.</h3>
+ </fieldset></div>
+</div>
+</body>
+</html>'''.trim()
 
     private getMockHttpClient(Map responseParams) {
         [execute: { httpRequest ->

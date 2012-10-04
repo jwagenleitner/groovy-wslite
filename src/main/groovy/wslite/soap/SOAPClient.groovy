@@ -21,6 +21,9 @@ class SOAPClient {
 
     String serviceURL
     HTTPClient httpClient
+	
+	List validContentTypes = [SOAP.SOAP_V11_MEDIA_TYPE, SOAP.SOAP_V12_MEDIA_TYPE]
+	boolean acceptNullContentType = true
 
     SOAPClient() {
         this.httpClient = new HTTPClient()
@@ -81,6 +84,7 @@ class SOAPClient {
 
     private SOAPResponse buildSOAPResponse(httpRequest, httpResponse) {
         SOAPResponse response
+        verifyContentType(httpRequest, httpResponse)
         try {
             String soapMessageText = httpResponse.contentAsString
             def soapEnvelope = soapMessageText ? parseEnvelope(soapMessageText) : null
@@ -94,6 +98,24 @@ class SOAPClient {
         return response
     }
 
+	/**
+	 * Throw a SOAPMessageParseException if the content type is 
+	 * <ul><li> not one of validContentTypes - list</li> 
+	 * <li> null and acceptNullContentType - boolean is false</li></ul>
+	 */
+    private void verifyContentType(httpRequest, httpResponse){
+        String contentType = httpResponse.contentType
+        if(validContentTypes.contains(contentType)){
+            return
+        }
+
+        //content type is not one of the valid content types, allow null through 
+        //if configured, otherwise throw exception
+        if(!(acceptNullContentType && (contentType == null))){
+            throw new SOAPMessageParseException("Invalid contentType $contentType given for message, expected one of $validContentTypes", httpRequest, httpResponse)
+        }
+    }
+    
     private parseEnvelope(String soapMessageText) {
         def envelopeNode = new XmlSlurper().parseText(soapMessageText)
         if (envelopeNode.name() != SOAP.ENVELOPE_ELEMENT_NAME) {
