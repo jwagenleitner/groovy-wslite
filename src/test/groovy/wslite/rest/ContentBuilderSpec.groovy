@@ -82,6 +82,49 @@ class ContentBuilderSpec extends Specification {
         'foo=bar&q=one&q=two' == new String(builder.getData(), builder.charset)
     }
 
+    void 'multipart'() {
+
+        when:
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            multipart 'my-property', 'my-value'.bytes
+        }
+
+        then:
+        String data = new String(builder.data, builder.charset)
+        String boundary = data.split('\r\n')[0]
+
+        and:
+        data.startsWith('------groovy-wslite-')
+        data.endsWith('\r\n'+boundary+'--\r\n')
+
+        and:
+        (data =~ '\r\n').size() == 5
+        (data =~ boundary).size() == 2
+
+    }
+
+    void 'multipart allows multiple parts'() {
+
+        when:
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            multipart 'my-property', 'my-value'.bytes
+            multipart 'other-property', 'my-other-value'.bytes
+        }
+
+        then:
+        String data = new String(builder.data, builder.charset)
+        String boundary = data.split('\r\n')[0]
+
+        and:
+        (data =~ '\r\n').size() == 9
+        (data =~ boundary).size() == 3
+
+        and:
+        data.contains 'Content-Disposition: form-data; name="my-property"'
+        data.contains 'Content-Disposition: form-data; name="other-property"'
+
+    }
+
     void 'xml'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
@@ -152,6 +195,17 @@ class ContentBuilderSpec extends Specification {
 
         then:
         ContentType.URLENC.toString() == contentTypeHeader.mediaType
+    }
+
+    void 'guesses content type for multipart'() {
+        when:
+        def builder = new ContentBuilder(null, null).build {
+            multipart 'foo', 'bar'.bytes
+        }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
+
+        then:
+        ContentType.MULTIPART.toString() == contentTypeHeader.mediaType
     }
 
     void 'guesses content type for xml'() {

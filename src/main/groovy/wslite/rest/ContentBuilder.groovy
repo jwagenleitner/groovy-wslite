@@ -136,19 +136,21 @@ class ContentBuilder {
         dataContentType = ContentType.MULTIPART
 
         multipartData.each { String name, byte[] cnt ->
-            baos.write(BOUNDARY_PREFIX)
-            baos.write(boundary.bytes)
-            baos.write(LINE_SEPARATOR)
-            baos.write("Content-Disposition: form-data; name=\"${name}\"".toString().bytes)
-            baos.write(LINE_SEPARATOR)
-            baos.write(LINE_SEPARATOR)
-            baos.write(cnt)
-            baos.write(LINE_SEPARATOR)
+
+            baos <<  BOUNDARY_PREFIX
+            baos <<  boundary.bytes
+            baos <<  LINE_SEPARATOR
+            baos <<  "Content-Disposition: form-data; name=\"${name}\"".toString().bytes
+            baos <<  LINE_SEPARATOR
+            baos <<  LINE_SEPARATOR
+            baos <<  cnt
+            baos <<  LINE_SEPARATOR
         }
-        baos.write(BOUNDARY_PREFIX)
-        baos.write(boundary.bytes)
-        baos.write(BOUNDARY_PREFIX)
-        baos.write(LINE_SEPARATOR)
+
+        baos <<  BOUNDARY_PREFIX
+        baos <<  boundary.bytes
+        baos <<  BOUNDARY_PREFIX
+        baos <<  LINE_SEPARATOR
 
         return baos.toByteArray()
 
