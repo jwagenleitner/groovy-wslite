@@ -20,14 +20,18 @@ import wslite.json.*
 
 class ContentBuilder {
 
+    private static final byte[] LINE_SEPARATOR = [13, 10]
+    private static final byte[] BOUNDARY_PREFIX = [45, 45]
     byte[] data
 
     private String contentType
     private String charset
+    private String boundary
 
     private ContentType dataContentType
 
     private Closure xmlContentClosure
+    private Map<String, byte[]> multipartData
 
     ContentBuilder(String defaultContentType, String defaultCharset) {
         contentType = defaultContentType
@@ -45,6 +49,9 @@ class ContentBuilder {
         // of the calling object.
         if (!data && xmlContentClosure) {
             data = closureToXmlString(xmlContentClosure).getBytes(getCharset())
+        }
+        if (!data && multipartData) {
+            data = buildMultipartRequest(multipartData)
         }
         return this
     }
@@ -70,6 +77,12 @@ class ContentBuilder {
     void urlenc(Map content) {
         dataContentType = ContentType.URLENC
         data = new URLParametersCodec().encode(content)?.getBytes(getCharset())
+    }
+
+    void multipart(String name, content) {
+        dataContentType = ContentType.MULTIPART
+        multipartData = multipartData ?: [:]
+        multipartData.put(name, content)
     }
 
     void xml(Closure content) {
@@ -98,7 +111,10 @@ class ContentBuilder {
 
     String getContentTypeHeader() {
         ContentTypeHeader contentTypeHeader = new ContentTypeHeader(getContentType())
-        if (!contentTypeHeader.charset) {
+        if (boundary) {
+            return contentTypeHeader.mediaType + '; boundary=' + boundary
+        }
+        else if (!contentTypeHeader.charset) {
             return contentTypeHeader.mediaType + '; charset=' + getCharset()
         }
         return contentTypeHeader.contentType
@@ -110,6 +126,32 @@ class ContentBuilder {
 
     private String closureToXmlString(content) {
         return XmlUtil.serialize(new StreamingMarkupBuilder().bind(content))
+    }
+
+    private byte[] buildMultipartRequest(content) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream()
+
+        boundary = ('-' * 4) + 'groovy-wslite-' + (UUID.randomUUID())
+        dataContentType = ContentType.MULTIPART
+
+        multipartData.each { String name, byte[] cnt ->
+            baos.write(BOUNDARY_PREFIX)
+            baos.write(boundary.bytes)
+            baos.write(LINE_SEPARATOR)
+            baos.write("Content-Disposition: form-data; name=\"${name}\"".toString().bytes)
+            baos.write(LINE_SEPARATOR)
+            baos.write(LINE_SEPARATOR)
+            baos.write(cnt)
+            baos.write(LINE_SEPARATOR)
+        }
+        baos.write(BOUNDARY_PREFIX)
+        baos.write(boundary.bytes)
+        baos.write(BOUNDARY_PREFIX)
+        baos.write(LINE_SEPARATOR)
+
+        return baos.toByteArray()
+
     }
 
 }
