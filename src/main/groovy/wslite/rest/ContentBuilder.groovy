@@ -17,6 +17,7 @@ package wslite.rest
 import groovy.xml.*
 import wslite.http.*
 import wslite.json.*
+import wslite.rest.multipart.BodyPart
 
 class ContentBuilder {
 
@@ -31,7 +32,7 @@ class ContentBuilder {
     private ContentType dataContentType
 
     private Closure xmlContentClosure
-    private Map<String, byte[]> multipartData
+    private List<BodyPart> multipartData
 
     ContentBuilder(String defaultContentType, String defaultCharset) {
         contentType = defaultContentType
@@ -79,10 +80,10 @@ class ContentBuilder {
         data = new URLParametersCodec().encode(content)?.getBytes(getCharset())
     }
 
-    void multipart(String name, content) {
+    void multipart(String name, byte[] content) {
         dataContentType = ContentType.MULTIPART
-        multipartData = multipartData ?: [:]
-        multipartData.put(name, content)
+        multipartData = multipartData ?: []
+        multipartData << new BodyPart(name: name, content: content)
     }
 
     void xml(Closure content) {
@@ -135,15 +136,15 @@ class ContentBuilder {
         boundary = ('-' * 4) + 'groovy-wslite-' + (UUID.randomUUID())
         dataContentType = ContentType.MULTIPART
 
-        multipartData.each { String name, byte[] cnt ->
+        multipartData.each { BodyPart part ->
 
             baos <<  BOUNDARY_PREFIX
             baos <<  boundary.bytes
             baos <<  LINE_SEPARATOR
-            baos <<  "Content-Disposition: form-data; name=\"${name}\"".toString().bytes
+            baos <<  "Content-Disposition: form-data; name=\"${part.name}\"".toString().bytes
             baos <<  LINE_SEPARATOR
             baos <<  LINE_SEPARATOR
-            baos <<  cnt
+            baos <<  part.content
             baos <<  LINE_SEPARATOR
         }
 
