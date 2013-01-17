@@ -39,9 +39,13 @@ class SOAPClient {
         this.httpClient.authorization = authorization
     }
 
-    SOAPResponse send(Map requestParams=[:], Closure content) {
+    SOAPResponse send(Map requestParams=[:], Closure content, Boolean isStripWhiteSpace = false) {
         def message = new SOAPMessageBuilder().build(content)
-        return send(requestParams, message.version, message.toString())
+        if (isStripWhiteSpace) {
+          return send(requestParams, message.version, stripWhiteSpace(message.toString()))
+        } else {
+          return send(requestParams, message.version, message.toString())
+        }
     }
 
     SOAPResponse send(Map requestParams=[:], String content) {
@@ -167,6 +171,10 @@ class SOAPClient {
             }
         } catch (Exception ex) { }
         return sv
+    }
+
+    private String stripWhiteSpace(String content) {
+        return content.replaceAll(/>\s+</, '><')
     }
 
 }

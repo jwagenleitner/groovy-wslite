@@ -444,6 +444,18 @@ class SOAPClientSpec extends Specification {
         'application/xml+soap+foo' == response.httpRequest.headers['Content-Type']
     }
 
+    void 'strip white space'() {
+        given:
+        def message = simpleSoap11Response
+        def expectMessage = """<?xml version='1.0' encoding='UTF-8'?><SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'><SOAP:Header><token>foo</token></SOAP:Header><SOAP:Body><GetFoo><result>bar</result></GetFoo></SOAP:Body></SOAP:Envelope>"""
+
+        when:
+        def result = soapClient.stripWhiteSpace(message)
+
+        then:
+        expectMessage == result
+    }
+
     private static final Closure testSoapMessage = { body { test(true) } }
 
     private static final String simpleSoap11Response = '''
