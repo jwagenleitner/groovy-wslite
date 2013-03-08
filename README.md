@@ -15,7 +15,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.1')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.2')
 import wslite.soap.*
 
 def client = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
@@ -240,7 +240,7 @@ Authenticator.setDefault(new Authenticator() {
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.1')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.2')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
@@ -439,7 +439,7 @@ __groovy-wslite__ is available in Maven Central.
     <dependency>
         <groupId>com.github.groovy-wslite</groupId>
         <artifactId>groovy-wslite</artifactId>
-        <version>0.7.1</version>
+        <version>0.7.2</version>
     </dependency>
 
 #### Snapshots
@@ -463,7 +463,7 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.1')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.7.2')
 
 #### Snapshots
 
@@ -489,7 +489,7 @@ The SOAP/RESTClients can easily be configured and used in your Grails applicatio
             //mavenRepo "https://oss.sonatype.org/content/groups/public"
         }
         dependencies {
-            runtime 'com.github.groovy-wslite:groovy-wslite:0.7.1'
+            runtime 'com.github.groovy-wslite:groovy-wslite:0.7.2'
         }
     }
 

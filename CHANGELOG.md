@@ -1,3 +1,7 @@
+## 0.7.2 (2013-02-02)
+
+* Fix [Error handling OneWay WebService method call] (/jwagenleitner/groovy-wslite/issues/46)
+
 ## 0.7.1 (2012-07-28)
 
 * Fix [When given a 204 (No Content) response, there's a fatal error] (/jwagenleitner/groovy-wslite/issues/43)

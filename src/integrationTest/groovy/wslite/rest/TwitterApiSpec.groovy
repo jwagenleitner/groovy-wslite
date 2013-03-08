@@ -42,16 +42,6 @@ class TwitterApiSpec extends Specification {
         'John Wagenleitner' == response.json.name
     }
 
-    @See('https://dev.twitter.com/docs/api/1/get/statuses/public_timeline')
-    void 'get public timeline'() {
-        when:
-        def response = twitterV1.get(path: '/statuses/public_timeline.json')
-
-        then:
-        200 == response.statusCode
-        1 < response.json.size()
-    }
-
     @See('https://dev.twitter.com/docs/api/1/get/statuses/mentions')
     void 'get mentions fails without auth'() {
         when:
