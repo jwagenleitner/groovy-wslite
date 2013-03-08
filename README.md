@@ -308,6 +308,18 @@ def response = client.post() {
 }
 ```
 
+You can also do multipart requests for uploading files and such. You don't need to specify content type as this will be multipart/form-data
+and will have a content boundary assigned to it.
+
+```groovy
+def response = client.post() {
+
+    // call once for each body-part
+    multipart 'username', 'antony'.bytes
+    multipart 'files[myfile.png]', myFile.bytes
+}
+```
+
 ### Client Defaults
 
 When interacting with a service that requires a particular Accept header or when sending content of
