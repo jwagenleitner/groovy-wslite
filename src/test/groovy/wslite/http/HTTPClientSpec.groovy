@@ -38,6 +38,13 @@ class HTTPClientSpec extends Specification {
         }] as HTTPConnectionFactory
     }
 
+    void cleanup() {
+        System.clearProperty('http.proxyHost')
+        System.clearProperty('http.proxyPort')
+        System.clearProperty('https.proxyHost')
+        System.clearProperty('https.proxyPort')
+    }
+
     void 'will use its settings if not specified in request'() {
         given:
         httpClient.connectTimeout = 20000
@@ -142,6 +149,9 @@ class HTTPClientSpec extends Specification {
         httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
 
+        System.setProperty('http.proxyHost', 'badproxy.example.com')
+        System.setProperty('http.proxyPort', '5432')
+
         when:
         httpClient.execute(mockHttpsGetRequest)
 
@@ -157,6 +167,9 @@ class HTTPClientSpec extends Specification {
         httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
         httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
         httpClient.sslTrustAllCerts = true
+
+        System.setProperty('https.proxyHost', 'badproxy.example.com')
+        System.setProperty('https.proxyPort', '5432')
 
         when:
         httpClient.execute(mockHttpsGetRequest)
@@ -196,12 +209,69 @@ class HTTPClientSpec extends Specification {
         httpClient.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
         def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy2.example.com', 80))
 
+        System.setProperty('http.proxyHost', 'badproxy.example.com')
+        System.setProperty('http.proxyPort', '5432')
+
         when:
         mockHttpsGetRequest.proxy = testproxy
         httpClient.execute(mockHttpsGetRequest)
 
         then:
         1 * httpClient.httpConnectionFactory.getConnection(mockHttpsGetRequest.url, testproxy) >> { url, proxy ->
+            conn.URL = url
+            conn
+        }
+    }
+
+    void 'system HTTP proxy settings take effect'() {
+        given:
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy3.example.com', 5555))
+
+        System.setProperty('http.proxyHost', testproxy.address().hostName)
+        System.setProperty('http.proxyPort', testproxy.address().port.toString())
+
+        when:
+        httpClient.execute(mockHttpsGetRequest)
+
+        then:
+        1 * httpClient.httpConnectionFactory.getConnection(mockHttpsGetRequest.url, testproxy) >> { url, proxy ->
+            conn.URL = url
+            conn
+        }
+    }
+
+    void 'system HTTPS proxy settings take effect with TrustAllSSLCerts'() {
+        given:
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+        httpClient.sslTrustAllCerts = true
+        def testproxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+        System.setProperty('https.proxyHost', testproxy.address().hostName)
+        System.setProperty('https.proxyPort', testproxy.address().port.toString())
+        System.setProperty('http.proxyHost', 'badproxy.example.com')
+        System.setProperty('http.proxyPort', '5432')
+
+        when:
+        httpClient.execute(mockHttpsGetRequest)
+
+        then:
+        1 * httpClient.httpConnectionFactory.getConnectionTrustAllSSLCerts(mockHttpsGetRequest.url, testproxy) >> {
+            url, proxy ->
+                conn.URL = url
+                conn
+        }
+    }
+
+    void 'falls back to no HTTP proxy'() {
+        given:
+        httpClient.httpConnectionFactory = Mock(HTTPConnectionFactory)
+
+        when:
+        httpClient.execute(mockHttpsGetRequest)
+
+        then:
+        1 * httpClient.httpConnectionFactory.getConnection(mockHttpsGetRequest.url, Proxy.NO_PROXY) >> { url, proxy ->
             conn.URL = url
             conn
         }

@@ -28,7 +28,7 @@ class HTTPClient {
     String sslTrustStoreFile
     String sslTrustStorePassword
 
-    Proxy proxy = Proxy.NO_PROXY
+    Proxy proxy
 
     def defaultHeaders = [Connection:'Close', 'Accept-Encoding':'gzip']
 
@@ -68,8 +68,8 @@ class HTTPClient {
     }
 
     private createConnection(HTTPRequest request) {
-        def usedProxy = request.proxy ?: proxy
         if (isSecureConnectionRequest(request)) {
+            def usedProxy = getProxy(request, true)
             if (shouldTrustAllSSLCerts(request)) {
                 return httpConnectionFactory.getConnectionTrustAllSSLCerts(request.url, usedProxy)
             }
@@ -87,7 +87,7 @@ class HTTPClient {
                         trustStoreFile, trustStorePassword, usedProxy)
             }
         }
-        return httpConnectionFactory.getConnection(request.url, usedProxy)
+        return httpConnectionFactory.getConnection(request.url, getProxy(request, false))
     }
 
     private boolean isSecureConnectionRequest(HTTPRequest request) {
@@ -177,6 +177,41 @@ class HTTPClient {
             headers[entry.key ?: ''] = entry.value.size() > 1 ? entry.value : entry.value[0]
         }
         return headers
+    }
+
+    /**
+     * Returns the proxy to use for the given request. The first proxy in the
+     * following list that is defined gets selected:
+     * <ol>
+     * <li>request.proxy</li>
+     * <li>HTTPClient's {@code proxy} property</li>
+     * <li>{@code http(s).proxyHost/Port} system properties</li>
+     * <li>no proxy</li>
+     * </ol>
+     * @param request The current HTTP(S) request.
+     * @param useHttpsProxy If {@code true}, the HTTPS proxy is returned, otherwise
+     * the method returns the standard HTTP one.
+     */
+    private Proxy getProxy(request, useHttpsProxy) {
+        return request.proxy ?: proxy ?: loadSystemProxy(useHttpsProxy) ?: Proxy.NO_PROXY
+    }
+
+    /**
+     * Reads the proxy information from the {@code http(s).proxyHost} and {@code http(s).proxyPort}
+     * system properties if set and returns a {@code java.net.Proxy} instance configured with
+     * those settings. If the {@code proxyHost} setting has no value, then this method returns
+     * {@code null}.
+     * @param useHttpsProxy {@code true} if you want the HTTPS proxy, otherwise {@code false}.
+     */
+    private Proxy loadSystemProxy(boolean useHttpsProxy) {
+        def propertyPrefix = useHttpsProxy ? "https" : "http"
+        def proxyHost = System.getProperty("${propertyPrefix}.proxyHost")
+        if (!proxyHost) return null
+
+        def proxyPort = System.getProperty("${propertyPrefix}.proxyPort")?.toInteger()
+        proxyPort = proxyPort ?: (useHttpsProxy ? 443 : 80)
+
+        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort))
     }
 
 }

@@ -235,6 +235,23 @@ Authenticator.setDefault(new Authenticator() {
 })
 ```
 
+You can also set the proxy on the SOAP client itself or via the standard java.net "http.proxyHost" and "http.proxyPort" system properties (or their "https.*" counterparts). To configure the client with a proxy, use code like this:
+
+``` groovy
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+def client = new SOAPClient("https://www.example.com/ExampleService")
+client.httpClient.proxy = proxy
+....
+```
+
+In decreasing precedence, groovy-wslite picks the proxy settings from:
+
+1. The request's proxy
+2. The client's proxy
+3. The java.net system properties
+4. No proxy
+
 ## REST
 
 ### Example
@@ -413,6 +430,55 @@ For all text based responses (content type starts with "text/") there will be a 
 For xml based responses, an *xml* (i.e., `response.xml`) property is available that is of type *GPathResult*.
 
 For json based responses, a *json* (i.e., `response.json`) property is available that is of type *JSONObject* or *JSONArray*.
+
+## Proxies
+
+If you want to send requests via a proxy, you can configure one in several ways. You can do it at the level of the request:
+
+``` groovy
+// SOAPClient
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+def client = new SOAPClient("https://www.example.com/ExampleService")
+def response = client.send(proxy:proxy) {
+    ....
+}
+
+// RESTClient
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+def client = new RESTClient("http://api.twitter.com/1/")
+def response = client.get(path:'/users/show.json', proxy:proxy, query:[screen_name:'jwagenleitner', include_entities:true])
+```
+
+You can also set the proxy on the SOAP client or REST client itself:
+
+``` groovy
+def proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress('proxy.example.com', 8080))
+
+def client = new SOAPClient("https://www.example.com/ExampleService")
+client.httpClient.proxy = proxy
+....
+```
+
+Finally, you can use the standard java.net "http.proxyHost" and "http.proxyPort" system properties (or their "https.*" counterparts). 
+
+In decreasing precedence, groovy-wslite picks the proxy settings from:
+
+1. The request's proxy
+2. The client's proxy
+3. The java.net system properties
+4. No proxy
+
+If the proxy requires authentication, then you will need to set an `Authenticator`:
+
+``` groovy
+Authenticator.setDefault(new Authenticator() {
+    protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication("username","password".toCharArray())
+    }
+})
+```
 
 ## Using groovy-wslite in your project
 
