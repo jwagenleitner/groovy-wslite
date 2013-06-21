@@ -19,6 +19,7 @@ enum ContentType {
     XML(['application/xml', 'text/xml', 'application/xhtml+xml', 'application/atom+xml']),
     HTML(['text/html']),
     URLENC(['application/x-www-form-urlencoded']),
+    MULTIPART(['multipart/form-data']),
     BINARY(['application/octet-stream']),
     TEXT(['text/plain']),
     ANY(['*/*'])

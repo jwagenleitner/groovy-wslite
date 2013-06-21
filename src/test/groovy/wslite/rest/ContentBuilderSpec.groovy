@@ -52,7 +52,7 @@ class ContentBuilderSpec extends Specification {
         'text/plain; charset=ISO-8859-1' == builder.getContentTypeHeader()
     }
 
-    void 'bytes'() {
+    void 'byte request'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             bytes 'foo'.getBytes('UTF-8')
@@ -62,7 +62,7 @@ class ContentBuilderSpec extends Specification {
         'foo'.getBytes('UTF-8') == builder.getData()
     }
 
-    void 'text'() {
+    void 'text request'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             text 'foo'
@@ -72,7 +72,7 @@ class ContentBuilderSpec extends Specification {
         'foo' == new String(builder.getData(), builder.charset)
     }
 
-    void 'urlenc'() {
+    void 'urlenc request'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             urlenc foo: 'bar', q: ['one', 'two']
@@ -82,7 +82,76 @@ class ContentBuilderSpec extends Specification {
         'foo=bar&q=one&q=two' == new String(builder.getData(), builder.charset)
     }
 
-    void 'xml'() {
+    void 'multipart request'() {
+
+        when:
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            multipart 'my-property', 'my-value'.bytes
+        }
+
+        then:
+        String data = new String(builder.data, builder.charset)
+        String boundary = data.split('\r\n')[0]
+
+        and:
+        data.startsWith('------groovy-wslite-')
+        data.endsWith('\r\n'+boundary+'--\r\n')
+
+        and:
+        (data =~ '\r\n').size() == 5
+        (data =~ boundary).size() == 2
+
+    }
+
+    void 'multipart allows multiple parts'() {
+
+        when:
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            multipart 'my-property', 'my-value'.bytes
+            multipart 'other-property', 'my-other-value'.bytes
+        }
+
+        then:
+        String data = new String(builder.data, builder.charset)
+        String boundary = data.split('\r\n')[0]
+
+        and:
+        (data =~ '\r\n').size() == 9
+        (data =~ boundary).size() == 3
+
+        and:
+        data.contains 'Content-Disposition: form-data; name="my-property"'
+        data.contains 'Content-Disposition: form-data; name="other-property"'
+
+    }
+
+    void 'multipart body parts can have duplicate names'() {
+
+        when:
+        def builder = new ContentBuilder('text/plain', 'UTF-8').build {
+            multipart 'my-property', 'my-first-value'.bytes
+            multipart 'my-property', 'my-second-value'.bytes
+        }
+
+        then:
+        String data = new String(builder.data, builder.charset)
+        String boundary = data.split('\r\n')[0]
+
+        and:
+        (data =~ '\r\n').size() == 9
+        (data =~ boundary).size() == 3
+
+        and:
+        data.contains 'Content-Disposition: form-data; name="my-property"\r\n\r\nmy-first-value'
+        data.contains 'Content-Disposition: form-data; name="my-property"\r\n\r\nmy-second-value'
+
+        and:
+        data
+
+
+    }
+
+    void 'xml request'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             xml {
@@ -97,7 +166,7 @@ class ContentBuilderSpec extends Specification {
         'bar' == xml.foo.text()
     }
 
-    void 'json'() {
+    void 'json request'() {
         when:
         def builder = new ContentBuilder('text/plain', 'UTF-8').build {
             json employee: [job: [title: 'Nuclear Technician', department: 'Sector 7g']]
@@ -152,6 +221,17 @@ class ContentBuilderSpec extends Specification {
 
         then:
         ContentType.URLENC.toString() == contentTypeHeader.mediaType
+    }
+
+    void 'guesses content type for multipart'() {
+        when:
+        def builder = new ContentBuilder(null, null).build {
+            multipart 'foo', 'bar'.bytes
+        }
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(builder.getContentTypeHeader())
+
+        then:
+        ContentType.MULTIPART.toString() == contentTypeHeader.mediaType
     }
 
     void 'guesses content type for xml'() {

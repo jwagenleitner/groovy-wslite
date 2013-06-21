@@ -17,17 +17,22 @@ package wslite.rest
 import groovy.xml.*
 import wslite.http.*
 import wslite.json.*
+import wslite.rest.multipart.BodyPart
 
 class ContentBuilder {
 
+    private static final byte[] LINE_SEPARATOR = [13, 10]
+    private static final byte[] BOUNDARY_PREFIX = [45, 45]
     byte[] data
 
     private String contentType
     private String charset
+    private String boundary
 
     private ContentType dataContentType
 
     private Closure xmlContentClosure
+    private List<BodyPart> multipartData
 
     ContentBuilder(String defaultContentType, String defaultCharset) {
         contentType = defaultContentType
@@ -45,6 +50,9 @@ class ContentBuilder {
         // of the calling object.
         if (!data && xmlContentClosure) {
             data = closureToXmlString(xmlContentClosure).getBytes(getCharset())
+        }
+        if (!data && multipartData) {
+            data = buildMultipartRequest(multipartData)
         }
         return this
     }
@@ -70,6 +78,12 @@ class ContentBuilder {
     void urlenc(Map content) {
         dataContentType = ContentType.URLENC
         data = new URLParametersCodec().encode(content)?.getBytes(getCharset())
+    }
+
+    void multipart(String name, byte[] content) {
+        dataContentType = ContentType.MULTIPART
+        multipartData = multipartData ?: []
+        multipartData << new BodyPart(name: name, content: content)
     }
 
     void xml(Closure content) {
@@ -98,7 +112,10 @@ class ContentBuilder {
 
     String getContentTypeHeader() {
         ContentTypeHeader contentTypeHeader = new ContentTypeHeader(getContentType())
-        if (!contentTypeHeader.charset) {
+        if (boundary) {
+            return contentTypeHeader.mediaType + '; boundary=' + boundary
+        }
+        else if (!contentTypeHeader.charset) {
             return contentTypeHeader.mediaType + '; charset=' + getCharset()
         }
         return contentTypeHeader.contentType
@@ -110,6 +127,34 @@ class ContentBuilder {
 
     private String closureToXmlString(content) {
         return XmlUtil.serialize(new StreamingMarkupBuilder().bind(content))
+    }
+
+    private byte[] buildMultipartRequest(content) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream()
+
+        boundary = ('-' * 4) + 'groovy-wslite-' + (UUID.randomUUID())
+        dataContentType = ContentType.MULTIPART
+
+        multipartData.each { BodyPart part ->
+
+            baos <<  BOUNDARY_PREFIX
+            baos <<  boundary.bytes
+            baos <<  LINE_SEPARATOR
+            baos <<  "Content-Disposition: form-data; name=\"${part.name}\"".toString().bytes
+            baos <<  LINE_SEPARATOR
+            baos <<  LINE_SEPARATOR
+            baos <<  part.content
+            baos <<  LINE_SEPARATOR
+        }
+
+        baos <<  BOUNDARY_PREFIX
+        baos <<  boundary.bytes
+        baos <<  BOUNDARY_PREFIX
+        baos <<  LINE_SEPARATOR
+
+        return baos.toByteArray()
+
     }
 
 }
