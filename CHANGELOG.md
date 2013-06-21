@@ -1,3 +1,8 @@
+## 0.8.0 (2013-06-21)
+
+* Added support for java.net proxy settings
+* Added support for multipart post
+
 ## 0.7.2 (2013-02-02)
 
 * Fix [Error handling OneWay WebService method call] (/jwagenleitner/groovy-wslite/issues/46)
