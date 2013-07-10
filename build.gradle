@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    groovy 'org.codehaus.groovy:groovy-all:1.7.6'
+    compile 'org.codehaus.groovy:groovy-all:1.7.6'
     testCompile('org.spockframework:spock-core:0.6-groovy-1.7') {
         exclude module: 'groovy-all'
     }
@@ -122,5 +122,5 @@ uploadArchives {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.4'
+    gradleVersion = '1.6'
 }
