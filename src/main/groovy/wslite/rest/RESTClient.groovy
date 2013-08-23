@@ -41,12 +41,12 @@ class RESTClient {
         this.httpClient.authorization = authorization
     }
 
-    Response get(Map params=[:]) {
-        return executeMethod(HTTPMethod.GET, params)
+    Response get(Map params=[:], Closure content=null) {
+        return executeMethod(HTTPMethod.GET, params, content)
     }
 
-    Response delete(Map params=[:]) {
-        return executeMethod(HTTPMethod.DELETE, params)
+    Response delete(Map params=[:], Closure content=null) {
+        return executeMethod(HTTPMethod.DELETE, params, content)
     }
 
     Response post(Map params=[:], Closure content) {
