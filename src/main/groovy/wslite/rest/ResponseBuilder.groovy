@@ -37,19 +37,20 @@ class ResponseBuilder {
     }
 
     private boolean isTextResponse(HTTPResponse httpResponse) {
-        return httpResponse.contentType?.startsWith('text/') ||
-               httpResponse.contentType in ( ContentType.TEXT.getContentTypeList() +
+        def contentType = contentTypeNoParameter(httpResponse)
+        return contentType?.startsWith('text/') ||
+               contentType in ( ContentType.TEXT.getContentTypeList() +
                                              ContentType.HTML.getContentTypeList() +
                                              ContentType.XML.getContentTypeList()  +
                                              ContentType.JSON.getContentTypeList() )
     }
 
     private boolean isXmlResponse(HTTPResponse httpResponse) {
-        return httpResponse.contentType in ContentType.XML.getContentTypeList()
+        return contentTypeNoParameter(httpResponse) in ContentType.XML.getContentTypeList()
     }
 
     private boolean isJsonResponse(HTTPResponse httpResponse) {
-        return httpResponse.contentType in ContentType.JSON.getContentTypeList()
+        return contentTypeNoParameter(httpResponse) in ContentType.JSON.getContentTypeList()
     }
 
     private parseXmlContent(String content) {
@@ -60,4 +61,8 @@ class ResponseBuilder {
         return content.trim().startsWith('[') ? new JSONArray(content) : new JSONObject(content)
     }
 
+    private String contentTypeNoParameter(HTTPResponse httpResponse) {
+        int sepIndex = httpResponse.contentType?.indexOf(';')
+        return sepIndex > 0 ? httpResponse.contentType.substring(0, sepIndex) : httpResponse.contentType
+    }
 }
