@@ -99,7 +99,8 @@ class ResponseBuilderSpec extends Specification {
         null == response.json
     }
 
-    void 'throws exception when content-type is xml and content contains invalid markup'() {
+
+        void 'throws exception when content-type is xml and content contains invalid markup'() {
         given:
         httpResponse.contentType = 'text/xml'
         httpResponse.data = '<html><body>Error<br></body></html>'.bytes
@@ -109,6 +110,18 @@ class ResponseBuilderSpec extends Specification {
 
         then:
         thrown(Exception)
+    }
+
+    void 'allows doctype in xml markup'() {
+        given:
+        httpResponse.contentType = 'text/xml'
+        httpResponse.data = '<!DOCTYPE Report ><foo><name>bar</name></foo>'.bytes
+
+        when:
+        def response = new ResponseBuilder().build(null, httpResponse)
+
+        then:
+        'bar' == response.xml.name.text()
     }
 
     void 'throws exception when content-type is json and content contains invalid json'() {
