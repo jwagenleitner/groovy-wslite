@@ -1,3 +1,7 @@
+## 0.8.1 (2014-07-07)
+
+* Fix for SAXParser validation (/jwagenleitner/groovy-wslite/pull/75)
+
 ## 0.8.0 (2013-06-21)
 
 * Added support for java.net proxy settings
