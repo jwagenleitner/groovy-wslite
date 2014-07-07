@@ -100,7 +100,7 @@ class ResponseBuilderSpec extends Specification {
     }
 
 
-        void 'throws exception when content-type is xml and content contains invalid markup'() {
+    void 'throws exception when content-type is xml and content contains invalid markup'() {
         given:
         httpResponse.contentType = 'text/xml'
         httpResponse.data = '<html><body>Error<br></body></html>'.bytes
