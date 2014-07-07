@@ -19,6 +19,9 @@ import wslite.http.HTTPResponse
 import wslite.json.JSONArray
 import wslite.json.JSONObject
 
+import javax.xml.parsers.SAXParserFactory
+import groovy.xml.FactorySupport;
+
 class ResponseBuilder {
 
     Response build(HTTPRequest httpRequest, HTTPResponse httpResponse) {
@@ -53,7 +56,10 @@ class ResponseBuilder {
     }
 
     private parseXmlContent(String content) {
-        return new XmlSlurper().parseText(content)
+        SAXParserFactory factory = FactorySupport.createSaxParserFactory();
+        factory.setNamespaceAware(true);
+        factory.setValidating(false);
+        return new XmlSlurper(factory.newSAXParser()).parseText(content)
     }
 
     private parseJsonContent(String content) {
