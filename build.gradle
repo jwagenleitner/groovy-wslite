@@ -52,6 +52,8 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
 task integrationTest(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
+    systemProperties['github.username'] = githubUsername
+    systemProperties['github.password'] = githubPassword
 }
 
 tasks.withType(CodeNarc) {

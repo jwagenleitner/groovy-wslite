@@ -23,6 +23,7 @@ breaking changes.
 * Requires [Groovy 2.3] (http://groovy.codehaus.org) or higher
 * Plans
     * Use Groovy's built-in JSON parsing
+    * Support for HEAD and PATCH verbs
     * Make use of `@CompileStatic` where appropriate
     * Make API more extensible
     * Clean up connection handling
@@ -32,7 +33,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.0')
 import wslite.soap.*
 
 def client = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
@@ -274,7 +275,7 @@ In decreasing precedence, groovy-wslite picks the proxy settings from:
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.0')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
@@ -522,7 +523,7 @@ __groovy-wslite__ is available in Maven Central.
     <dependency>
         <groupId>com.github.groovy-wslite</groupId>
         <artifactId>groovy-wslite</artifactId>
-        <version>0.8.2</version>
+        <version>1.1.0</version>
     </dependency>
 
 #### Snapshots
@@ -546,7 +547,7 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.0')
 
 #### Snapshots
 
@@ -572,7 +573,7 @@ The SOAP/RESTClients can easily be configured and used in your Grails applicatio
             //mavenRepo "https://oss.sonatype.org/content/groups/public"
         }
         dependencies {
-            runtime 'com.github.groovy-wslite:groovy-wslite:0.8.2'
+            runtime 'com.github.groovy-wslite:groovy-wslite:1.1.0'
         }
     }
 
