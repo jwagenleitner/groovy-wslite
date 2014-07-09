@@ -1,10 +1,10 @@
 ## 0.8.2 (2014-07-09)
 
-* Fix [parsing of Content-Type containing 'charset' parameter] (/jwagenleitner/groovy-wslite/pull/76)
+* Fix [parsing of Content-Type containing 'charset' parameter] (/../../issues/76)
 
 ## 0.8.1 (2014-07-07)
 
-* Fix for [SAXParser validation] (/jwagenleitner/groovy-wslite/pull/75)
+* Fix for [SAXParser validation] (/../../issues/75)
 
 ## 0.8.0 (2013-06-21)
 
@@ -13,15 +13,15 @@
 
 ## 0.7.2 (2013-02-02)
 
-* Fix [Error handling OneWay WebService method call] (/jwagenleitner/groovy-wslite/issues/46)
+* Fix [Error handling OneWay WebService method call] (/../../issues/46)
 
 ## 0.7.1 (2012-07-28)
 
-* Fix [When given a 204 (No Content) response, there's a fatal error] (/jwagenleitner/groovy-wslite/issues/43)
+* Fix [When given a 204 (No Content) response, there's a fatal error] (/../../issues/43)
 
 ## 0.7.0 (2012-04-02)
 
-* Fix [setSoapActionHeaderIfNotPresent treats the empty string same as null] (/jwagenleitner/groovy-wslite/issues/39)
+* Fix [setSoapActionHeaderIfNotPresent treats the empty string same as null] (/../../issues/39)
 
 ## 0.6.0 (2012-02-18)
 
@@ -31,11 +31,11 @@
 
 * Fix for SOAP 1.2 action header (thanks @jladenfors)
 * RESTClient JSON fixes
-* Fix [JSON builder does not handle properly GStrings] (/jwagenleitner/groovy-wslite/issues/33)
+* Fix [JSON builder does not handle properly GStrings] (/../../issues/33)
 
 ## 0.5.1 (2011-12-11)
 
-* Fixed [IncompatibleClassChangeError when exceptions are thrown and using JDK 7] (/jwagenleitner/groovy-wslite/issues/31)
+* Fixed [IncompatibleClassChangeError when exceptions are thrown and using JDK 7] (/../../issues/31)
 
 ## 0.5.0 (2011-12-05)
 
@@ -47,15 +47,15 @@
 
 * Added per client/request Proxy support
 
-[List of issues resolved] (/jwagenleitner/groovy-wslite/issues?milestone=4&state=closed)
+[List of issues resolved] (/../../issues?milestone=4&state=closed)
 
 ## 0.3 (2011-09-21)
 
-[List of issues resolved] (/jwagenleitner/groovy-wslite/issues?sort=created&direction=desc&state=closed&page=1&milestone=2)
+[List of issues resolved] (/../../issues?sort=created&direction=desc&state=closed&page=1&milestone=2)
 
 ## 0.2 (2011-09-10)
 
-[List of issues resolved] (/jwagenleitner/groovy-wslite/issues?sort=created&direction=desc&state=closed&page=1&milestone=1)
+[List of issues resolved] (/../../issues?sort=created&direction=desc&state=closed&page=1&milestone=1)
 
 #### Important changes to note
 
