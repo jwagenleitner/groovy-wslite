@@ -1,3 +1,5 @@
+## 1.0.0 (2014-07-09)
+
 ## 0.8.2 (2014-07-09)
 
 * Fix [parsing of Content-Type containing 'charset' parameter] (/../../issues/76)

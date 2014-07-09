@@ -15,7 +15,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.8.2')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
 import wslite.soap.*
 
 def client = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
@@ -257,7 +257,7 @@ In decreasing precedence, groovy-wslite picks the proxy settings from:
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.8.2')
+@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
@@ -529,7 +529,7 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='0.8.2')
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0')
 
 #### Snapshots
 
