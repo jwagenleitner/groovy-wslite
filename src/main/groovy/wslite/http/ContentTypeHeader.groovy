@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,12 @@
  */
 package wslite.http
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
+
 import java.util.regex.Pattern
 
+@CompileStatic
 class ContentTypeHeader {
 
     private final static String TOKEN = '''(?x)
@@ -72,11 +76,13 @@ class ContentTypeHeader {
         return contentType
     }
 
+    @CompileStatic(value = TypeCheckingMode.SKIP)
     private String parseMediaType(String contentType) {
         def m = contentType =~ MEDIATYPE_PATTERN
         return m.size() > 0 ? m[0][1] : null
     }
 
+    @CompileStatic(value = TypeCheckingMode.SKIP)
     private String parseCharset(String contentType) {
         def m = contentType =~ CHARSET_PATTERN
         return m.size() > 0 ? m[0][1] : null

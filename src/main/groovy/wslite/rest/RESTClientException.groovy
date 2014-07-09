@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
  */
 package wslite.rest
 
+import groovy.transform.CompileStatic
 import wslite.http.*
 
+@CompileStatic
 class RESTClientException extends HTTPClientException {
 
     RESTClientException(String message, HTTPRequest httpRequest, HTTPResponse httpResponse) {

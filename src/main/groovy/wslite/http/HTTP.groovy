@@ -14,6 +14,9 @@
  */
 package wslite.http
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 class HTTP {
 
     static final String DEFAULT_CHARSET = 'ISO-8859-1' // http://tools.ietf.org/html/rfc2616#section-3.7.1

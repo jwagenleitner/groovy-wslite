@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  */
 package wslite.rest
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 enum ContentType {
     JSON(['application/json', 'application/javascript', 'text/javascript', 'text/json']),
     XML(['application/xml', 'text/xml', 'application/xhtml+xml', 'application/atom+xml']),
@@ -39,7 +42,7 @@ enum ContentType {
         return contentTypes.join(', ')
     }
 
-    private ContentType(contentTypes) {
+    private ContentType(List contentTypes) {
         this.contentTypes = contentTypes
     }
 

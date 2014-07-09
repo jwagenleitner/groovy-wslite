@@ -14,6 +14,9 @@
  */
 package wslite.http
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 enum HTTPMethod {
 
     GET('GET'),
