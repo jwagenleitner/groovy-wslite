@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,6 +327,22 @@ class RESTClientSpec extends Specification {
         ex.response != null
         ex.response.contentType == 'text/xml'
         ex.response.contentAsString == '<foo><name></foo>'
+    }
+
+    void 'http patch method using method override'() {
+        when:
+        def response = client.patch()
+
+        then:
+        'PATCH' == client.httpClient.request.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER]
+    }
+
+    void 'http head method'() {
+        when:
+        def response = client.head()
+
+        then:
+        HTTPMethod.HEAD == client.httpClient.request.method
     }
 
     private getMockResponse(headers=[:], data=null) {

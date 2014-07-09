@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,19 @@ class RESTClientIntegrationSpec extends Specification {
         'UTF-8' == response.charset
         'text/xml; charset=UTF-8' == response.headers."Content-Type"
         'FresnoStateNews.com' == response.xml.channel.title.text()
+    }
+
+    void 'FresnoStateNews.com head request'() {
+        when:
+        def client = new RESTClient('http://www.fresnostatenews.com/')
+        def response = client.head()
+
+        then:
+        200 == response.statusCode
+        'text/html' == response.contentType
+        'UTF-8' == response.charset
+        'text/html; charset=UTF-8' == response.headers."Content-Type"
+        '' == response.getContentAsString()
     }
 
     void 'Holiday Service get holidays by country, year and month'() {
