@@ -53,12 +53,24 @@ class RESTClient {
         return executeMethod(HTTPMethod.DELETE, params, content)
     }
 
+    Response post(Closure content) {
+        return post([:], content)
+    }
+
     Response post(Map params=[:], Closure content=null) {
         return executeMethod(HTTPMethod.POST, params, content)
     }
 
+    Response put(Closure content) {
+        return put([:], content)
+    }
+
     Response put(Map params=[:], Closure content=null) {
         return executeMethod(HTTPMethod.PUT, params, content)
+    }
+
+    Response patch(Closure content) {
+        patch([:], content)
     }
 
     Response patch(Map params=[:], Closure content=null) {
