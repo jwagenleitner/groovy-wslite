@@ -17,11 +17,11 @@ package wslite.soap
 class SOAPFaultException extends SOAPClientException {
 
     @Delegate
-    SOAPResponse response
+    SOAPResponse soapResponse
 
     SOAPFaultException(SOAPResponse response) {
         super(parseFaultCode(response) + ' - ' + parseFaultReason(response), response.httpRequest, response.httpResponse)
-        this.response = response
+        this.soapResponse = response
     }
 
     private static String parseFaultCode(SOAPResponse faultResponse) {

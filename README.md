@@ -5,6 +5,10 @@ Library for Groovy that provides no-frills SOAP and REST webservice clients.
 This library assumes you know exactly what messages you want to send to your services and want full control over the
 request.  No streams are used and all request/responses are buffered in memory for convenience.
 
+# Versions
+
+notes about v1 vs v2 here...
+
 **Note**
 
 Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/blob/master/CHANGELOG.md) for any

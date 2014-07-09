@@ -192,7 +192,7 @@ class HTTPClient {
      * @param useHttpsProxy If {@code true}, the HTTPS proxy is returned, otherwise
      * the method returns the standard HTTP one.
      */
-    private Proxy getProxy(request, useHttpsProxy) {
+    Proxy getProxy(request, useHttpsProxy) {
         return request.proxy ?: proxy ?: loadSystemProxy(useHttpsProxy) ?: Proxy.NO_PROXY
     }
 

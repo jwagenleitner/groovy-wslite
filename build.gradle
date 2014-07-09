@@ -4,22 +4,21 @@ apply plugin: 'signing'
 apply plugin: 'codenarc'
 apply plugin: 'idea'
 
-version = '1.0.0'
+version = '2.0.0-SNAPSHOT'
 group = 'com.github.groovy-wslite'
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 //compileGroovy.options.compilerArgs = ['-Xlint:unchecked']
 
 repositories {
     mavenCentral()
-    mavenRepo url: 'http://m2repo.spockframework.org/releases'
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:1.7.6'
-    testCompile('org.spockframework:spock-core:0.6-groovy-1.7') {
+    compile 'org.codehaus.groovy:groovy-all:2.3.2'
+    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude module: 'groovy-all'
     }
     testCompile 'cglib:cglib-nodep:2.2'
@@ -121,6 +120,13 @@ uploadArchives {
     }
 }
 
+idea {
+    project {
+        jdkName '1.7'
+        languageLevel '1.7'
+    }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+    gradleVersion = '2.0'
 }

@@ -468,7 +468,7 @@ class SOAPClientSpec extends Specification {
 
     private mockHTTPClient(Map responseParams) {
         return [execute: { httpRequest ->
-            return responseParams
+            return new HTTPResponse(responseParams)
         }] as HTTPClient
     }
 
