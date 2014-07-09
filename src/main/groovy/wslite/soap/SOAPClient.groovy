@@ -22,6 +22,9 @@ class SOAPClient {
     String serviceURL
     HTTPClient httpClient
 
+    boolean validating = false
+    boolean namespaceAware = true
+
     SOAPClient() {
         this.httpClient = new HTTPClient()
     }
@@ -95,7 +98,7 @@ class SOAPClient {
     }
 
     private parseEnvelope(String soapMessageText) {
-        def envelopeNode = new XmlSlurper().parseText(soapMessageText)
+        def envelopeNode = new XmlSlurper(validating, namespaceAware).parseText(soapMessageText)
         if (envelopeNode.name() != SOAP.ENVELOPE_ELEMENT_NAME) {
             throw new IllegalStateException('Root element is ' + envelopeNode.name() +
                     ', expected ' + SOAP.ENVELOPE_ELEMENT_NAME)
@@ -162,7 +165,7 @@ class SOAPClient {
     private SOAPVersion detectSOAPVersion(String content) {
         SOAPVersion sv = SOAPVersion.V1_1
         try {
-            if (SOAP.SOAP12_NS == new XmlSlurper().parseText(content).namespaceURI()) {
+            if (SOAP.SOAP12_NS == new XmlSlurper(validating, namespaceAware).parseText(content).namespaceURI()) {
                 sv = SOAPVersion.V1_2
             }
         } catch (Exception ex) { }
