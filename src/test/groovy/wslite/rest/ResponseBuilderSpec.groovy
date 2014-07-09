@@ -1,4 +1,4 @@
-/* Copyright 2012 the original author or authors.
+/* Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,13 @@ class ResponseBuilderSpec extends Specification {
     void 'json response sets text property and json property'() {
         given:
         httpResponse.contentType = 'application/json'
-        httpResponse.data = '{foo:{name: "bar"}}'.bytes
+        httpResponse.data = '{"foo":{"name": "bar"}}'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        '{foo:{name: "bar"}}' == response.text
+        '{"foo":{"name": "bar"}}' == response.text
         'bar' == response.json.foo.name
         null == response.xml
     }
@@ -139,13 +139,13 @@ class ResponseBuilderSpec extends Specification {
     void 'json response with charset sets text property and json property'() {
         given:
         httpResponse.contentType = 'application/json; charset=UTF-8'
-        httpResponse.data = '{foo:{name: "bar"}}'.bytes
+        httpResponse.data = '{"foo":{"name": "bar"}}'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        '{foo:{name: "bar"}}' == response.text
+        '{"foo":{"name": "bar"}}' == response.text
         'bar' == response.json.foo.name
         null == response.xml
     }
@@ -153,13 +153,13 @@ class ResponseBuilderSpec extends Specification {
     void 'json response with text/json content-type and charset sets text property and json property'() {
         given:
         httpResponse.contentType = 'text/json; charset=UTF-8'
-        httpResponse.data = '{foo:{name: "bar"}}'.bytes
+        httpResponse.data = '{"foo":{"name": "bar"}}'.bytes
 
         when:
         def response = new ResponseBuilder().build(null, httpResponse)
 
         then:
-        '{foo:{name: "bar"}}' == response.text
+        '{"foo":{"name": "bar"}}' == response.text
         'bar' == response.json?.foo?.name
         null == response.xml
     }

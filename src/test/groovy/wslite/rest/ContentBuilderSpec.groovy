@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  */
 package wslite.rest
 
+import groovy.json.JsonSlurper
 import spock.lang.*
 import wslite.http.*
-import wslite.json.*
 
 class ContentBuilderSpec extends Specification {
 
@@ -173,7 +173,7 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        def json = new JSONObject(new String(builder.getData(), builder.charset))
+        def json = new JsonSlurper().parseText(new String(builder.getData(), builder.charset))
         'Nuclear Technician' == json.employee.job.title
         'Sector 7g' == json.employee.job.department
     }
@@ -269,7 +269,7 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        def json = new JSONObject(new String(builder.getData(), 'UTF-8'))
+        def json = new JsonSlurper().parseText(new String(builder.getData(), builder.charset))
         'a' == json.param
     }
 
@@ -285,7 +285,7 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        def json = new JSONArray(new String(builder.getData(), 'UTF-8'))
+        def json = new JsonSlurper().parseText(new String(builder.getData(), builder.charset))
         'a' == json[0]
         'b' == json[1]
     }
@@ -342,7 +342,7 @@ class ContentBuilderSpec extends Specification {
         }
 
         then:
-        def json = new JSONObject(new String(builder.getData(), 'UTF-8'))
+        def json = new JsonSlurper().parseText(new String(builder.getData(), builder.charset))
         'a' == json.text
         'b' == json.title
     }

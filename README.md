@@ -459,7 +459,7 @@ For all text based responses (content type starts with "text/") there will be a 
 
 For xml based responses, an *xml* (i.e., `response.xml`) property is available that is of type *GPathResult*.
 
-For json based responses, a *json* (i.e., `response.json`) property is available that is of type *JSONObject* or *JSONArray*.
+For json based responses, a *json* (i.e., `response.json`) property is available that is of type returned from `groovy.json.JsonSlurper`.
 
 ## Proxies
 

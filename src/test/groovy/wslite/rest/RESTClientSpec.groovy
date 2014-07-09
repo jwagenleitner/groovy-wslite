@@ -16,7 +16,6 @@ package wslite.rest
 
 import spock.lang.*
 import wslite.http.*
-import wslite.json.*
 
 class RESTClientSpec extends Specification {
 
@@ -92,7 +91,6 @@ class RESTClientSpec extends Specification {
 
         expect:
         response.json.foo == foo
-        assert response.json instanceof JSONObject
 
         where:
         contentType                 | foo
@@ -111,7 +109,6 @@ class RESTClientSpec extends Specification {
         response.json[0].foo == foo0
         response.json[1].foo == foo1
         assert response.json.size() == 2
-        assert response.json instanceof JSONArray
 
         where:
         contentType                 | foo0      | foo1
