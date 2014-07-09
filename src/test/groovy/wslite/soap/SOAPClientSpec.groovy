@@ -444,6 +444,21 @@ class SOAPClientSpec extends Specification {
         'application/xml+soap+foo' == response.httpRequest.headers['Content-Type']
     }
 
+    void 'allows doctype in xml markup'() {
+        given:
+        soapClient.httpClient = mockHTTPClient(data: simpleSoap11ResponseWithDocType.bytes)
+
+        when:
+        def response = soapClient.send {
+            body {
+                foo()
+            }
+        }
+
+        then:
+        'bar with DOCTYPE' == response.GetFoo.result.text()
+    }
+
     private static final Closure testSoapMessage = { body { test(true) } }
 
     private static final String simpleSoap11Response = '''
@@ -465,6 +480,15 @@ class SOAPClientSpec extends Specification {
                                     <GetFoo/>
                                   </SOAP:Body>
                                 </SOAP:Envelope>'''.trim()
+
+    private static final String simpleSoap11ResponseWithDocType = '''<!DOCTYPE SOAP:Envelope >
+            <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+              <SOAP:Body>
+                <GetFoo>
+                  <result>bar with DOCTYPE</result>
+                </GetFoo>
+              </SOAP:Body>
+            </SOAP:Envelope>'''.trim()
 
     private mockHTTPClient(Map responseParams) {
         return [execute: { httpRequest ->
