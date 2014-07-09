@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,5 +22,6 @@ class HTTP {
     static final String CONTENT_LENGTH_HEADER = 'Content-Length'
     static final String AUTHORIZATION_HEADER = 'Authorization'
     static final String ACCEPT_HEADER = 'Accept'
+    static final String X_HTTP_METHOD_OVERRIDE_HEADER = 'X-HTTP-Method-Override'
 
 }

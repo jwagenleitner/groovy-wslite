@@ -1,4 +1,4 @@
-/* Copyright 2011 the original author or authors.
+/* Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ class RESTClient {
         this.httpClient.authorization = authorization
     }
 
+    Response head(Map params=[:], Closure content=null) {
+        return executeMethod(HTTPMethod.HEAD, params, content)
+    }
+
     Response get(Map params=[:], Closure content=null) {
         return executeMethod(HTTPMethod.GET, params, content)
     }
@@ -49,12 +53,24 @@ class RESTClient {
         return executeMethod(HTTPMethod.DELETE, params, content)
     }
 
-    Response post(Map params=[:], Closure content) {
+    Response post(Map params=[:], Closure content=null) {
         return executeMethod(HTTPMethod.POST, params, content)
     }
 
-    Response put(Map params=[:], Closure content) {
+    Response put(Map params=[:], Closure content=null) {
         return executeMethod(HTTPMethod.PUT, params, content)
+    }
+
+    Response patch(Map params=[:], Closure content=null) {
+        Map newParams = new LinkedHashMap(params ?: [:])
+        if (newParams.headers) {
+            newParams.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH
+        } else {
+            Map override = [:]
+            override[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH
+            newParams['headers'] = override
+        }
+        return executeMethod(HTTPMethod.POST, newParams, content)
     }
 
     private Response executeMethod(HTTPMethod method, Map params) {
