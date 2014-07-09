@@ -14,6 +14,7 @@
  */
 package wslite.rest
 
+import wslite.http.ContentTypeHeader
 import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
 import wslite.json.JSONArray
@@ -62,7 +63,6 @@ class ResponseBuilder {
     }
 
     private String contentTypeNoParameter(HTTPResponse httpResponse) {
-        int sepIndex = httpResponse.contentType?.indexOf(';')
-        return sepIndex > 0 ? httpResponse.contentType.substring(0, sepIndex) : httpResponse.contentType
+        return new ContentTypeHeader(httpResponse.contentType).mediaType
     }
 }
