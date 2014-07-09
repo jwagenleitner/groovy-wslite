@@ -135,4 +135,46 @@ class ResponseBuilderSpec extends Specification {
         then:
         thrown(Exception)
     }
+
+    void 'json response with charset sets text property and json property'() {
+        given:
+        httpResponse.contentType = 'application/json; charset=UTF-8'
+        httpResponse.data = '{foo:{name: "bar"}}'.bytes
+
+        when:
+        def response = new ResponseBuilder().build(null, httpResponse)
+
+        then:
+        '{foo:{name: "bar"}}' == response.text
+        'bar' == response.json.foo.name
+        null == response.xml
+    }
+
+    void 'json response with text/json content-type and charset sets text property and json property'() {
+        given:
+        httpResponse.contentType = 'text/json; charset=UTF-8'
+        httpResponse.data = '{foo:{name: "bar"}}'.bytes
+
+        when:
+        def response = new ResponseBuilder().build(null, httpResponse)
+
+        then:
+        '{foo:{name: "bar"}}' == response.text
+        'bar' == response.json?.foo?.name
+        null == response.xml
+    }
+
+    void 'xml response with charset sets text property and xml property'() {
+        given:
+        httpResponse.contentType = 'application/xml; charset=UTF-8'
+        httpResponse.data = '<foo><name>bar</name></foo>'.bytes
+
+        when:
+        def response = new ResponseBuilder().build(null, httpResponse)
+
+        then:
+        '<foo><name>bar</name></foo>' == response.text
+        'bar' == response.xml.name.text()
+        null == response.json
+    }
 }
