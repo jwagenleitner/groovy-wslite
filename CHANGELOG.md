@@ -1,10 +1,10 @@
 ## 0.8.2 (2014-07-09)
 
-* Fix parsing of Content-Type containing 'charset' parameter (/jwagenleitner/groovy-wslite/pull/76)
+* Fix [parsing of Content-Type containing 'charset' parameter] (/jwagenleitner/groovy-wslite/pull/76)
 
 ## 0.8.1 (2014-07-07)
 
-* Fix for SAXParser validation (/jwagenleitner/groovy-wslite/pull/75)
+* Fix for [SAXParser validation] (/jwagenleitner/groovy-wslite/pull/75)
 
 ## 0.8.0 (2013-06-21)
 
