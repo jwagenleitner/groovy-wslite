@@ -7,12 +7,25 @@ request.  No streams are used and all request/responses are buffered in memory f
 
 # Versions
 
-notes about v1 vs v2 here...
-
 **Note**
 
 Please consult the [Changelog] (https://github.com/jwagenleitner/groovy-wslite/blob/master/CHANGELOG.md) for any
 breaking changes.
+
+## 1.0
+
+* JDK 1.5 or higher
+* Requires [Groovy 1.7.6] (http://groovy.codehaus.org) or higher
+
+## 2.0 (beta)
+
+* JDK 1.7 or higher
+* Requires [Groovy 2.3] (http://groovy.codehaus.org) or higher
+* Plans
+    * Use Groovy's built-in JSON parsing
+    * Make use of `@CompileStatic` where appropriate
+    * Make API more extensible
+    * Clean up connection handling
 
 ## SOAP
 
@@ -525,7 +538,7 @@ __groovy-wslite__ is available in Maven Central.
         <dependency>
             <groupId>com.github.groovy-wslite</groupId>
             <artifactId>groovy-wslite</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -538,7 +551,7 @@ __groovy-wslite__ is available in Maven Central.
 #### Snapshots
 
     @GrabResolver(name='groovy-wslite', root='https://oss.sonatype.org/content/groups/public', m2Compatible=true)
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.0.0-SNAPSHOT', changing=true)
+    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='2.0.0-SNAPSHOT', changing=true)
 
 ## Using with Grails
 
@@ -620,10 +633,6 @@ class MyService {
 ## Versioning
 
 This project uses [Semantic Versioning] (http://semver.org/).
-
-## Dependencies
-
-* [Groovy 1.7.6] (http://groovy.codehaus.org) or higher
 
 ## Building
 
