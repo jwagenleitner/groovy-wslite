@@ -95,7 +95,7 @@ class ContentBuilderSpec extends Specification {
 
         and:
         data.startsWith('------groovy-wslite-')
-        data.endsWith('\r\n'+boundary+'--\r\n')
+        data.endsWith('\r\n' + boundary + '--\r\n')
 
         and:
         (data =~ '\r\n').size() == 5
@@ -400,4 +400,22 @@ class ContentBuilderSpec extends Specification {
         then:
         builder.contentTypeHeader.startsWith(ContentType.MULTIPART.toString())
     }
+
+    @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/83')
+    void 'multipart allows optional content type and filename parameters'() {
+        given:
+        def builder = new ContentBuilder(null, null)
+
+        when:
+        builder.build {
+            multipart 'foo', 'bar'.bytes
+            multipart 'inputFile', 'test'.bytes, 'image/png', 'test.png'
+        }
+        String data = new String(builder.data)
+
+        then:
+        data.find(/Content-Disposition:\s+form-data;\s+name="inputFile";\s+filename="test.png"/)
+        data.find(/Content-Type:\s+image\/png\W+test/)
+    }
+
 }
