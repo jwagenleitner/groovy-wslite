@@ -389,4 +389,15 @@ class ContentBuilderSpec extends Specification {
         null == builderJson.getData()
     }
 
+    @Issue('https://github.com/jwagenleitner/groovy-wslite/issues/82')
+    void 'multipart overrides default content type'() {
+        given:
+        def builder = new ContentBuilder('application/json', 'UTF-8')
+
+        when:
+        builder.build { multipart 'foo', 'bar'.bytes }
+
+        then:
+        builder.contentTypeHeader.startsWith(ContentType.MULTIPART.toString())
+    }
 }

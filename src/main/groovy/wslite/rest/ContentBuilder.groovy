@@ -122,6 +122,10 @@ class ContentBuilder {
     }
 
     private String getContentType() {
+        // Ignore defaultContentType if request includes multipart data
+        if (multipartData && ContentType.MULTIPART.equals(dataContentType)) {
+            return dataContentType.toString()
+        }
         return contentType ?: dataContentType.toString()
     }
 
