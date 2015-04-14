@@ -15,7 +15,7 @@
 package wslite.rest
 
 enum ContentType {
-    JSON(['application/json', 'application/javascript', 'text/javascript', 'text/json']),
+    JSON(['application/json', 'application/hal+json', 'application/javascript', 'text/javascript', 'text/json']),
     XML(['application/xml', 'text/xml', 'application/xhtml+xml', 'application/atom+xml']),
     HTML(['text/html']),
     URLENC(['application/x-www-form-urlencoded']),
