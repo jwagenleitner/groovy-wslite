@@ -1,3 +1,7 @@
+## 1.1.1 (2015-06-02)
+
+* added `application/hal+json` JSON content type
+
 ## 1.1.0 (2014-07-09)
 
 * RESTClient support for HEAD and PATCH methods
