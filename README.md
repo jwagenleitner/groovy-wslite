@@ -275,7 +275,7 @@ In decreasing precedence, groovy-wslite picks the proxy settings from:
 ### Example
 
 ``` groovy
-@Grab('com.github.groovy-wslite:groovy-wslite:1.1.0')
+@Grab('com.github.groovy-wslite:groovy-wslite:1.1.1')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
@@ -523,7 +523,7 @@ __groovy-wslite__ is available in Maven Central.
     <dependency>
         <groupId>com.github.groovy-wslite</groupId>
         <artifactId>groovy-wslite</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </dependency>
 
 #### Snapshots
@@ -573,7 +573,7 @@ The SOAP/RESTClients can easily be configured and used in your Grails applicatio
             //mavenRepo "https://oss.sonatype.org/content/groups/public"
         }
         dependencies {
-            runtime 'com.github.groovy-wslite:groovy-wslite:1.1.0'
+            runtime 'com.github.groovy-wslite:groovy-wslite:1.1.1'
         }
     }
 
