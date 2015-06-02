@@ -15,7 +15,7 @@ breaking changes.
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.1')
+@Grab('com.github.groovy-wslite:groovy-wslite:1.1.1')
 import wslite.soap.*
 
 def client = new SOAPClient('http://www.holidaywebservice.com/Holidays/US/Dates/USHolidayDates.asmx')
@@ -531,7 +531,7 @@ __groovy-wslite__ is available in Maven Central.
 
 #### Releases
 
-    @Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.1')
+    @Grab('com.github.groovy-wslite:groovy-wslite:1.1.1')
 
 #### Snapshots
 
