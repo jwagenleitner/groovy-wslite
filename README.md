@@ -275,7 +275,7 @@ In decreasing precedence, groovy-wslite picks the proxy settings from:
 ### Example
 
 ``` groovy
-@Grab(group='com.github.groovy-wslite', module='groovy-wslite', version='1.1.0')
+@Grab('com.github.groovy-wslite:groovy-wslite:1.1.0')
 import wslite.rest.*
 
 def client = new RESTClient("http://api.twitter.com/1/")
