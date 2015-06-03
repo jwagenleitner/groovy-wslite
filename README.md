@@ -336,6 +336,8 @@ def response = client.post() {
     // call once for each body-part
     multipart 'username', 'antony'.bytes
     multipart 'files[myfile.png]', myFile.bytes
+    // specify content-type and filename
+    multipart 'inputFile', 'test'.bytes, 'image/png', 'test.png'
 }
 ```
 
