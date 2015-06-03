@@ -516,7 +516,8 @@ Authenticator.setDefault(new Authenticator() {
 
 ## Using groovy-wslite in your project
 
-* [Download JAR Files] (/jwagenleitner/groovy-wslite/archives/master)
+* [Download Release JAR Files] (http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.groovy-wslite%22%20AND%20a%3A%22groovy-wslite%22)
+* [Download SNAPSHOT JAR Files] (https://oss.sonatype.org/content/groups/public/com/github/groovy-wslite/groovy-wslite/2.0.0-SNAPSHOT/)
 
 __groovy-wslite__ is available in Maven Central.
 
