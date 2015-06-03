@@ -9,7 +9,6 @@
 ## 1.1.0 (2014-07-09)
 
 * RESTClient support for HEAD and PATCH methods
-* SOAPClient should allow DOCTYPE in response
 
 ## 1.0.1 (2014-07-09)
 
