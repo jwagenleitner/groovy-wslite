@@ -1,3 +1,7 @@
+## 1.1.2 (2015-06-03)
+
+* fix Multipart request not sent correct
+
 ## 1.1.1 (2015-06-02)
 
 * added `application/hal+json` JSON content type
