@@ -76,10 +76,10 @@ class RESTClient {
     Response patch(Map params=[:], Closure content=null) {
         Map newParams = new LinkedHashMap(params ?: [:])
         if (newParams.headers) {
-            newParams.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH
+            newParams.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH.toString()
         } else {
             Map override = [:]
-            override[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH
+            override[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER] = HTTPMethod.PATCH.toString()
             newParams['headers'] = override
         }
         return executeMethod(HTTPMethod.POST, newParams, content)
