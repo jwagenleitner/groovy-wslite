@@ -331,7 +331,7 @@ class RESTClientSpec extends Specification {
         def response = client.patch()
 
         then:
-        HTTPMethod.PATCH == client.httpClient.request.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER]
+        HTTPMethod.PATCH.toString() == client.httpClient.request.headers[HTTP.X_HTTP_METHOD_OVERRIDE_HEADER]
     }
 
     void 'http head method'() {
