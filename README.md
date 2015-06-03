@@ -289,10 +289,12 @@ assert "John Wagenleitner" == response.json.name
 
 *RESTClient* supports the following methods:
 
+* head
 * get
 * delete
 * post
 * put
+* patch
 
 ### Parameters
 
