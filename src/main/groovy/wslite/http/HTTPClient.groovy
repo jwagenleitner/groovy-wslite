@@ -44,6 +44,10 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
+        return this.execute(request, HTTP.DEFAULT_CHARSET)
+    }
+
+    HTTPResponse execute(HTTPRequest request, String defaultCharset) {
         if (!(request?.url && request?.method)) {
             throw new IllegalArgumentException('HTTP Request must contain a url and method')
         }
@@ -52,7 +56,7 @@ class HTTPClient {
         try {
             conn = createConnection(request)
             setupConnection(conn, request)
-            response = buildResponse(conn, conn.inputStream)
+            response = buildResponse(conn, conn.inputStream, defaultCharset)
         } catch(Exception ex) {
             if (!conn) {
                 throw new HTTPClientException(ex.message, ex, request, response)
@@ -147,6 +151,10 @@ class HTTPClient {
     }
 
     private HTTPResponse buildResponse(conn, responseStream) {
+        return this.buildResponse(conn, responseStream, HTTP.DEFAULT_CHARSET)
+    }
+
+    private HTTPResponse buildResponse(conn, responseStream, defaultCharset) {
         def response = new HTTPResponse()
         response.data = getResponseContent(responseStream, conn.contentEncoding)
         response.statusCode = conn.responseCode
@@ -154,7 +162,7 @@ class HTTPClient {
         response.url = conn.URL
         response.contentEncoding = conn.contentEncoding
         response.contentLength = conn.contentLength
-        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(conn.contentType)
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(conn.contentType, defaultCharset)
         response.contentType = contentTypeHeader.mediaType
         response.charset = contentTypeHeader.charset
         response.date = new Date(conn.date)

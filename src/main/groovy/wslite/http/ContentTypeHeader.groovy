@@ -60,10 +60,14 @@ class ContentTypeHeader {
     final String charset
 
     ContentTypeHeader(final String contentType) {
+        this(contentType, HTTP.DEFAULT_CHARSET)
+    }
+
+    ContentTypeHeader(final String contentType, final String defaultCharset) {
         if (contentType) {
             this.contentType = contentType
             this.mediaType = parseMediaType(contentType)
-            this.charset = parseCharset(contentType)
+            this.charset = parseCharset(contentType, defaultCharset)
         }
     }
 
@@ -77,9 +81,9 @@ class ContentTypeHeader {
         return m.size() > 0 ? m[0][1] : null
     }
 
-    private String parseCharset(String contentType) {
+    private String parseCharset(String contentType, String defaultCharset) {
         def m = contentType =~ CHARSET_PATTERN
-        return m.size() > 0 ? m[0][1] : null
+        return m.size() > 0 ? m[0][1] : defaultCharset
     }
 
 }
