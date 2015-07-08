@@ -27,6 +27,7 @@ class HTTPClient {
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
+    String defaultCharset = 'UTF-8'
 
     Proxy proxy
 
@@ -44,10 +45,6 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
-        return this.execute(request, null)
-    }
-
-    HTTPResponse execute(HTTPRequest request, String defaultCharset) {
         if (!(request?.url && request?.method)) {
             throw new IllegalArgumentException('HTTP Request must contain a url and method')
         }
@@ -56,7 +53,7 @@ class HTTPClient {
         try {
             conn = createConnection(request)
             setupConnection(conn, request)
-            response = buildResponse(conn, conn.inputStream, defaultCharset)
+            response = buildResponse(conn, conn.inputStream)
         } catch(Exception ex) {
             if (!conn) {
                 throw new HTTPClientException(ex.message, ex, request, response)
@@ -151,10 +148,6 @@ class HTTPClient {
     }
 
     private HTTPResponse buildResponse(conn, responseStream) {
-        return this.buildResponse(conn, responseStream, null)
-    }
-
-    private HTTPResponse buildResponse(conn, responseStream, defaultCharset) {
         def response = new HTTPResponse()
         response.data = getResponseContent(responseStream, conn.contentEncoding)
         response.statusCode = conn.responseCode
