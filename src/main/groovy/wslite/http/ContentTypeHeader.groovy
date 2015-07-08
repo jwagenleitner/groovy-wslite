@@ -60,7 +60,7 @@ class ContentTypeHeader {
     final String charset
 
     ContentTypeHeader(final String contentType) {
-        this(contentType, HTTP.DEFAULT_CHARSET)
+        this(contentType, null)
     }
 
     ContentTypeHeader(final String contentType, final String defaultCharset) {
@@ -83,7 +83,7 @@ class ContentTypeHeader {
 
     private String parseCharset(String contentType, String defaultCharset) {
         def m = contentType =~ CHARSET_PATTERN
-        return m.size() > 0 ? m[0][1] : defaultCharset
+        return m.size() > 0 ? m[0][1] : (defaultCharset ? defaultCharset : null)
     }
 
 }

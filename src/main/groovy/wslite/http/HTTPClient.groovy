@@ -44,7 +44,7 @@ class HTTPClient {
     }
 
     HTTPResponse execute(HTTPRequest request) {
-        return this.execute(request, HTTP.DEFAULT_CHARSET)
+        return this.execute(request, null)
     }
 
     HTTPResponse execute(HTTPRequest request, String defaultCharset) {
@@ -151,7 +151,7 @@ class HTTPClient {
     }
 
     private HTTPResponse buildResponse(conn, responseStream) {
-        return this.buildResponse(conn, responseStream, HTTP.DEFAULT_CHARSET)
+        return this.buildResponse(conn, responseStream, null)
     }
 
     private HTTPResponse buildResponse(conn, responseStream, defaultCharset) {
