@@ -1,3 +1,12 @@
+ext.mavenUsername = project.hasProperty("mavenUsername") ? mavenUsername : null
+ext.mavenUsername = project.hasProperty("mavenPassword") ? mavenPassword : null
+ext.signing = project.hasProperty("signing") ? signing : [:]
+ext.signing.secretKeyRingFile = project.hasProperty("signing.secretKeyRingFile") ? signing.secretKeyRingFile : null
+ext.signing.keyId = project.hasProperty("signing.keyId") ? signing.keyId : null
+ext.signing.password = project.hasProperty("signing.password") ? signing.password : null
+ext.githubUsername = project.hasProperty("githubUsername") ? githubUsername : null
+ext.githubPassword = project.hasProperty("githubPassword") ? githubPassword : null
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
