@@ -2,6 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'codenarc'
+apply plugin: 'org.dm.bundle'
 
 version = '2.0.0-SNAPSHOT'
 group = 'com.github.groovy-wslite'
@@ -21,6 +22,27 @@ dependencies {
         exclude module: 'groovy-all'
     }
     testCompile 'cglib:cglib-nodep:3.1'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.dm.gradle:gradle-bundle-plugin:0.6.3'
+    }
+}
+
+bundle {
+    instruction 'Export-Package', 
+                """wslite,
+                   wslite.soap,
+                   wslite.rest,
+                   wslite.rest.multipart,
+                   wslite.util,
+                   wslite.http,
+                   wslite.http.auth"""
 }
 
 sourceSets {
