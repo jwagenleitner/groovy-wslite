@@ -15,6 +15,7 @@
 package wslite.rest
 
 import spock.lang.*
+import wslite.http.HTTP
 import wslite.http.auth.HTTPBasicAuthorization
 
 /**
@@ -46,7 +47,11 @@ class GithubApiSpec extends Specification {
     }
 
     void 'get a public gist'() {
+		given:
+		String username = System.getProperty('github.username', 'GUEST')
+        String password = System.getProperty('github.password', 'GUEST')
         when:
+		github.authorization = new HTTPBasicAuthorization(username, password)
         def response = github.get(path: "gists/${gistId}")
 
         then:
