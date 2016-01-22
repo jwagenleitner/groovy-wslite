@@ -51,8 +51,6 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
 task integrationTest(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
-    systemProperties['github.username'] = githubUsername
-    systemProperties['github.password'] = githubPassword
 }
 
 tasks.withType(CodeNarc) {
@@ -118,6 +116,18 @@ uploadArchives {
                 }
             }
         }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(':integrationTest')) {
+        if (!project.hasProperty('githubUsername') || !project.hasProperty('githubPassword')) {
+            throw new GradleException("The integration tests require you to provide both 'githubUsername'" +
+                    " and 'githubPassword' project properties in order to run.")
+        }
+
+        integrationTest.systemProperties['github.username'] = githubUsername
+        integrationTest.systemProperties['github.password'] = githubPassword
     }
 }
 
