@@ -14,7 +14,7 @@
  */
 package wslite.http;
 
-public class HTTPClientException extends Exception {
+public class HTTPClientException extends RuntimeException {
 
     private HTTPRequest request;
     private HTTPResponse response;
