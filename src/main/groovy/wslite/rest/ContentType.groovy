@@ -30,6 +30,21 @@ enum ContentType {
         return contentTypes
     }
 
+    boolean contains(String contentType) {
+        boolean result = contentType in contentTypes
+        if (!result) {
+            switch (this) {
+                case JSON:
+                    result = contentType ==~ /application\/.*\+json/
+                    break;
+                case XML:
+                    result = contentType ==~ /application\/.*\+xml/
+                    break;
+            }
+        }
+        return result
+    }
+
     @Override
     String toString() {
         return contentTypes.first()
