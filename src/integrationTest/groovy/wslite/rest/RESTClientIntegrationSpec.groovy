@@ -25,10 +25,10 @@ class RESTClientIntegrationSpec extends Specification {
 
         then:
         200 == response.statusCode
-        'text/xml' == response.contentType
+        'application/rss+xml' == response.contentType
         'UTF-8' == response.charset
-        'text/xml; charset=UTF-8' == response.headers."Content-Type"
-        'FresnoStateNews.com' == response.xml.channel.title.text()
+        'application/rss+xml; charset=UTF-8' == response.headers."Content-Type"
+        'Fresno State News' == response.xml.channel.title.text()
     }
 
     void 'FresnoStateNews.com head request'() {
