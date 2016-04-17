@@ -184,7 +184,6 @@ public class JSONArray implements List {
      * @param index
      *  The index must be between 0 and length() - 1.
      * @return An object value.
-     * @throws JSONException If there is no value for the index.
      */
     public Object get(int index) {
         Object object = this.opt(index);

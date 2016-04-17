@@ -82,7 +82,7 @@ import groovy.lang.GString;
  *     <code>{ } [ ] / \ : , = ; #</code> and if they do not look like numbers
  *     and if they are not the reserved words <code>true</code>,
  *     <code>false</code>, or <code>null</code>.</li>
- * <li>Keys can be followed by <code>=</code> or <code>=></code> as well as
+ * <li>Keys can be followed by <code>=</code> or <code>=&gt;</code> as well as
  *     by <code>:</code>.</li>
  * <li>Values can be followed by <code>;</code> <small>(semicolon)</small> as
  *     well as by <code>,</code> <small>(comma)</small>.</li>
@@ -175,8 +175,6 @@ public class JSONObject implements Map {
      * Missing keys are ignored.
      * @param jo A JSONObject.
      * @param names An array of strings.
-     * @throws JSONException
-     * @exception JSONException If a value is a non-finite number or if a name is duplicated.
      */
     public JSONObject(JSONObject jo, String[] names) {
         this();
@@ -251,7 +249,6 @@ public class JSONObject implements Map {
      *
      * @param map A map object that can be used to initialize the contents of
      *  the JSONObject.
-     * @throws JSONException
      */
     public JSONObject(Map map) {
         this.map = new HashMap();
@@ -1168,7 +1165,7 @@ public class JSONObject implements Map {
 
     /**
      * Produce a string in double quotes with backslash sequences in all the
-     * right places. A backslash will be inserted within </, producing <\/,
+     * right places. A backslash will be inserted within &lt;/, producing &lt;\/,
      * allowing JSON text to be delivered in HTML. In JSON text, a string
      * cannot contain a control character or an unescaped quote or backslash.
      * @param string A String
