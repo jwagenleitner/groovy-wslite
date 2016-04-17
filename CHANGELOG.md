@@ -1,3 +1,8 @@
+## 1.1.3 (2016-04-17)
+
+* Fix content-type parsing to recognize custom types (i.e., application/something+json)
+* Fix exceptions to be RuntimeException types
+
 ## 1.1.2 (2015-06-03)
 
 * fix Multipart request not sent correct
