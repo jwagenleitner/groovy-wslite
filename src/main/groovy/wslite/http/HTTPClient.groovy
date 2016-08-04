@@ -185,7 +185,7 @@ class HTTPClient {
      * <ol>
      * <li>request.proxy</li>
      * <li>HTTPClient's {@code proxy} property</li>
-     * <li>{@code http(s).proxyHost/Port} system properties</li>
+     * <li>{@code http(s).proxyHost/Port} system properties (via default {@code ProxySelector.select})</li>
      * <li>no proxy</li>
      * </ol>
      * @param request The current HTTP(S) request.
@@ -193,25 +193,18 @@ class HTTPClient {
      * the method returns the standard HTTP one.
      */
     Proxy getProxy(request, useHttpsProxy) {
-        return request.proxy ?: proxy ?: loadSystemProxy(useHttpsProxy) ?: Proxy.NO_PROXY
+        if (request.proxy) return request.proxy
+        if(proxy) return proxy
+
+        java.net.URL url = request.url
+        url = new java.net.URL(
+          useHttpsProxy ? 'https' : 'http',
+          url.host,
+          url.port,
+          url.file
+        )
+
+        def proxies = ProxySelector.getDefault().select(url.toURI())
+        proxies[0]
     }
-
-    /**
-     * Reads the proxy information from the {@code http(s).proxyHost} and {@code http(s).proxyPort}
-     * system properties if set and returns a {@code java.net.Proxy} instance configured with
-     * those settings. If the {@code proxyHost} setting has no value, then this method returns
-     * {@code null}.
-     * @param useHttpsProxy {@code true} if you want the HTTPS proxy, otherwise {@code false}.
-     */
-    private Proxy loadSystemProxy(boolean useHttpsProxy) {
-        def propertyPrefix = useHttpsProxy ? "https" : "http"
-        def proxyHost = System.getProperty("${propertyPrefix}.proxyHost")
-        if (!proxyHost) return null
-
-        def proxyPort = System.getProperty("${propertyPrefix}.proxyPort")?.toInteger()
-        proxyPort = proxyPort ?: (useHttpsProxy ? 443 : 80)
-
-        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort))
-    }
-
 }
