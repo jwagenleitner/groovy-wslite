@@ -638,21 +638,46 @@ class MyService {
 
 ## Using with Android
 
-wslite can easily used in an Android-Project, but you might need the following in your build.gradle of your android-project:
+wslite can easily used in an Android-Project, but you need the following in your **build.gradle** of your android-project:
 
 ```gradle
 compile ('org.codehaus.groovy:groovy-json:2.4.3') {
     exclude group: 'org.codehaus.groovy'
 }
-```
-and / or
-
-```gradle
 compile ('org.codehaus.groovy:groovy-xml:2.4.3') {
     exclude group: 'org.codehaus.groovy'
 }
 ```
-in your dependency group.
+in your dependency group. And the following parameters in your Android-Project **proguard-rules.pro** file:
+
+```
+-keep class wslite.**
+```
+
+Though my **proguard-rules.pro** file with groovy, SwissKnife and MPCharting library looks like:
+```
+-dontwarn org.codehaus.groovy.**
+-dontwarn groovy**
+-dontwarn com.vividsolutions.**
+-dontwarn com.squareup.**
+-dontwarn okio.**
+-keep class org.codehaus.groovy.vmplugin.**
+-keep class org.codehaus.groovy.runtime.**
+-keep class groovy.**
+-keepclassmembers class org.codehaus.groovy.runtime.dgm* {*;}
+-keepclassmembers class ** implements org.codehaus.groovy.runtime.GeneratedClosure {*;}
+-keepclassmembers class org.codehaus.groovy.reflection.GroovyClassValue* {*;}
+
+# Don't shrink SwissKnife methods
+-keep class com.arasthel.swissknife** { *; }
+
+# Add this for any classes that will have SK injections
+-keep class * extends android.app.Activity
+-keepclassmembers class * extends android.app.Activity {*;}
+
+-keep class com.github.mikephil.charting.** { *; }
+-keep class wslite.**
+```
 
 A small example (with [SwissKnife](https://github.com/Arasthel/SwissKnife) annotations):
 
