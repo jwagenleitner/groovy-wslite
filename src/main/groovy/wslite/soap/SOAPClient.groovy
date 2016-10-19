@@ -137,7 +137,7 @@ class SOAPClient {
     }
 
     private String getCharacterEncodingFromXmlDeclaration(String xml) {
-        def m = xml =~ /^<\?xml.*?encoding\s*=\s*["|'](.*)["|'].*\?>/
+        def m = xml =~ /^<\?xml.*?encoding\s*=\s*["|'](.*?)["|'].*\?>/
         return (m && m[0]?.size() == 2) ? m[0][1] : null
     }
 
