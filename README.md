@@ -636,6 +636,88 @@ class MyService {
 }
 ```
 
+## Using with Android
+
+wslite can easily used in an Android-Project, but you need the following in your **build.gradle** of your android-project:
+
+```gradle
+compile ('org.codehaus.groovy:groovy-json:2.4.3') {
+    exclude group: 'org.codehaus.groovy'
+}
+compile ('org.codehaus.groovy:groovy-xml:2.4.3') {
+    exclude group: 'org.codehaus.groovy'
+}
+```
+in your dependency group. And the following parameters in your Android-Project **proguard-rules.pro** file:
+
+```
+-keep class wslite.**
+```
+
+Though my **proguard-rules.pro** file with groovy, SwissKnife and MPCharting library looks like:
+```
+-dontwarn org.codehaus.groovy.**
+-dontwarn groovy**
+-dontwarn com.vividsolutions.**
+-dontwarn com.squareup.**
+-dontwarn okio.**
+-keep class org.codehaus.groovy.vmplugin.**
+-keep class org.codehaus.groovy.runtime.**
+-keep class groovy.**
+-keepclassmembers class org.codehaus.groovy.runtime.dgm* {*;}
+-keepclassmembers class ** implements org.codehaus.groovy.runtime.GeneratedClosure {*;}
+-keepclassmembers class org.codehaus.groovy.reflection.GroovyClassValue* {*;}
+
+# Don't shrink SwissKnife methods
+-keep class com.arasthel.swissknife** { *; }
+
+# Add this for any classes that will have SK injections
+-keep class * extends android.app.Activity
+-keepclassmembers class * extends android.app.Activity {*;}
+
+-keep class com.github.mikephil.charting.** { *; }
+-keep class wslite.**
+```
+
+A small example (with [SwissKnife](https://github.com/Arasthel/SwissKnife) annotations):
+
+```groovy
+@OnBackground
+public void fetchContractData(String queryType) {
+    try {
+        ConnectivityManager cMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)
+        NetworkInfo networkInfo = cMgr.activeNetworkInfo
+        if (networkInfo != null && networkInfo.isConnected()) {
+
+            def client = new RESTClient("http://example.org:8080/MyApp/", new HTTPClient())
+            client.authorization = new HTTPBasicAuthorization(credUserName, credUserPassword)
+
+            def response = client.get(path: '/api/stat/contractAmount', query: [type: queryType])
+            if (response.statusCode != 200)
+                showErrorSnackbar(response.statusCode, response.statusMessage)
+            else
+                showDataInView(response.json)
+        } else
+            showErrorSnackbar("998", "no connection")
+    } catch (Exception ex) {
+        showErrorSnackbar("999", ex.message)
+    }
+}
+    
+@OnUIThread
+public void showDataInView(data) {
+    data.each { line ->
+        ...
+    }
+}
+    
+@OnUIThread
+public void showErrorSnackbar(code, message) {
+    Snackbar.make(<view>, code + ": " + message, Snackbar.LENGTH_LONG).show()
+}
+```
+
+
 ## Versioning
 
 This project uses [Semantic Versioning] (http://semver.org/).
