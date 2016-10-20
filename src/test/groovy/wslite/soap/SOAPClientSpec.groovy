@@ -459,10 +459,38 @@ class SOAPClientSpec extends Specification {
         'bar with DOCTYPE' == response.GetFoo.result.text()
     }
 
+    void 'accepts "standalone" attribute in xml declaration'() {
+        given:
+        soapClient.httpClient = mockHTTPClient(data: simpleSoap11ResponseWithXmlStandalone)
+
+        when:
+        def response = soapClient.send {
+            body() {
+                foo()
+            }
+        }
+
+        then:
+        'UTF-8' == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
+    }
+
     private static final Closure testSoapMessage = { body { test(true) } }
 
     private static final String simpleSoap11Response = '''
             <?xml version='1.0' encoding='UTF-8'?>
+            <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
+              <SOAP:Header>
+                <token>foo</token>
+              </SOAP:Header>
+              <SOAP:Body>
+                <GetFoo>
+                  <result>bar</result>
+                </GetFoo>
+              </SOAP:Body>
+            </SOAP:Envelope>'''.trim()
+
+    private static final String simpleSoap11ResponseWithXmlStandalone = '''
+            <?xml version='1.0' encoding='UTF-8' standalone='no'?>
             <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
               <SOAP:Header>
                 <token>foo</token>
@@ -480,6 +508,7 @@ class SOAPClientSpec extends Specification {
                                     <GetFoo/>
                                   </SOAP:Body>
                                 </SOAP:Envelope>'''.trim()
+
 
     private static final String simpleSoap11ResponseWithDocType = '''<!DOCTYPE SOAP:Envelope >
             <SOAP:Envelope xmlns:SOAP='http://schemas.xmlsoap.org/soap/envelope/'>
