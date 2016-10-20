@@ -32,8 +32,7 @@ class HTTPClient {
 
     def defaultHeaders = [Connection:'Close', 'Accept-Encoding':'gzip']
     def authRequired = [
-        HttpURLConnection.HTTP_UNAUTHORIZED,
-        HttpURLConnection.HTTP_FORBIDDEN
+        HttpURLConnection.HTTP_UNAUTHORIZED
     ]
 
     HTTPConnectionFactory httpConnectionFactory
@@ -64,17 +63,16 @@ class HTTPClient {
                 response = buildResponse(conn, conn.errorStream)
                 if (response.statusCode in authRequired && authorization instanceof HTTPAuthenticator) {
                     HTTPAuthenticator authenticator = (HTTPAuthenticator)authorization
-                    if (authenticator.authenticate()) {
-                        try {
-                            conn?.disconnect()
-                            conn = createConnection(request)
-                            setupConnection(conn, request)
-                            response = buildResponse(conn, conn.inputStream)
-                        } catch (Exception nested) {
-                            response = buildResponse(conn, conn.errorStream)
-                            throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
-                                nested, request, response)
-                        }
+                    authenticator.authenticate()
+                    try {
+                        conn?.disconnect()
+                        conn = createConnection(request)
+                        setupConnection(conn, request)
+                        response = buildResponse(conn, conn.inputStream)
+                    } catch (Exception nested) {
+                        response = buildResponse(conn, conn.errorStream)
+                        throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
+                            nested, request, response)
                     }
                 } else {
                     throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,

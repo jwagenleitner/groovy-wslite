@@ -1,6 +1,7 @@
 package wslite.http.auth
 
+import wslite.http.HTTPClientException
 
 interface HTTPAuthenticator {
-    boolean authenticate()
+    boolean authenticate() throws HTTPClientException
 }
