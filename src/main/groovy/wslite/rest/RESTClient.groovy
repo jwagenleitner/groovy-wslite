@@ -107,6 +107,7 @@ class RESTClient {
         HTTPResponse httpResponse
         try {
             httpRequest = requestBuilder.build(method, url, requestParams, data)
+            httpClient.defaultCharset = defaultCharset
             httpResponse = httpClient.execute(httpRequest)
         } catch (HTTPClientException httpEx) {
             throw new RESTClientException(httpEx.message, httpEx, httpEx.request, httpEx.response)

@@ -27,6 +27,7 @@ class HTTPClient {
     boolean sslTrustAllCerts
     String sslTrustStoreFile
     String sslTrustStorePassword
+    String defaultCharset = 'UTF-8'
 
     Proxy proxy
 
@@ -154,7 +155,7 @@ class HTTPClient {
         response.url = conn.URL
         response.contentEncoding = conn.contentEncoding
         response.contentLength = conn.contentLength
-        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(conn.contentType)
+        ContentTypeHeader contentTypeHeader = new ContentTypeHeader(conn.contentType, defaultCharset)
         response.contentType = contentTypeHeader.mediaType
         response.charset = contentTypeHeader.charset
         response.date = new Date(conn.date)
