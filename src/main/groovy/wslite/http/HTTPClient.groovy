@@ -31,6 +31,9 @@ class HTTPClient {
     Proxy proxy
 
     def defaultHeaders = [Connection:'Close', 'Accept-Encoding':'gzip']
+    def authRequired = [
+        HttpURLConnection.HTTP_UNAUTHORIZED
+    ]
 
     HTTPConnectionFactory httpConnectionFactory
     HTTPAuthorization authorization
@@ -58,8 +61,23 @@ class HTTPClient {
                 throw new HTTPClientException(ex.message, ex, request, response)
             } else {
                 response = buildResponse(conn, conn.errorStream)
-                throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
+                if (response.statusCode in authRequired && authorization instanceof HTTPAuthenticator) {
+                    HTTPAuthenticator authenticator = (HTTPAuthenticator)authorization
+                    authenticator.authenticate()
+                    try {
+                        conn?.disconnect()
+                        conn = createConnection(request)
+                        setupConnection(conn, request)
+                        response = buildResponse(conn, conn.inputStream)
+                    } catch (Exception nested) {
+                        response = buildResponse(conn, conn.errorStream)
+                        throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
+                            nested, request, response)
+                    }
+                } else {
+                    throw new HTTPClientException(response.statusCode + ' ' + response.statusMessage,
                         ex, request, response)
+                }
             }
         } finally {
             conn?.disconnect()
