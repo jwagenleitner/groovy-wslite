@@ -73,6 +73,11 @@ class RESTClient {
         patch([:], content)
     }
 
+    Response options(Map params=[:], Closure content=null) {
+        return executeMethod(HTTPMethod.OPTIONS, params, content)
+    }
+
+
     Response patch(Map params=[:], Closure content=null) {
         Map newParams = new LinkedHashMap(params ?: [:])
         if (newParams.headers) {

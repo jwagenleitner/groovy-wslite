@@ -21,7 +21,8 @@ enum HTTPMethod {
     PUT('PUT'),
     PATCH('PATCH'),
     HEAD('HEAD'),
-    DELETE('DELETE')
+    DELETE('DELETE'),
+    OPTIONS('OPTIONS')
 
     private String method
 

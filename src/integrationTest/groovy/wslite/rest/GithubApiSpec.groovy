@@ -72,4 +72,13 @@ class GithubApiSpec extends Specification {
         testToken == response.json.files.'spec_test.txt'.content
     }
 
+    void 'CORS requests'() {
+        when:
+        def response = github.options(path: 'users/alvarosanchez', headers: [Origin: 'http://localhost:9000'])
+
+        then:
+        204 == response.statusCode
+        '*' == response.headers.get('Access-Control-Allow-Origin')
+    }
+
 }
