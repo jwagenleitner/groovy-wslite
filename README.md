@@ -1,4 +1,4 @@
-# groovy-wslite
+# groovy-wslite [![Build Status](https://travis-ci.org/jwagenleitner/groovy-wslite.svg?branch=master)](https://travis-ci.org/jwagenleitner/groovy-wslite)
 
 Library for Groovy that provides no-frills SOAP and REST webservice clients.
 
