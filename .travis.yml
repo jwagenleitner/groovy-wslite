@@ -3,7 +3,6 @@ sudo: false
 
 matrix:
   include:
-    - jdk: oraclejdk7
     - jdk: oraclejdk8
       addons:
         apt:
