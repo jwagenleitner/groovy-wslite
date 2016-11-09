@@ -24,12 +24,15 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    testCompile.exclude group: 'org.spockframework', module: 'groovy-all'
+}
+
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.9'
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.3') {
-        exclude module: 'groovy-all'
-    }
-    testCompile 'cglib:cglib-nodep:3.1'
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.7'
+
+    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+    testCompile group: 'cglib', name: 'cglib-nodep', version: '3.2.4'
 }
 
 sourceSets {
