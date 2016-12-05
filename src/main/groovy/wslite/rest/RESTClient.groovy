@@ -100,7 +100,9 @@ class RESTClient {
         byte[] data = null
         if (content) {
             def contentBuilder = new ContentBuilder(defaultContentTypeHeader, defaultCharset).build(content)
-            setDefaultContentHeader(requestParams, contentBuilder.contentTypeHeader)
+            if (contentBuilder.data) {
+                setDefaultContentHeader(requestParams, contentBuilder.contentTypeHeader)
+            }
             data = contentBuilder.data
         }
         HTTPRequest httpRequest

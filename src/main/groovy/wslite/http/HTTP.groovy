@@ -23,5 +23,6 @@ class HTTP {
     static final String AUTHORIZATION_HEADER = 'Authorization'
     static final String ACCEPT_HEADER = 'Accept'
     static final String X_HTTP_METHOD_OVERRIDE_HEADER = 'X-HTTP-Method-Override'
+    static final String USER_AGENT = 'User-Agent'
 
 }

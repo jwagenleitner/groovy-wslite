@@ -152,12 +152,22 @@ class RESTClientSpec extends Specification {
         'text/csv' == client.httpClient.request.headers.Accept
     }
 
-    void 'content type header sets header even if no data'() {
+    void 'content type header set explicitly sets header even if no data'() {
         when:
         def response = client.get(headers: ['Content-Type': 'application/json'])
 
         then:
         'application/json' == client.httpClient.request.headers.'Content-Type'
+    }
+
+    void 'content type header not set automatically if no real data'() {
+        when:
+        def response = client.get([:]) {
+            // no real content
+        }
+
+        then:
+        !client.httpClient.request.headers.'Content-Type'
     }
 
     void 'default content type'() {
