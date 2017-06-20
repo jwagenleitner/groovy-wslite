@@ -378,7 +378,7 @@ class SOAPClientSpec extends Specification {
         }
 
         then:
-        'ISO-8859-1' == new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset
+        new ContentTypeHeader(response.httpRequest.headers['Content-Type']).charset == 'ISO-8859-1'
     }
 
     void 'uses character encoding specified in the Content-Type header'() {

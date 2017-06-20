@@ -14,6 +14,8 @@
  */
 package wslite.soap
 
+import groovy.xml.StreamingMarkupBuilder
+
 class SOAPMessageBuilder {
 
     String soapNamespacePrefix = SOAP.SOAP_NS_PREFIX
@@ -64,16 +66,24 @@ class SOAPMessageBuilder {
     }
 
     String toString() {
-        def writer = new StringWriter()
-        def soap = new groovy.xml.MarkupBuilder(writer)
-        soap.mkp.xmlDeclaration(version:'1.0', encoding:encoding)
-        soap."${soapNamespacePrefix}:${SOAP.ENVELOPE_ELEMENT_NAME}"(
-                ["xmlns:${soapNamespacePrefix}":xmlnsSoap[version]] + envelopeAttributes
-        ) {
-            "${soapNamespacePrefix}:${SOAP.HEADER_ELEMENT_NAME}"(headerAttributes, header)
-            "${soapNamespacePrefix}:${SOAP.BODY_ELEMENT_NAME}"(bodyAttributes, body)
-        }
-        writer.toString()
+        // Use StreamingMarkupBuilder instead of MarkupBuilder
+        // It allows using Closures with mkp.yield
+        def builder = new StreamingMarkupBuilder(encoding: encoding)
+
+        def xml = builder.bind({
+            mkp.xmlDeclaration(version:'1.0')
+            "${soapNamespacePrefix}:${SOAP.ENVELOPE_ELEMENT_NAME}"(
+                    ["xmlns:${soapNamespacePrefix}":xmlnsSoap[version]] + envelopeAttributes
+            ) {
+                "${soapNamespacePrefix}:${SOAP.HEADER_ELEMENT_NAME}"(headerAttributes, header)
+                "${soapNamespacePrefix}:${SOAP.BODY_ELEMENT_NAME}"(bodyAttributes, body)
+            }
+        })
+
+        // XmlUtil.serialize(xml) not used intentionally because it
+        // changes the encoding to UTF-8 by default, and apparently it's not
+        // possible to override this behaviour
+        xml.toString()
     }
 
 }
