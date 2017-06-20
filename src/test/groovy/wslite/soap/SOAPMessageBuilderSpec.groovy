@@ -126,6 +126,34 @@ class SOAPMessageBuilderSpec extends Specification {
         assert !envHeader.Header.header.body.isEmpty()
     }
 
+    void 'can handle mkp.yield with closures'() {
+        when: 'message body has nested header or body elements'
+        def xmlPart = {
+            xmlOrder() {
+                order {
+                    header { }
+                    body { }
+                    foo {
+                        orderName('bar')
+                    }
+                }
+            }
+        }
+        def message = new SOAPMessageBuilder().build {
+            body {
+                ejecutar( 'xmlns:mns': 'urn:servicioFrontera') {
+                    mkp.yield xmlPart
+                }
+            }
+        }
+
+        then:
+        def env = slurp(message.toString())
+        assert !env.Body.ejecutar.xmlOrder.order.header.isEmpty()
+        assert !env.Body.ejecutar.xmlOrder.order.body.isEmpty()
+        assert !env.Body.ejecutar.xmlOrder.order.foo.isEmpty()
+    }
+
     private slurp(message) {
         return new XmlSlurper().parseText(message)
     }
