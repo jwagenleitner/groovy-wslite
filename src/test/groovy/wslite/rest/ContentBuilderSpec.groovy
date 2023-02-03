@@ -15,6 +15,7 @@
 package wslite.rest
 
 import groovy.json.JsonSlurper
+import groovy.xml.XmlSlurper
 import spock.lang.*
 import wslite.http.*
 

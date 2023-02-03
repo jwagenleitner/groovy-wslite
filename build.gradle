@@ -1,22 +1,10 @@
-ext.mavenUsername = project.hasProperty("mavenUsername") ? mavenUsername : null
-ext.mavenUsername = project.hasProperty("mavenPassword") ? mavenPassword : null
-ext.signing = project.hasProperty("signing") ? signing : [:]
-ext.signing.secretKeyRingFile = project.hasProperty("signing.secretKeyRingFile") ? signing.secretKeyRingFile : null
-ext.signing.keyId = project.hasProperty("signing.keyId") ? signing.keyId : null
-ext.signing.password = project.hasProperty("signing.password") ? signing.password : null
-ext.githubUsername = project.hasProperty("githubUsername") ? githubUsername : null
-ext.githubPassword = project.hasProperty("githubPassword") ? githubPassword : null
-
 apply plugin: 'groovy'
-apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'codenarc'
+apply plugin: 'eclipse'
 
 version = '2.0.0-SNAPSHOT'
 group = 'com.github.groovy-wslite'
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
 
 //compileGroovy.options.compilerArgs = ['-Xlint:unchecked']
 
@@ -25,21 +13,11 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.9'
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.3') {
+    implementation 'org.apache.groovy:groovy-all:4.0.6'
+    testImplementation('org.spockframework:spock-core:2.3-groovy-4.0') {
         exclude module: 'groovy-all'
     }
-    testCompile 'cglib:cglib-nodep:3.1'
-}
-
-sourceSets {
-    integrationTest {
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + sourceSets.main.output + configurations.testRuntime
-        groovy {
-            srcDir 'src/integrationTest/groovy'
-        }
-    }
+    testImplementation 'cglib:cglib-nodep:3.1'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -57,17 +35,10 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
     from groovydoc.destinationDir
 }
 
-task integrationTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
-    classpath = sourceSets.integrationTest.runtimeClasspath
-}
-
 tasks.withType(CodeNarc) {
     ignoreFailures = true
     configFile = file("$rootProject.projectDir/config/codenarc/codenarc.groovy")
 }
-
-build.dependsOn integrationTest
 
 artifacts {
     archives jar, sourcesJar, javadocJar, groovydocJar
@@ -80,66 +51,6 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-    // Should be set in gradle.properties (check gradle.properties.sample)
-    if (['mavenUsername', 'mavenPassword'].every { project.hasProperty(it) }) {
-       repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-                    authentication(userName: mavenUsername, password: mavenPassword)
-                }
-
-                repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-                    authentication(userName: mavenUsername, password: mavenPassword)
-                }
-
-                pom.project {
-                    name 'groovy-wslite'
-                    description 'Lightweight SOAP and REST webservice clients for Groovy'
-                    url 'https://github.com/jwagenleitner/groovy-wslite'
-                    inceptionYear '2011'
-                    licenses {
-                        license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                            distribution 'repo'
-                        }
-                    }
-                    scm {
-                        url 'scm:git:git@github.com:jwagenleitner/groovy-wslite.git'
-                        connection 'https://github.com/jwagenleitner/groovy-wslite'
-                    }
-                    developers {
-                        developer {
-                            id 'jwagenleitner'
-                            name 'John Wagenleitner'
-                            email 'john.wagenleitner@gmail.com'
-                            roles {
-                                role 'Lead'
-                                role 'Founder'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-gradle.taskGraph.whenReady { graph ->
-    if (graph.hasTask(':integrationTest')) {
-        if (!project.hasProperty('githubUsername') || !project.hasProperty('githubPassword')) {
-            throw new GradleException("The integration tests require you to provide both 'githubUsername'" +
-                    " and 'githubPassword' project properties in order to run.")
-        }
-
-        integrationTest.systemProperties['github.username'] = githubUsername
-        integrationTest.systemProperties['github.password'] = githubPassword
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
+tasks.withType(JavaCompile) {
+    options.release = 17
 }

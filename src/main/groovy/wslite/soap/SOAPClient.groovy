@@ -14,6 +14,7 @@
  */
 package wslite.soap
 
+import groovy.xml.XmlSlurper
 import wslite.http.*
 import wslite.http.auth.*
 

@@ -20,7 +20,8 @@ import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
 
 import javax.xml.parsers.SAXParserFactory
-import groovy.xml.FactorySupport;
+import groovy.xml.FactorySupport
+import groovy.xml.XmlSlurper
 
 class ResponseBuilder {
 
@@ -57,9 +58,9 @@ class ResponseBuilder {
     }
 
     private parseXmlContent(String content) {
-        SAXParserFactory factory = FactorySupport.createSaxParserFactory();
-        factory.setNamespaceAware(true);
-        factory.setValidating(false);
+        SAXParserFactory factory = FactorySupport.createSaxParserFactory()
+        factory.setNamespaceAware(true)
+        factory.setValidating(false)
         return new XmlSlurper(factory.newSAXParser()).parseText(content)
     }
 

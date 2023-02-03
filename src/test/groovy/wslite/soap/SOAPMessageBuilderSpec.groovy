@@ -14,6 +14,7 @@
  */
 package wslite.soap
 
+import groovy.xml.XmlSlurper
 import spock.lang.*
 
 class SOAPMessageBuilderSpec extends Specification {
