@@ -21,6 +21,8 @@ dependencies {
     }
 //    testImplementation 'cglib:cglib-nodep:3.3.0'
     testImplementation 'net.bytebuddy:byte-buddy:1.12.23'
+    codenarc("org.codenarc:CodeNarc:3.2.0-groovy-4.0")
+    codenarc('org.apache.groovy:groovy-all:4.0.6')
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -50,10 +52,55 @@ tasks.withType(CodeNarc) {
     configFile = file("$rootProject.projectDir/config/codenarc/codenarc.groovy")
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 artifacts {
     archives jar, sourcesJar, javadocJar, groovydocJar
 }
 
 tasks.withType(JavaCompile) {
     options.release = 17
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+              pom {
+                name = 'groovy-wslite'
+                description = 'Lightweight SOAP and REST webservice clients for Groovy'
+                url = 'https://github.com/jwagenleitner/groovy-wslite'
+                inceptionYear = '2011'
+                licenses {
+                    license {
+                      name = 'The Apache Software License, Version 2.0'
+                      url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                      distribution = 'repo'
+                    }
+                }
+                scm {
+                  url = 'scm:git:git@github.com:jwagenleitner/groovy-wslite.git'
+                  connection = 'https://github.com/jwagenleitner/groovy-wslite'
+                }
+                developers {
+                  developer {
+                      id = 'jwagenleitner'
+                      name = 'John Wagenleitner'
+                      email = 'john.wagenleitner@gmail.com'
+                  }
+                }
+              }
+          }
+      }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+            def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
 }
