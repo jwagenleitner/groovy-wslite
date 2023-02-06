@@ -15,6 +15,8 @@
 package wslite.http
 
 import javax.net.ssl.*
+
+import java.net.Proxy
 import java.security.KeyStore
 import java.security.SecureRandom
 

@@ -14,6 +14,8 @@
  */
 package wslite.http
 
+import java.net.Proxy
+
 import wslite.util.ObjectHelper
 
 class HTTPRequest {
