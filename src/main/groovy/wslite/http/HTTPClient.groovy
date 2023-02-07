@@ -16,6 +16,7 @@ package wslite.http
 
 import wslite.http.auth.*
 
+import java.net.Proxy
 import java.util.zip.GZIPInputStream
 
 class HTTPClient {

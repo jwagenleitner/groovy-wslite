@@ -16,7 +16,7 @@ package wslite.soap
 
 import wslite.http.HTTPRequest
 import wslite.http.HTTPResponse
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.slurpersupport.GPathResult
 import wslite.util.ObjectHelper
 
 class SOAPResponse {
