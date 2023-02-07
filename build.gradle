@@ -1,17 +1,24 @@
+ext.mavenUsername = project.hasProperty("mavenUsername") ? mavenUsername : null
+ext.mavenUsername = project.hasProperty("mavenPassword") ? mavenPassword : null
+ext.signing = project.hasProperty("signing") ? signing : [:]
+ext.signing.secretKeyRingFile = project.hasProperty("signing.secretKeyRingFile") ? signing.secretKeyRingFile : null
+ext.signing.keyId = project.hasProperty("signing.keyId") ? signing.keyId : null
+ext.signing.password = project.hasProperty("signing.password") ? signing.password : null
+ext.githubUsername = project.hasProperty("githubUsername") ? githubUsername : null
+ext.githubPassword = project.hasProperty("githubPassword") ? githubPassword : null
+
 apply plugin: 'groovy'
 apply plugin: 'signing'
 apply plugin: 'codenarc'
-apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '3.0.0-SNAPSHOT'
+version = '2.0.0-SNAPSHOT'
 group = 'com.github.groovy-wslite'
 
 //compileGroovy.options.compilerArgs = ['-Xlint:unchecked']
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -19,7 +26,7 @@ dependencies {
     testImplementation('org.spockframework:spock-core:2.3-groovy-4.0') {
         exclude module: 'groovy-all'
     }
-//    testImplementation 'cglib:cglib-nodep:3.3.0'
+
     testImplementation 'net.bytebuddy:byte-buddy:1.12.23'
     codenarc("org.codenarc:CodeNarc:3.2.0-groovy-4.0")
     codenarc('org.apache.groovy:groovy-all:4.0.6')
@@ -56,6 +63,7 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+
 
 artifacts {
     archives jar, sourcesJar, javadocJar, groovydocJar
@@ -97,7 +105,6 @@ publishing {
       }
     repositories {
         maven {
-            // change URLs to point to your repos, e.g. http://my.org/repo
             def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
             def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
